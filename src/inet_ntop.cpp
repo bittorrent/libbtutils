@@ -40,7 +40,7 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 		memcpy(&ipv6_address->sin6_addr, src, sizeof(in6_addr));
 	}
 
-	int string_length = (int)(length);
+	DWORD string_length = (int)(length);
 	int result;
 	result = WSAAddressToStringA((sockaddr*)(&address),
 								 address_length, 0, dest,
