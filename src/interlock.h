@@ -3,6 +3,29 @@
 
 #include "utypes.h" // for LONG
 
+// GCC 4.3 (and before) define macro _GLIBCXX_ATOMIC_BUILTINS
+// GCC 4.4 and after define macros _GLIBCXX_ATOMIC_BUILTINS_[1|2|4|8] and don't define _GLIBCXX_ATOMIC_BUILTINS
+// 2013 02 13 - updates on newer gcc versions
+// GCC 4.6, from looking at compiler output logs, looks like it behaves like gcc 4.3 and before
+// GCC 4.7 defines macro _GLIBCXX_ATOMIC_BUILTINS, and not the _[1|2|4|8] ones
+
+// AVOID_GLIBCXX_ATOMIC_BUILTINS macro defined on compiler command line
+// originating from makefile if the system libraries on the target platform
+// do not correctly implement the gcc atomic memory access functions
+// (see http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html)
+// This could be the case for some embedded devices.
+
+#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 3)) && defined(_GLIBCXX_ATOMIC_BUILTINS) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
+// Case for gcc 4.7 and later, and gcc 4.3 and before
+#define USE_GLIBCXX_ATOMIC_BUILTINS 1
+#elif _GLIBCXX_ATOMIC_BUILTINS_4 && ((!defined _LP64) || _GLIBCXX_ATOMIC_BUILTINS_8) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
+// Case for gcc 4.4 - 4.6
+#define USE_GLIBCXX_ATOMIC_BUILTINS 1
+#else
+// Roll our own atomic operations
+#define USE_GLIBCXX_ATOMIC_BUILTINS 0
+#endif
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -46,7 +69,7 @@ inline void *MyInterlockedCompareExchangePointer(void **ptr, void *newvalue, voi
 
 #include <libkern/OSAtomic.h>
 
-static OSSpinLock spin = 0;
+extern OSSpinLock g_interlocked_spin;
 
 inline LONG InterlockedAdd(LONG * ptr, LONG value) {
 	return OSAtomicAdd32Barrier((int32_t)value, (int32_t*)ptr);
@@ -67,211 +90,175 @@ inline LONG InterlockedDecrement(LONG * ptr) {
 }
 
 inline LONG InterlockedExchange(LONG *ptr, LONG value) {
-	OSSpinLockLock(&spin);
+	OSSpinLockLock(&g_interlocked_spin);
 	LONG old = *ptr;
 	*ptr = value;
-	OSSpinLockUnlock(&spin);
+	OSSpinLockUnlock(&g_interlocked_spin);
 	return old;
 }
 
 inline void *InterlockedExchangePointer(void **ptr, void *value) {
-	OSSpinLockLock(&spin);
+	OSSpinLockLock(&g_interlocked_spin);
 	void *old = *ptr;
 	*ptr = value;
-	OSSpinLockUnlock(&spin);
+	OSSpinLockUnlock(&g_interlocked_spin);
 	return old;
 }
 
 inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void *oldvalue) {
-	OSSpinLockLock(&spin);
+	OSSpinLockLock(&g_interlocked_spin);
 	void *old = *ptr;
 	if (old == oldvalue) *ptr = newvalue;
-	OSSpinLockUnlock(&spin);
+	OSSpinLockUnlock(&g_interlocked_spin);
 	return old;
 }
 
-#else
-
-// GCC 4.3 (and before) define macro _GLIBCXX_ATOMIC_BUILTINS
-// GCC 4.4 and after define macros _GLIBCXX_ATOMIC_BUILTINS_[1|2|4|8] and don't define _GLIBCXX_ATOMIC_BUILTINS
-// 2013 02 13 - updates on newer gcc versions
-// GCC 4.6, from looking at compiler output logs, looks like it behaves like gcc 4.3 and before
-// GCC 4.7 defines macro _GLIBCXX_ATOMIC_BUILTINS, and not the _[1|2|4|8] ones
-
-// AVOID_GLIBCXX_ATOMIC_BUILTINS macro defined on compiler command line
-// originating from makefile if the system libraries on the target platform
-// do not correctly implement the gcc atomic memory access functions
-// (see http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html)
-// This could be the case for some embedded devices.
-
-#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 3)) && defined(_GLIBCXX_ATOMIC_BUILTINS) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
-// Case for gcc 4.7 and later, and gcc 4.3 and before
-#define USE_GLIBCXX_ATOMIC_BUILTINS 1
-#elif _GLIBCXX_ATOMIC_BUILTINS_4 && ((!defined _LP64) || _GLIBCXX_ATOMIC_BUILTINS_8) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
-// Case for gcc 4.4 - 4.6
-#define USE_GLIBCXX_ATOMIC_BUILTINS 1
-#else
-// Roll our own atomic operations
-#define USE_GLIBCXX_ATOMIC_BUILTINS 0
-#pragma message WARN("Using single platform-specific CRITICAL_SECTION for synchronizing all atomic operations")
-#endif
-
-#if !USE_GLIBCXX_ATOMIC_BUILTINS
-namespace _Interlocked {
-
-struct interlock_init
-{
-	interlock_init()
-	{
-		InitializeCriticalSection(&cs);
-		initialized = true;
-	}
-	CRITICAL_SECTION cs;
-	bool initialized;
-};
-
-extern struct interlock_init g_initializer;
-
-} // namespace
-#endif // !USE_GLIBCXX_ATOMIC_BUILTINS
+#elif USE_GLIBCXX_ATOMIC_BUILTINS
 
 inline LONG InterlockedAdd(LONG* ptr, LONG value) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_add_and_fetch(ptr, value);
-#else
-	LONG rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	*ptr += value;
-	rval=*ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-	return rval;
-#endif
 }
 
 #ifdef _LP64
 inline long long int InterlockedAdd(long long int * ptr, long long int value) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_add_and_fetch(ptr, value);
-#else
-	long long int rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	*ptr += value;
-	rval = *ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-	return rval;
-#endif
 }
 #endif // _LP64
 
 inline LONG InterlockedIncrement(LONG* ptr) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_add_and_fetch(ptr, 1);
-#else
-	LONG rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	*ptr += 1;
-	rval=*ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-	return rval;
-#endif
 }
 
 #ifdef _LP64
 inline long long int InterlockedIncrement(long long int * ptr) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_add_and_fetch(ptr, 1);
-#else
-	long long int rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	*ptr += 1;
-	rval = *ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-	return rval;
-#endif
 }
 #endif // _LP64
 
 inline LONG InterlockedDecrement(LONG* ptr) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_sub_and_fetch(ptr, 1);
-#else
-	LONG rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	*ptr -= 1;
-	rval=*ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-	return rval;
-#endif
 }
 
 #ifdef _LP64
 inline long long int InterlockedDecrement(long long int * ptr) {
-#if USE_GLIBCXX_ATOMIC_BUILTINS
 	return __sync_sub_and_fetch(ptr, 1);
+}
+#endif // _LP64
+
+inline LONG InterlockedExchange(LONG *ptr, LONG value) {
+	return __sync_lock_test_and_set(ptr, value);
+}
+
+#ifdef _LP64
+inline LONG InterlockedExchange(long long int *ptr, long long int value) {
+	return __sync_lock_test_and_set(ptr, value);
+}
+#endif // _LP64
+
+inline void *InterlockedExchangePointer(void **ptr, void *value) {
+	return __sync_lock_test_and_set(ptr, value);
+}
+
+inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void *oldvalue) {
+	return __sync_val_compare_and_swap(ptr, oldvalue, newvalue);
+}
+
 #else
+
+#pragma message ("Using single mutex for synchronizing all atomic operations")
+
+#include <pthread.h>
+
+extern pthread_mutex_t g_interlocked_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+inline LONG InterlockedAdd(LONG* ptr, LONG value) {
+	LONG rval;
+	pthread_mutex_lock(&g_interlocked_mutex);
+	*ptr += value;
+	rval=*ptr;
+	pthread_mutex_unlock(&g_interlocked_mutex);
+	return rval;
+}
+
+#ifdef _LP64
+inline long long int InterlockedAdd(long long int * ptr, long long int value) {
 	long long int rval;
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_lock(&g_interlocked_mutex);
+	*ptr += value;
+	rval = *ptr;
+	pthread_mutex_unlock(&g_interlocked_mutex);
+	return rval;
+}
+#endif // _LP64
+
+inline LONG InterlockedIncrement(LONG* ptr) {
+	LONG rval;
+	pthread_mutex_lock(&g_interlocked_mutex);
+	*ptr += 1;
+	rval=*ptr;
+	pthread_mutex_unlock(&g_interlocked_mutex);
+	return rval;
+}
+
+#ifdef _LP64
+inline long long int InterlockedIncrement(long long int * ptr) {
+	return __sync_add_and_fetch(ptr, 1);
+}
+#endif // _LP64
+
+inline LONG InterlockedDecrement(LONG* ptr) {
+	return __sync_sub_and_fetch(ptr, 1);
+}
+
+#ifdef _LP64
+inline long long int InterlockedDecrement(long long int * ptr) {
+	long long int rval;
+	pthread_mutex_lock(&g_interlocked_mutex);
 	*ptr -= 1;
 	rval = *ptr;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_unlock(&g_interlocked_mutex);
 	return rval;
-#endif
 }
 #endif // _LP64
 
 inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	LONG res;
-#if USE_GLIBCXX_ATOMIC_BUILTINS
-	res = __sync_lock_test_and_set(ptr, value);
-#else
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_lock(&g_interlocked_mutex);
 	res = *ptr;
 	*ptr = value;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-#endif
+	pthread_mutex_unlock(&g_interlocked_mutex);
 	return res;
 }
 
 #ifdef _LP64
 inline LONG InterlockedExchange(long long int *ptr, long long int value) {
 	long long int res;
-#if USE_GLIBCXX_ATOMIC_BUILTINS
-	res = __sync_lock_test_and_set(ptr, value);
-#else
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_lock(&g_interlocked_mutex);
 	res = *ptr;
 	*ptr = value;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-#endif
+	pthread_mutex_unlock(&g_interlocked_mutex);
 	return res;
 }
 #endif // _LP64
 
 inline void *InterlockedExchangePointer(void **ptr, void *value) {
 	void * res;
-#if USE_GLIBCXX_ATOMIC_BUILTINS
-	res = __sync_lock_test_and_set(ptr, value);
-#else
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_lock(&g_interlocked_mutex);
 	res = *ptr;
 	*ptr = value;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-#endif
+	pthread_mutex_unlock(&g_interlocked_mutex);
 	return res;
 }
 
 inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void *oldvalue) {
 	void *result;
-#if USE_GLIBCXX_ATOMIC_BUILTINS
-	result = __sync_val_compare_and_swap(ptr, oldvalue, newvalue);
-#else
-	EnterCriticalSection(&_Interlocked::g_initializer.cs);
+	pthread_mutex_lock(&g_interlocked_mutex);
 	result = *ptr;
 	if (result == oldvalue) *ptr = newvalue;
-	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
-#endif
+	pthread_mutex_unlock(&g_interlocked_mutex);
 	return result;
 }
+
 #endif
 
 /* TODO: enable gcc __i386__ version after testing it */

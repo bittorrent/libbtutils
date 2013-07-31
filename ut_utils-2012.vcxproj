@@ -41,6 +41,7 @@
     <ClCompile Include="src/bloom_filter.cpp" />
     <ClCompile Include="src/get_microseconds.cpp" />
     <ClCompile Include="src/bitfield.cpp" />
+    <ClCompile Include="src/interlock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src/RefBase.h" />
