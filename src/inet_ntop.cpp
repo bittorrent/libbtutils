@@ -1,5 +1,9 @@
-//#include "StdAfxCore.h"
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <sys/socket.h>
+#endif
 #include "inet_ntop.h"
 
 const char *inet_ntop(int af, const void *src, char *dest, size_t length)

@@ -1,4 +1,3 @@
-#include "StdAfxCore.h"
 #include "interlock.h"
 #include "RefBase.h"
 

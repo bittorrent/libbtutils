@@ -3,6 +3,11 @@
 
 #include <ctype.h>
 
+#if defined WIN32
+#include <windows.h>
+#include <tchar.h> // for _T
+#endif
+
 // standard types
 typedef unsigned char byte;
 typedef unsigned char uint8;

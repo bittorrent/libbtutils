@@ -35,26 +35,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sockaddr.cpp" />
-    <ClCompile Include="inet_ntop.cpp" />
-    <ClCompile Include="RefBase.cpp" />
-    <ClCompile Include="bloom_filter.cpp" />
-    <ClCompile Include="get_microseconds.cpp" />
-    <ClCompile Include="bitfield.cpp" />
+    <ClCompile Include="src/sockaddr.cpp" />
+    <ClCompile Include="src/inet_ntop.cpp" />
+    <ClCompile Include="src/RefBase.cpp" />
+    <ClCompile Include="src/bloom_filter.cpp" />
+    <ClCompile Include="src/get_microseconds.cpp" />
+    <ClCompile Include="src/bitfield.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RefBase.h" />
-    <ClInclude Include="inet_ntop.h" />
-    <ClInclude Include="sockaddr.h" />
-    <ClInclude Include="target.h" />
-    <ClInclude Include="utypes.h" />
-    <ClInclude Include="endian_utils.h" />
-    <ClInclude Include="smart_ptr.h" />
-    <ClInclude Include="tailqueue.h" />
-    <ClInclude Include="bloom_filter.h" />
-    <ClInclude Include="bitfield.h" />
-    <ClInclude Include="sha1_hash.h" />
-    <ClInclude Include="get_microseconds.h" />
+    <ClInclude Include="src/RefBase.h" />
+    <ClInclude Include="src/inet_ntop.h" />
+    <ClInclude Include="src/sockaddr.h" />
+    <ClInclude Include="src/target.h" />
+    <ClInclude Include="src/utypes.h" />
+    <ClInclude Include="src/endian_utils.h" />
+    <ClInclude Include="src/smart_ptr.h" />
+    <ClInclude Include="src/tailqueue.h" />
+    <ClInclude Include="src/bloom_filter.h" />
+    <ClInclude Include="src/bitfield.h" />
+    <ClInclude Include="src/sha1_hash.h" />
+    <ClInclude Include="src/get_microseconds.h" />
+    <ClInclude Include="src/interlock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DB9F2491-9218-41EF-8A80-E371987F6FE9}</ProjectGuid>
