@@ -3,7 +3,12 @@
 #include <ws2tcpip.h>
 #else
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet6/in6.h>
 #endif
+
+#include <stdlib.h> // for NULL
+
 #include "inet_ntop.h"
 
 const char *inet_ntop(int af, const void *src, char *dest, size_t length)
