@@ -1,13 +1,12 @@
+
+// This is a standard function, but windows doesn't provide it
+// that's why we only need this on windows
 #ifdef WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet6/in6.h>
-#endif
 
 #include <stdlib.h> // for NULL
+#include <string.h> // for memcpy
 
 #include "inet_ntop.h"
 
@@ -18,8 +17,8 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 		return NULL;
 	}
 
-	SOCKADDR_STORAGE address;
-	DWORD address_length;
+	sockaddr_storage address;
+	int address_length;
 
 	if (af == AF_INET)
 	{
@@ -41,7 +40,7 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 		memcpy(&ipv6_address->sin6_addr, src, sizeof(in6_addr));
 	}
 
-	DWORD string_length = (DWORD)(length);
+	int string_length = (int)(length);
 	int result;
 	result = WSAAddressToStringA((sockaddr*)(&address),
 								 address_length, 0, dest,
@@ -51,3 +50,6 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 
 	return result == SOCKET_ERROR ? NULL : dest;
 }
+
+#endif // WIN32
+

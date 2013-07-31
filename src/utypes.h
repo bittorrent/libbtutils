@@ -29,6 +29,7 @@ typedef long long int64;
 #ifndef WIN32
 typedef long LONG;
 typedef unsigned long ULONG;
+typedef uint32 DWORD;
 #endif
 
 #if __cplusplus > 199711L

@@ -7,6 +7,10 @@
 #include "inet_ntop.h"
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
 
+#ifndef WIN32
+#include <arpa/inet.h> // for inet_pton
+#endif
+
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;
 in6_addr SockAddr::_in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
