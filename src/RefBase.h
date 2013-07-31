@@ -7,6 +7,8 @@
 #define STDMETHODCALLTYPE
 #endif
 
+#include "utypes.h" // for LONG
+
 ///
 /// An intrusive base class for reference counting, along with a macro, REFBASE, which
 /// provides COM style AddRef and Release methods in an implementation class.  We do

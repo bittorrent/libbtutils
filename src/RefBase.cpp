@@ -1,12 +1,12 @@
 #include "interlock.h"
 #include "RefBase.h"
 
-STDMETHODIMP_(ULONG) RefBase::AddRef()
+ULONG STDMETHODCALLTYPE RefBase::AddRef()
 {
 	return InterlockedIncrement(&refcount);
 }
 
-STDMETHODIMP_(ULONG) RefBase::Release()
+ULONG STDMETHODCALLTYPE RefBase::Release()
 {
 	ULONG Result = InterlockedDecrement(&refcount);
 	if (!Result)

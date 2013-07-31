@@ -26,6 +26,11 @@ typedef unsigned long long uint64;
 typedef long long int64;
 #endif
 
+#ifndef WIN32
+typedef long LONG;
+typedef unsigned long ULONG;
+#endif
+
 #if __cplusplus > 199711L
 static_assert (8 == sizeof(uint64), "sizeof uint64 is not 8");
 static_assert (8 == sizeof(int64), "sizeof int64 is not 8");

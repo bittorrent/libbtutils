@@ -1,6 +1,8 @@
 #ifndef _INTERLOCKED_H_
 #define _INTERLOCKED_H_
 
+#include "utypes.h" // for LONG
+
 #ifdef WIN32
 
 #include <windows.h>
@@ -66,14 +68,16 @@ inline LONG InterlockedDecrement(LONG * ptr) {
 
 inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	OSSpinLockLock(&spin);
-	LONG old = exch<LONG>(*ptr, value);
+	LONG old = *ptr;
+	*ptr = value;
 	OSSpinLockUnlock(&spin);
 	return old;
 }
 
 inline void *InterlockedExchangePointer(void **ptr, void *value) {
 	OSSpinLockLock(&spin);
-	void *old = exch<void*>(*ptr, value);
+	void *old = *ptr;
+	*ptr = value;
 	OSSpinLockUnlock(&spin);
 	return old;
 }
@@ -221,7 +225,8 @@ inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	res = __sync_lock_test_and_set(ptr, value);
 #else
 	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	res = exch<LONG>(*ptr, value);
+	res = *ptr;
+	*ptr = value;
 	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
 #endif
 	return res;
@@ -234,7 +239,8 @@ inline LONG InterlockedExchange(long long int *ptr, long long int value) {
 	res = __sync_lock_test_and_set(ptr, value);
 #else
 	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	res = exch<long long int>(*ptr, value);
+	res = *ptr;
+	*ptr = value;
 	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
 #endif
 	return res;
@@ -247,7 +253,8 @@ inline void *InterlockedExchangePointer(void **ptr, void *value) {
 	res = __sync_lock_test_and_set(ptr, value);
 #else
 	EnterCriticalSection(&_Interlocked::g_initializer.cs);
-	res = exch<void*>(*ptr, value);
+	res = *ptr;
+	*ptr = value;
 	LeaveCriticalSection(&_Interlocked::g_initializer.cs);
 #endif
 	return res;
