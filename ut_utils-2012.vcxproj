@@ -58,7 +58,7 @@
     <ClInclude Include="src/interlock.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DB9F2491-9218-41EF-8A80-E371987F6FE9}</ProjectGuid>
+    <ProjectGuid>{507D2D6B-0616-4D4A-A75A-EC6915B9F952}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ut_utils2012</RootNamespace>
     <ProjectName>ut_utils</ProjectName>
