@@ -27,8 +27,8 @@ typedef long long int64;
 #endif
 
 #ifndef WIN32
-typedef long LONG;
-typedef unsigned long ULONG;
+typedef int32 LONG;
+typedef uint32 ULONG;
 typedef uint32 DWORD;
 #endif
 

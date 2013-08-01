@@ -1,11 +1,10 @@
-//#include "StdAfxCore.h"
 #include "sockaddr.h"
 
 #include <string.h> // for memcpy
-#include <stdio.h> // for snprintf
 #include <algorithm> // for std::min
 #include "inet_ntop.h"
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
+#include "snprintf.h" // for snprintf
 
 #ifndef WIN32
 #include <arpa/inet.h> // for inet_pton
@@ -15,21 +14,6 @@
 bool SockAddr::_use_ipv6 = false;
 in6_addr SockAddr::_in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
 in6_addr SockAddr::_in6addr_any = IN6ADDR_ANY_INIT;
-
-#if defined WIN32
-
-#include <stdarg.h>
-
-inline int snprintf(char* buf, int len, char const* fmt, ...)
-{
-   va_list lp;
-   va_start(lp, fmt);
-   int ret = _vsnprintf(buf, len, fmt, lp);
-   va_end(lp);
-   if (ret < 0) { buf[len-1] = 0; ret = len-1; }
-   return ret;
-}
-#endif
 
 /*
 void sockaddr_from_bytes(sockaddr_storage* ss, uint8_t const* buf, int len)

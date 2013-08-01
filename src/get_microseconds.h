@@ -4,6 +4,7 @@
 #include "utypes.h"
 
 uint64 get_microseconds();
+uint64 get_milliseconds();
 
 #endif
 

@@ -124,5 +124,8 @@ uint64 get_microseconds()
 }
 #endif
 
-
+uint64 get_milliseconds()
+{
+	return get_microseconds() / 1000;
+}
 

@@ -4,6 +4,8 @@
 #include <string.h> // for memcmp, et. al.
 #include <assert.h>
 
+#include "utypes.h" // for byte
+
 #define SHA1_DIGESTSIZE 20
 
 struct sha1_hash {
