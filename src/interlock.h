@@ -169,7 +169,7 @@ inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void 
 
 #include <pthread.h>
 
-extern pthread_mutex_t g_interlocked_mutex = PTHREAD_MUTEX_INITIALIZER;
+extern pthread_mutex_t g_interlocked_mutex;
 
 inline LONG InterlockedAdd(LONG* ptr, LONG value) {
 	LONG rval;
