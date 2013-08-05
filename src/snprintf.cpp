@@ -1,5 +1,6 @@
 #if defined WIN32
 
+#include <stdio.h>
 #include <stdarg.h>
 
 int snprintf(char* buf, int len, char const* fmt, ...)
