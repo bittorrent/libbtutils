@@ -29,11 +29,6 @@
 #ifdef WIN32
 
 #include <windows.h>
-
-#ifndef WIN_RT
-#define _M_CEE_PURE
-#endif	// WIN_RT
-
 #include <intrin.h>
 #include <assert.h>
 
