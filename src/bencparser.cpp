@@ -1,11 +1,12 @@
 #include "bencparser.h"
+#include <cassert>
 //#include "btstring.h"
 
 #define READBYTE2(START, END, CURRENT) assert(START <= END); if (START == END) return NULL; CURRENT = *((START)++);
 
-const byte *BencParser::ParseString(size_t *pSize)
+const unsigned char *BencParser::ParseString(size_t *pSize)
 {
-	byte m;
+	unsigned char m;
 	READBYTE2(_p, _pEnd, m);
 
 	size_t val = 0;
@@ -17,45 +18,45 @@ const byte *BencParser::ParseString(size_t *pSize)
 		if (!(m >= '0' && m <= '9'))
 			return NULL;
 	}
-	byte *pReturn = _p;
+	unsigned char *pReturn = _p;
 	_p += val;
 	*pSize = val;
 
 	// See if this string length goes off the end of the buffer or file
 	if(_p > _pEnd) {
-		DbgLogf("Can't parse string with length longer than remaining buffer:  %Lu %s",
-			(uint64) val, (cstr) pReturn);
-		DEBUG_ASSERT(0);
+		/*DbgLogf("Can't parse string with length longer than remaining buffer:  %Lu %s",
+			(uint64_t) val, (const unsigned char*) pReturn);
+		DEBUG_ASSERT(0);*/
 		return NULL;	// Error will propagate out of the parser
 	}
 
 	return pReturn;
 }
 
-const byte *BencParser::ParseNum(size_t *pSize)
+const unsigned char *BencParser::ParseNum(size_t *pSize)
 {
 	// this is a more forgiving interpretation of the integer.
 	// sometimes torrents are broken and encode integers incorrectly
 	// this will avoid failing to parse those
 
-	byte *e = _p;
+	unsigned char *e = _p;
 	// skip any remaining garbage
-	while (_p < _pEnd && *_p != (byte) 'e') ++_p;
+	while (_p < _pEnd && *_p != (unsigned char) 'e') ++_p;
 	*pSize = _p - e;
 	if (_p != _pEnd) ++_p; // skip the 'e'
-	return (const byte*)e;
+	return (const unsigned char*)e;
 }
 
-IBencParser::PARSE_T  BencParser::ParseNext(const byte **ppElement, size_t *pSize, bool isKey )
+IBencParser::PARSE_T  BencParser::ParseNext(const unsigned char **ppElement, size_t *pSize, bool isKey )
 {
 	PARSE_T tReturn = BERROR;
 	*pSize = 0;
 	if( _p == _pEnd ) return DONE;
 	if(_p > _pEnd) {
-		DEBUG_ASSERT(0);
+		//DEBUG_ASSERT(0);
 		return BERROR;
 	}
-	byte m = *((_p)++);
+	unsigned char m = *((_p)++);
 
 	if (m >= '0' && m <= '9') {
 		_p--;
@@ -88,9 +89,9 @@ IBencParser::PARSE_T  BencParser::ParseNext(const byte **ppElement, size_t *pSiz
 // _key is a 'key path' like "foo\0bar\0\0"
 // This means, match [benc] in "d ... 3:food ... 3:bar[ benc ] ... e ... e"
 // Note that the double eol is required.
-IBencParser::PARSE_T  BencParserElement::ParseNext( const byte **ppStart, size_t *pSize, bool isKey )
+IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStart, size_t *pSize, bool isKey )
 {
-	const byte* pElementStart = _p; // store the pointer to the start of the element before ParseNext moves it away
+	const unsigned char* pElementStart = _p; // store the pointer to the start of the element before ParseNext moves it away
 	PARSE_T parseReturn = BencParser::ParseNext( ppStart, pSize, isKey );
 
 	// Skip this business if we think we have found the element
@@ -107,8 +108,8 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const byte **ppStart, size_t
 			// keys to match in depth.
 			if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
 				// +1 and -1 are to include the i-prefix and e-suffix
-				_elementStart = const_cast<byte*>((*ppStart)-1);
-				_elementEnd = const_cast<byte*>((*ppStart) + *pSize + 1);
+				_elementStart = const_cast<unsigned char*>((*ppStart)-1);
+				_elementEnd = const_cast<unsigned char*>((*ppStart) + *pSize + 1);
 			}
 			break;
 		case STRING :
@@ -117,21 +118,21 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const byte **ppStart, size_t
 				_lastString = *ppStart;
 				_lastSize = *pSize;
 				// We mark a key match if we were parsing a key position, and the string matches in length and content
-				if (memcmp( (byte *) _lastString, _key, _keyLen) == 0 && _keyLen == *pSize) {
+				if (memcmp( (unsigned char *) _lastString, _key, _keyLen) == 0 && _keyLen == *pSize) {
 					// _keyMatch is a bitstring whose i'th bit remembers whether the key leading here at level i matched
 					// the desired key in the key path in _key.
 					_keyMatch |= 1 << (_level - 1);
 				}
 			} else if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
-				_elementStart = const_cast<byte*>(pElementStart);
-				_elementEnd = const_cast<byte*>(*ppStart + *pSize);
+				_elementStart = const_cast<unsigned char*>(pElementStart);
+				_elementEnd = const_cast<unsigned char*>(*ppStart + *pSize);
 			}
 			break;
 		case DICT :
 		case LIST :
 			// check for "element", record start
 			if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
-				_elementStart = const_cast<byte*>(*ppStart - 1);
+				_elementStart = const_cast<unsigned char*>(*ppStart - 1);
 				_elementLevel = _level;
 			}
 			_lastString = 0;
@@ -166,7 +167,7 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const byte **ppStart, size_t
 				_keyLen = strlen(_key);
 			}
 			if( _elementLevel && _elementStart && _elementLevel == _level && _elementEnd == NULL ) {
-				_elementEnd = const_cast<byte*>(*ppStart);	// there, we're done
+				_elementEnd = const_cast<unsigned char*>(*ppStart);	// there, we're done
 			}
 			break;
 		case BERROR:
@@ -179,7 +180,7 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const byte **ppStart, size_t
 	return parseReturn;
 }
 
-void BencParserElement::GetElement( byte **ppElementStart, byte **ppElementEnd ) const
+void BencParserElement::GetElement( unsigned char **ppElementStart, unsigned char **ppElementEnd ) const
 {
 	*ppElementStart = _elementStart;
 	*ppElementEnd = _elementEnd;

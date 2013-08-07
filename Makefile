@@ -1,6 +1,6 @@
 CXX=g++
 CFLAGS=-DPOSIX -DDEBUG -D_LIB
-CXXFLAGS=$(CFLAGS) -std=c++11
+CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
 
 SRC=src/RefBase.cpp src/bitfield.cpp src/bloom_filter.cpp src/get_microseconds.cpp \
 		src/inet_ntop.cpp src/sockaddr.cpp src/interlock.cpp src/snprintf.cpp

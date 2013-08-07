@@ -317,23 +317,17 @@ void BencEntity::Print(int indent)
 }
 #endif
 
-class BencodedEmitter {
-	std::vector<char> _emit_buf;
-public:
+void BencodedEmitterBase::EmitChar(char a) {
+	_emit_buf.push_back(a);
+}
 
-	void Emit(const void *a, size_t len)
-	{
-		if (len > 0) {
-			assert(a);
-			_emit_buf.insert(_emit_buf.end(), (char*)a, (char*)((char*)a + len*sizeof(char)));
-		}
+void BencodedEmitterBase::Emit(const void *a, size_t len) {
+	if (len > 0) {
+		assert(a);
+		_emit_buf.insert(_emit_buf.end(), (char*)a, (char*)((char*)a + len*sizeof(char)));
 	}
-
-	void EmitChar(char a)
-	{
-		_emit_buf.push_back(a);
-	}
-
+}
+#if 0 // for json
 	void EmitQuoted(const void* a, size_t len)
 	{
 		EmitChar('\"');
@@ -379,130 +373,6 @@ public:
 			}
 		}
 		EmitChar('\"');
-	}
-
-	void EmitIndent(int n)
-	{
-		if (!n)
-			return;
-
-		static const char blanks[] = "						";
-		const int numblanks = min<int>(n * 2, lenof(blanks) - 1);
-		Emit((unsigned char*)blanks + lenof(blanks) - 1 - numblanks, numblanks);
-	}
-
-	BencodedEmitter() {
-		_emit_buf.Init(4096);
-	}
-
-	unsigned char *GetResult(size_t *len)
-	{
-		_emit_buf.Compact();
-		return (unsigned char *)_emit_buf.StealArray(len);
-	}
-
-	void Emit(const BencEntity *e)
-	{
-		char buf[64];
-
-		switch(e->bencType) {
-		case BENC_INT:
-			//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-			Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
-			break;
-
-		case BENC_BIGINT:
-			//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-			Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
-			break;
-
-		case BENC_STR: {
-			const BencEntityMem *me = BencEntity::AsBencString( e );
-			//Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
-			Emit(buf, snprintf(buf, sizeof(buf), "%d:", me->GetSize()));
-			Emit(me->GetRaw(), me->GetSize());
-			break;
-		}
-		case BENC_LIST:
-		case BENC_VLIST:
-		{
-			const BencodedList *el = BencEntity::AsList( e );
-			EmitChar('l');
-			for(size_t i=0; i!=el->GetCount(); i++)
-				Emit(el->Get(i));
-			EmitChar('e');
-			break;
-		}
-		case BENC_DICT: {
-			const BencodedDict *ed = BencEntity::AsDict( e );
-			EmitChar('d');
-			for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
-				size_t j = btstrnlen(it->first.GetRaw(), it->first.GetCount());
-				//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-				Emit(buf, snprintf(buf, sizeof(buf), "%u:", j));
-				Emit(it->first.GetRaw(), j);
-				Emit(&it->second);
-			}
-			EmitChar('e');
-			break;
-		}
-		default:
-			assert(0);
-
-		}
-	}
-
-	void EmitAsXML(const char* tag, const BencEntity *e, int indent = 0)
-	{
-		char buf[128];
-		EmitIndent(indent);
-		Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "<%U>", tag));
-		++indent;
-
-		switch(e->bencType) {
-		case BENC_INT:
-			Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "%Ld", e->num));
-			break;
-
-		case BENC_BIGINT:
-			Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "%Ld", e->num));
-			break;
-
-		case BENC_STR: {
-			const BencEntityMem *me = BencEntity::AsBencString( e );
-
-			if (me->GetSize() > 0) {
-				btsnprintf(buf, lenof(buf), "%%.%uU", me->GetSize());
-				unsigned char *tmp = (unsigned char*)malloc(sizeof(unsigned char) * me->GetSize() * 4);
-				Emit(tmp, btsnprintf((char*)tmp, me->GetSize() * 4, buf, me->GetRaw()));
-				free(tmp);
-			}
-			break;
-		}
-
-		case BENC_LIST:
-		case BENC_VLIST: {
-			Emit("\r\n", 2);
-			const BencodedList *el = BencEntity::AsList( e );
-			for(size_t i=0; i!=el->list->GetCount(); i++)
-				EmitAsXML("item", el->Get(i), indent);
-			EmitIndent(indent-1);
-			break;
-		}
-		case BENC_DICT: {
-			const BencodedDict *ed = BencEntity::AsDict( e );
-			Emit("\r\n", 2);
-			for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
-				EmitAsXML((const char*)it->first.GetRaw(), &it->second, indent);
-			}
-			EmitIndent(indent-1);
-			break;
-		}
-		default:
-			assert(0);
-		}
-
-		Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "</%U>\r\n", tag));
 	}
 
 	void EmitAsJson(const BencEntity *e, int indent = 0)
@@ -572,7 +442,131 @@ public:
 			assert(0);
 		}
 	}
+#endif
 
+#if 0 // for XML
+	void EmitIndent(int n)
+	{
+		if (!n)
+			return;
+
+		static const char blanks[] = "						";
+		const int numblanks = min<int>(n * 2, lenof(blanks) - 1);
+		Emit((unsigned char*)blanks + lenof(blanks) - 1 - numblanks, numblanks);
+	}
+
+	void EmitAsXML(const char* tag, const BencEntity *e, int indent = 0)
+	{
+		char buf[128];
+		EmitIndent(indent);
+		Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "<%U>", tag));
+		++indent;
+
+		switch(e->bencType) {
+		case BENC_INT:
+			Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "%Ld", e->num));
+			break;
+
+		case BENC_BIGINT:
+			Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "%Ld", e->num));
+			break;
+
+		case BENC_STR: {
+			const BencEntityMem *me = BencEntity::AsBencString( e );
+
+			if (me->GetSize() > 0) {
+				btsnprintf(buf, lenof(buf), "%%.%uU", me->GetSize());
+				unsigned char *tmp = (unsigned char*)malloc(sizeof(unsigned char) * me->GetSize() * 4);
+				Emit(tmp, btsnprintf((char*)tmp, me->GetSize() * 4, buf, me->GetRaw()));
+				free(tmp);
+			}
+			break;
+		}
+
+		case BENC_LIST:
+		case BENC_VLIST: {
+			Emit("\r\n", 2);
+			const BencodedList *el = BencEntity::AsList( e );
+			for(size_t i=0; i!=el->list->GetCount(); i++)
+				EmitAsXML("item", el->Get(i), indent);
+			EmitIndent(indent-1);
+			break;
+		}
+		case BENC_DICT: {
+			const BencodedDict *ed = BencEntity::AsDict( e );
+			Emit("\r\n", 2);
+			for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
+				EmitAsXML((const char*)it->first.GetRaw(), &it->second, indent);
+			}
+			EmitIndent(indent-1);
+			break;
+		}
+		default:
+			assert(0);
+		}
+
+		Emit((unsigned char*)buf, btsnprintf(buf, lenof(buf), "</%U>\r\n", tag));
+	}
+#endif
+
+unsigned char* BencodedEmitterBase::GetResult() {
+	unsigned char* result = static_cast<unsigned char*>(malloc(_emit_buf.size()*sizeof(unsigned char)));
+	memcpy(result, &_emit_buf[0], _emit_buf.size()*sizeof(unsigned char));
+	_emit_buf.clear();
+	return result;
+}
+
+void BencodedEmitter::EmitEntity(const BencEntity *e) {
+	char buf[64];
+
+	switch(e->bencType) {
+	case BENC_INT:
+		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
+		break;
+
+	case BENC_BIGINT:
+		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
+		break;
+
+	case BENC_STR: {
+		const BencEntityMem *me = BencEntity::AsBencString( e );
+		//Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
+		Emit(buf, snprintf(buf, sizeof(buf), "%d:", me->GetSize()));
+		Emit(me->GetRaw(), me->GetSize());
+		break;
+	}
+	case BENC_LIST:
+	case BENC_VLIST:
+	{
+		const BencodedList *el = BencEntity::AsList( e );
+		EmitChar('l');
+		for(size_t i=0; i!=el->GetCount(); i++)
+			EmitEntity(el->Get(i));
+		EmitChar('e');
+		break;
+	}
+	case BENC_DICT: {
+		const BencodedDict *ed = BencEntity::AsDict( e );
+		EmitChar('d');
+		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
+			size_t j = strnlen(&(it->first[0]), it->first.GetCount());
+			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
+			Emit(buf, snprintf(buf, sizeof(buf), "%u:", j));
+			Emit(&(it->first[0]), j);
+			EmitEntity(&it->second);
+		}
+		EmitChar('e');
+		break;
+	}
+	default:
+		assert(0);
+
+	}
+}
+
+#if 0	//ascii
 	void EmitQuotedAscii(const void* a, int len)
 	{
 		for (int i = 0; i < len; ++i) {
@@ -660,97 +654,15 @@ public:
 
 		}
 	}
-};
-
-#if 0
-class BencodedEmitterBase {
-public:
-	virtual void EmitEntity(const BencEntity *e) = 0;
-	virtual void EmitListStart() = 0;
-	virtual void EmitListEnd() = 0;
-	virtual void EmitListItemSep() = 0;
-	virtual void EmitDictItemStart() = 0;
-	virtual void EmitDictItemLabel(BencKey *) = 0;
-	virtual void EmitDictPairSep() = 0;
-//	virtual void BaseEmitter(&it->second) = 0;
-	virtual void EmitDictItemEnd() = 0;
-	virtual void EmitChar(char) = 0;
-};
-
-class BencodedEmitterExperimental : public BencodedEmitterBase
-{
-public:
-	virtual void EmitListStart(){ EmitChar('l'); }
-	virtual void EmitListEnd(){ EmitChar('e'); }
-	virtual void EmitListItemSep(){}
-//	virtual void EmitDictStart{ EmitChar('d'); }
-//	virtual void EmitDictEnd{ EmitChar('e'); }
-	virtual void EmitDictItemStart(){}
-	virtual void EmitDictItemLabel(BencKey *key){
-		char buf[128];
-		Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-	}
-	virtual void EmitDictPairSep() = 0;
-//	virtual void BaseEmitter(&it->second) = 0;
-	virtual void EmitDictItemEnd() = 0;
-
-	virtual void EmitEntity(const BencEntity *e)
-	{
-		char buf[64];
-
-		switch(e->bencType) {
-		case BENC_INT:
-			Emit(buf, btsnprintf(buf, lenof(buf), "i%de", e->num));
-			break;
-
-		case BENC_BIGINT:
-			Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-			break;
-
-		case BENC_STR: {
-			const BencEntityMem *me = BencEntity::AsBencString( e );
-			Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
-			Emit(me->GetRaw(), me->GetSize());
-			break;
-		}
-		case BENC_LIST:
-		case BENC_VLIST:
-		{
-			const BencodedList *el = BencEntity::AsList( e );
-			EmitChar('l');
-			for(size_t i=0; i!=el->list->GetCount(); i++)
-				Emit(el->Get(i));
-			EmitChar('e');
-			break;
-		}
-		case BENC_DICT: {
-			const BencodedDict *ed = BencEntity::AsDict( e );
-			EmitChar('d');
-			for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
-				size_t j = btstrnlen(it->first.GetRaw(), it->first.GetCount());
-				Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-				Emit(it->first.GetRaw(), j);
-				Emit(&it->second);
-			}
-			EmitChar('e');
-			break;
-		}
-		default:
-			assert(0);
-
-		}
-	}
-};
 #endif
 
-unsigned char *BencEntity::Serialize(size_t *len) const
-{
+unsigned char* SerializeBencEntity(const BencEntity* entity) {
 	BencodedEmitter emit;
-	emit.Emit(this);
-	return emit.GetResult(len);
+	emit.EmitEntity(entity);
+	return emit.GetResult();
 }
 
-
+#if 0
 char* BencEntity::SerializeAsAscii(size_t* len) const
 {
 	BencodedEmitter emit;
@@ -803,6 +715,7 @@ char* BencEntity::SerializeByMimeType(const char* mime_type, const char* tag, co
 		return SerializeAsJson();
 	}
 }
+#endif
 
 
 bool BencEntityIsValid(unsigned char *b, size_t len, void *userdata)
@@ -812,11 +725,11 @@ bool BencEntityIsValid(unsigned char *b, size_t len, void *userdata)
 	return (BencEntity::Parse(b, *self, bend) == bend);
 }
 
-int BencEntity::LoadFromFile_Safe(const tstr filename)
+/*int BencEntity::LoadFromFile_Safe(const tstr filename)
 {
 	return LoadFile_Safe(filename, BencEntityIsValid, this);
 }
-
+*/
 
 #define READBYTE() assert(p <= pend); if (p == pend) return NULL; m = *p++;
 #define READBYTE2(START, END, CURRENT) assert(START <= END); if (START == END) return NULL; CURRENT = *((START)++);
@@ -882,7 +795,7 @@ void BencodedList::grow(unsigned int num)
 	size_t i = START_SIZE;
 	do{
 		if (num < 1<<i) {
-			list->Resize(1<<i);
+			list->reserve(1<<i);
 			break;
 		}
 		i++;
@@ -903,26 +816,22 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 
 		// Instead of another item, we have reached the end of this collection
 		if (parseResult == IBencParser::END_E) {
-			if (list->GetCount()) {
-				list->Compact();
+			if (list->size()) {
+				list->shrink_to_fit();
 			}
 
 			*ent = NULL;
 			break;
 		}
 
-		grow((unsigned int)list->GetCount());
-		*ent = &(list->Append());
-		(*ent)->ZeroOut();	// perhaps not totally necessary?
-
-		if((*ent)->SetParsed( parseResult, pElement, (int)elementSize, regime )){
+		grow((unsigned int)list->size());
+		BencEntity ent;
+		if(ent.SetParsed( parseResult, pElement, (int)elementSize, regime )){
 			// Don't handle vlist since this is for parsing
-			if ((*ent)->bencType == BENC_LIST || (*ent)->bencType == BENC_DICT) {
+			list->push_back(ent);
+			if (ent.bencType == BENC_LIST || ent.bencType == BENC_DICT) {
 				break;
 			}
-		}
-		else {
-			list->RemoveElement(list->GetCount());
 		}
 	}
 
@@ -965,8 +874,9 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		}
 
 		BencKey *bencKey = regime->NewKey((char *)pKey, (int)keySize);
-		BencodedEntityMap::insert_return_type inserted =
-			dict->insert(lastIt, BencodedEntityMap::value_type(*bencKey, BencEntity(BENC_VOID)));
+		//std::pair<BencodedEntityMap::iterator, bool> inserted =
+		BencodedEntityMap::value_type value (*bencKey, BencEntity(BENC_VOID));
+		BencodedEntityMap::iterator inserted = dict->insert(lastIt, value);
 		delete bencKey;
 
 		// Check whether the dict has
@@ -977,12 +887,12 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		// (e.g. DHT queries, settings file updates, etc.
 		// this actually happens in the wild when broken DHT nodes
 		// sends invalid dht messages
-		if(! inserted.second) {
+		if(inserted == lastIt) {
 			return false;
 		}
 
 		// Point to the one in our dict
-		*ent = const_cast<BencEntity *>( &(inserted.first->second) );
+		*ent = const_cast<BencEntity *>( &(inserted->second) );
 		//Assign it the parsed value/type
 		(*ent)->SetParsed( parseResult, pElement, elementSize, regime );
 		// Don't handle vlist since this is for parsing
@@ -990,7 +900,7 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 			return true;
 		}
 
-		lastIt = inserted.first;
+		lastIt = inserted;
 	}
 	return(parseResult != IBencParser::BERROR);
 }
@@ -1063,12 +973,11 @@ bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRe
 		return false;
 	}
 	ent.SetParsed( parseResult, pEnt, entSize, pRegime );
-	LList<BencEntity*> stack;
-	stack.Init();
-	stack.Append(&ent);
+	std::vector<BencEntity*> stack;
+	stack.push_back(&ent);
 
 	// depth-first tree creation
-	while (stack.GetCount()) {
+	while (stack.size()) {
 		BencEntity *nent = NULL;
 		BencEntity *tent = stack.back();
 
@@ -1084,18 +993,16 @@ bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRe
 			break;
 		}
 		if (nent) {
-			stack.Append(nent);
+			stack.push_back(nent);
 		} else {
 			stack.pop_back();
 		}
 	}
 
-	stack.Free();
-
 	return bReturn;
 }
 
-void BencEntity::SetInt64(int64 i)
+void BencEntity::SetInt64(int64_t i)
 {
 	FreeMembers();
 	bencType = BENC_BIGINT;
@@ -1114,7 +1021,7 @@ int BencEntity::GetInt(int def /*= 0*/) const {
 	return num;
 }
 
-int64 BencEntity::GetInt64(int64 def /*= 0*/) const {
+int64_t BencEntity::GetInt64(int64_t def /*= 0*/) const {
 	if(bencType != BENC_INT && bencType != BENC_BIGINT) return def;
 	return num;
 }
@@ -1187,7 +1094,7 @@ int BencEntityLazyInt::GetInt(int def /*= 0*/) {
 
 // Here we do a transformation: once the lazy int gets read/loaded,
 // we are transformed to a regular int
-int64 BencEntityLazyInt::GetInt64(int64 def /*= 0*/) {
+int64_t BencEntityLazyInt::GetInt64(int64_t def /*= 0*/) {
 	assert(bencType == BENC_INT_LAZY);
 	if(bencType != BENC_INT_LAZY) return def;
 	BencodedMem *pMem = mem;
@@ -1223,6 +1130,7 @@ tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
 }
 
 // Hmm, does a BencEntity need to know about RPC format?
+/*
 BencodedDict* BencEntity::ParseRpcParams(char* paramlist, bool allowmultiple)
 {
 	char* action = paramlist;
@@ -1248,6 +1156,7 @@ BencodedDict* BencEntity::ParseRpcParams(char* paramlist, bool allowmultiple)
 	action_dict->Insert(action, param_dict);
 	return action_dict;
 }
+*/
 
 // C++ interface functions
 BencodedDict *BencodedList::GetDict(size_t i)
@@ -1277,9 +1186,8 @@ BencEntity *BencodedList::Append(BencEntity &e)
 {
 	assert(bencType == BENC_LIST);
 	assert(list);
-	size_t index = list->Append(e);
-	e.ZeroOut();
-	return &((*list)[index]);
+	list->push_back(e);
+	return &((*list)[(list->size())-1]);
 }
 
 void BencodedList::Delete(size_t i)
@@ -1288,7 +1196,7 @@ void BencodedList::Delete(size_t i)
 	assert(list);
 	BencEntity *d = Get(i);
 	d->~BencEntity();
-	list->RemoveElement(i);
+	list->erase(list->begin() + i);
 }
 
 int BencodedList::GetInt(size_t item, int def) const
@@ -1300,7 +1208,7 @@ int BencodedList::GetInt(size_t item, int def) const
 	return e->GetInt(def);
 }
 
-int64 BencodedList::GetInt64(size_t item, int64 def) const
+int64_t BencodedList::GetInt64(size_t item, int64_t def) const
 {
 	assert(bencType == BENC_LIST);
 	assert(list);
@@ -1313,9 +1221,9 @@ void BencodedList::FreeMembers()
 {
 	assert(bencType == BENC_LIST);
 	if(list) {
-		for( int i = 0; i < list->GetCount(); i++ )
+		for( int i = 0; i < list->size(); i++ )
 			(*list)[i].FreeMembers();
-		list->Free();
+		list->clear();
 		delete list;
 		list = NULL;
 	}
@@ -1326,12 +1234,15 @@ void BencodedList::CopyFrom(const BencEntity &b)
 	assert(bencType == BENC_LIST);
 	FreeMembers();
 	bencType = b.bencType;
-	list = new BencodedEntityList( b.list->GetCount() );
-	for( int i = 0; i < b.list->GetCount(); i++ ) {
+	//list = new BencodedEntityList( b.list->size() );
+	list = new BencodedEntityList(b.list->begin(), b.list->end());
+	/*
+	for( int i = 0; i < b.list->size(); i++ ) {
 		(*list)[i].ZeroOut(); //ideally need placement new
 		(*list)[i].CopyFrom((*b.list)[i]);
 }
-	list->SetCount(b.list->GetCount());
+	list->SetCount(b.list->size());
+	*/
 }
 
 BencEntityMem *BencodedList::AppendString(const char* str, size_t length /*=-1*/)
@@ -1341,7 +1252,8 @@ BencEntityMem *BencodedList::AppendString(const char* str, size_t length /*=-1*/
 	beM.SetStr( str, (int)length );
 	return (BencEntityMem *) Append( beM );
 }
-BencEntityMem *BencodedList::AppendStringT(const char* str, size_t length /*=-1*/)
+
+BencEntityMem *BencodedList::AppendStringT(const tstr str, size_t length /*=-1*/)
 {
 	assert(bencType == BENC_LIST);
 	BencEntityMem beM;
@@ -1355,7 +1267,7 @@ BencEntity *BencodedList::AppendInt( int val )
 	beInt.SetInt( val );
 	return Append( beInt );
 }
-BencEntity *BencodedList::AppendInt64( int64 val )
+BencEntity *BencodedList::AppendInt64( int64_t val )
 {
 	assert(bencType == BENC_LIST);
 	BencEntity beInt;
@@ -1381,7 +1293,7 @@ const BencEntity *BencodedDict::Get(const char* key) const
 {
 	assert(bencType == BENC_DICT);
 	assert(dict);
-	BencKey Key( (char *) key, (int)strlen(key), adopt_string );
+	BencKey Key( (char *) key, (int)strlen(key));
 	BencodedEntityMap::const_iterator it = dict->find( Key );
 	if( it == dict->end() )
 		return NULL;
@@ -1446,7 +1358,7 @@ int BencodedDict::GetInt(const char* key, int def) const
 	return e->GetInt(def);
 }
 
-int64 BencodedDict::GetInt64(const char* key, int64 def) const
+int64_t BencodedDict::GetInt64(const char* key, int64_t def) const
 {
 	assert(bencType == BENC_DICT);
 	assert(list);
@@ -1463,15 +1375,15 @@ void BencodedDict::CopyFrom(const BencEntity& b)
 	BencodedEntityMap::iterator lastIt = dict->begin();
 	for( BencodedEntityMap::iterator it = b.dict->begin(); it != b.dict->end(); it++) {
 		BencKey bencKey(it->first);
-		BencodedEntityMap::insert_return_type inserted =
+		BencodedEntityMap::iterator inserted =
 			dict->insert( lastIt, BencodedEntityMap::value_type(bencKey, BencEntity(it->second.bencType)) );
-		bencKey.StealArray();	// leave the new array in the dict
-		assert(inserted.second);	// should always be new
+		//bencKey.StealArray();	// leave the new array in the dict
+		assert(inserted != lastIt);	// should always be new
 		// Point to the one in our dict
-		BencEntity *ent = const_cast<BencEntity *>( &(inserted.first->second) );
+		BencEntity *ent = const_cast<BencEntity *>( &(inserted->second) );
 		//Assign it the parsed value/type
 		ent->CopyFrom( it->second );
-		lastIt = inserted.first;
+		lastIt = inserted;
 	}
 }
 
@@ -1538,9 +1450,9 @@ BencEntity *BencodedDict::Insert(const char* key, BencEntity &val)
 	Key.SetArray( (char *) key, strlen( key ) );
 	// insert will make a deep copy of bKey, but a shallow copy of val,
 	// which we zero out before returning.
-	BencodedEntityMap::insert_return_type result = dict->insert( Key, val );
+	std::pair<BencodedEntityMap::iterator, bool> result = dict->insert(std::pair<BencKey, BencEntity>(Key, val));
 	val.ZeroOut();
-	Key.StealArray();
+	//Key.StealArray();
 	return &(result.first->second);
 }
 
@@ -1596,7 +1508,7 @@ void BencodedDict::Delete(const char* key)
 	// Assume we omit the null terminator
 	bKey.SetArray( (char *) key, strlen(key) );
 	dict->erase( bKey );
-	bKey.StealArray();
+	//bKey.StealArray();
 }
 
 unsigned char *BencodedDict::Serialize(size_t *len)
@@ -1604,12 +1516,14 @@ unsigned char *BencodedDict::Serialize(size_t *len)
 	assert(bencType == BENC_DICT);
 	INVARIANT_CHECK;
 
-	return BencEntity::Serialize(len);
+	return SerializeBencEntity(this);
 }
 
-BencEntityMem *BencodedDict::InsertString(const string& key, const string& str, int length /*=-1*/)
+BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)
 {
-	return InsertString(key.c_str(), str.c_str(), length);
+	// contiguous if string length > 0
+	assert(!key.empty() && !str.empty());
+	return InsertString(&(key[0]), &(str[0]), length);
 }
 
 BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int length /*=-1*/)
@@ -1636,7 +1550,7 @@ BencEntity *BencodedDict::InsertInt(const char* key, int val)
 	return Insert( key, beInt );
 }
 
-BencEntity *BencodedDict::InsertInt64(const char* key, int64 val)
+BencEntity *BencodedDict::InsertInt64(const char* key, int64_t val)
 {
 	assert(bencType == BENC_DICT);
 	BencEntity beInt;

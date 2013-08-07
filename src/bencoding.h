@@ -6,6 +6,7 @@
 #include <algorithm> // std::mismatch
 #include <cassert>
 #include <cwchar>
+#include <string>
 #include <map>
 #include <vector>
 #include <utility>	// std::pair
@@ -67,14 +68,15 @@ public:
 		this->_arr = b._arr;
 	}
 	BencArray( T *p, int count ) {
-		this->_arr.assign(*p, (*p) + count * sizeof(T*));
+		this->_arr.assign(p, p + count * sizeof(T));
 	}
 	bool operator<(const BencArray<T>& arg) const {
-		std::pair<T*, T*> match;
+		return (this->_arr<arg._arr)?true:false;
+		/*std::pair<T*, T*> match;
 		match = std::mismatch(this->_arr.begin(), this->_arr.end(), arg._arr.begin());
 		if (match.first == match.second)
 			return (this->_arr.size() < arg._arr.size())?true:false;
-		return (match.first < match.second)?true:false;
+		return (match.first < match.second)?true:false;*/
 	}
 	BencArray<T>& operator=(const BencArray<T>& arg) {
 		this->_arr = arg._arr;
@@ -83,7 +85,17 @@ public:
 	T& operator[] (size_t index) {
 		return this->_arr[index];
 	}
+	const T& operator[] (size_t index) const {
+		return this->_arr[index];
+	}
 	size_t GetCount() const {return this->_arr.size();}
+	void Clear() {this->_arr.clear();}
+	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count*sizeof(p)); }
+	void AppendTerminated(const T *p, int count) { this->Append(p, count-1); this->Append(0, 1); }
+	void Resize(size_t size) { this->_arr.resize(size); }
+	// whyyyy is len in bytes?
+	void SetArray(T *p, size_t len) { assert(len%sizeof(p)==0); this->_arr.assign(p, p + len); }
+	const unsigned char* GetRaw() const {return &(this->_arr[0]);}
 };
 
 typedef BencArray<char> BencKey;
@@ -97,6 +109,22 @@ struct ReturnElementRgn {
 
 typedef void (*BencVListCallback)(void *user, size_t i, BencEntity *result);
 struct VListData;
+
+class BencodedEmitterBase {
+	std::vector<char> _emit_buf;
+public:
+	BencodedEmitterBase() { _emit_buf.reserve(4096); };
+	void EmitChar(char);
+	void Emit(const void *a, size_t len);
+	unsigned char* GetResult();
+	virtual void EmitEntity(const BencEntity *e) = 0;
+};
+
+class BencodedEmitter : public BencodedEmitterBase {
+public:
+	virtual void EmitEntity(const BencEntity *e);
+};
+
 class BencEntity {
 public:
 	union {
@@ -194,14 +222,13 @@ public:
 	static BencEntityMem *AsBencString(BencEntity *e) { return e && e->bencType == BENC_STR ? (BencEntityMem*)e : NULL; }
 	static const BencEntityMem *AsBencString(const BencEntity *e) { return e && e->bencType == BENC_STR ? (BencEntityMem*)e : NULL; }
 
-	unsigned char *Serialize(size_t *len = NULL) const;
-	unsigned char *SerializeAsText(size_t *len = NULL) const;
+/*	unsigned char *SerializeAsText(size_t *len = NULL) const;
 	char * SerializeAsXML(const char * tag, size_t* len = NULL) const;
 	char * SerializeAsJson(size_t* len = NULL) const;
 	char * SerializeAsAscii(size_t* len = NULL) const;
-	char * SerializeByMimeType(const char * mime_type, const char * tag, const char *& encoding, const char * json_callback = NULL);
+	char * SerializeByMimeType(const char * mime_type, const char * tag, const char *& encoding, const char * json_callback = NULL);*/
 
-	int LoadFromFile_Safe(const tstr filename);
+	//int LoadFromFile_Safe(const tstr filename);
 
 	// Parse a list of web RPC params of the form:
 	//  action?param1=val1?param2=val2 ...
@@ -214,7 +241,7 @@ public:
 	//	  }
 	//  }
 // Hmm, does a BencEntity need to know about RPC format?
-	BencodedDict* ParseRpcParams(char * paramlist, bool allowmultiple = false);
+//	BencodedDict* ParseRpcParams(char * paramlist, bool allowmultiple = false);
 
 	static const unsigned char *ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend);
 	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, ReturnElementRgn *rgn);
@@ -229,6 +256,8 @@ protected:
 private:
 	static bool DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *regime);
 };
+
+unsigned char* SerializeBencEntity(const BencEntity* entity);
 
 class BencEntityMem : public BencEntity {
 public:
@@ -259,7 +288,7 @@ public:
 		return GetSize() ? (char *)GetRaw() : "";
 	}
 
-	tstr GetStringT(int encoding, size_t *count) const;
+	tstring GetStringT(int encoding, size_t *count) const;
 
 	// Sets a unicode string, internally converts to utf-8
 	void SetStrT(const tstr s);
@@ -329,7 +358,7 @@ public:
 	void CopyFrom(const BencEntity& b);
 
 protected:
-	void grow(unsigned short num);
+	void grow(unsigned int num);
 private:
 	BencodedList(const BencodedList&);
 };
