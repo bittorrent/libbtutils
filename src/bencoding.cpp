@@ -60,7 +60,7 @@ char* EncodeUtf8(const tstr input, size_t *out_len = NULL) { return str_to_utf8(
 BencEntityMem::BencEntityMem(const tstr memArg, size_t len): BencEntity( BENC_STR ) {
 	assert(memArg);
 	std::string utf8(EncodeUtf8(memArg));
-	if(len == ~0)
+	if(len == static_cast<size_t>(~0))
 		len = utf8.size();
 	mem = new BencodedMem( (unsigned char *) utf8.c_str(), static_cast<int>(len) );
 }
@@ -533,7 +533,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
 		//Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
-		Emit(buf, snprintf(buf, sizeof(buf), "%d:", me->GetSize()));
+		Emit(buf, snprintf(buf, sizeof(buf), "%lu:", me->GetSize()));
 		Emit(me->GetRaw(), me->GetSize());
 		break;
 	}
@@ -553,7 +553,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
 			size_t j = strnlen(&(it->first[0]), it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			Emit(buf, snprintf(buf, sizeof(buf), "%u:", j));
+			Emit(buf, snprintf(buf, sizeof(buf), "%lu:", j));
 			Emit(&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
@@ -794,12 +794,12 @@ void BencodedList::grow(unsigned int num)
 {
 	size_t i = START_SIZE;
 	do{
-		if (num < 1<<i) {
+		if (num < static_cast<unsigned int>(1<<i)) {
 			list->reserve(1<<i);
 			break;
 		}
 		i++;
-	} while (i < 32 && num >= 1<<i);
+	} while (i < 32 && num >= static_cast<unsigned int>(1<<i));
 }
 
 bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegime *regime)
@@ -1221,7 +1221,7 @@ void BencodedList::FreeMembers()
 {
 	assert(bencType == BENC_LIST);
 	if(list) {
-		for( int i = 0; i < list->size(); i++ )
+		for(unsigned int i = 0; i < list->size(); i++ )
 			(*list)[i].FreeMembers();
 		list->clear();
 		delete list;

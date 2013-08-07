@@ -616,7 +616,7 @@ char* SockAddr::get_arpa() const
 SockAddr SockAddr::round_up(SockAddr ip, const SockAddr &mask)
 {
 	int m = 1;
-	for (int i = sizeof(ip._in._in6) - 1; m && i >= (ip.isv6() ? 0 : sizeof(ip._in._in6) - sizeof(in_addr)); i--) {
+	for (unsigned int i = sizeof(ip._in._in6) - 1; m && i >= (ip.isv6() ? 0 : sizeof(ip._in._in6) - sizeof(in_addr)); i--) {
 		byte invmask = ~mask._in._in6[i];
 		m = (int)(invmask | ip._in._in6[i]) + 1;
 		ip._in._in6[i] = m;

@@ -7,7 +7,7 @@ inline uint64 ReadBE64(const void *p)
 {
 	byte *pp = (byte*)p;
 	uint64 ret = 0;
-	for (int i = 0; i < sizeof(uint64); ++i, ++pp) {
+	for (unsigned int i = 0; i < sizeof(uint64); ++i, ++pp) {
 		ret <<= 8;
 		ret |= *pp;
 	}

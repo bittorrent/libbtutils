@@ -271,14 +271,14 @@ public:
 	BencEntityMem(const void *memArg, size_t len = ~0): BencEntity( BENC_STR ){
 		assert(memArg);
 
-		if( len == ~0 )
+		if( len == static_cast<size_t>(~0) )
 			len = strlen( (const char *) memArg );
 		mem = new BencodedMem( (unsigned char *) memArg, static_cast<int>(len));
 	}
 
 	void SetStr(const char * s, int len = -1);
 	unsigned char *GetRaw(void) const { return &(*mem)[0]; }
-	int GetSize(void) const { return (int) mem->GetCount(); }
+	size_t GetSize(void) const { return mem->GetCount(); }
 	void CopyFrom(const BencEntity& b);
 
 	const char * GetString(size_t *count) const {

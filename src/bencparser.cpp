@@ -106,7 +106,7 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 			// This condition is repeated verbatim for each case below:
 			// It means that we capture the result if we have matched every key in the key path so far, and there are no more
 			// keys to match in depth.
-			if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
+			if( _lastString && _elementStart == NULL && _level && static_cast<size_t>((1 << _level) - 1) == _keyMatch && !*(_key + _keyLen + 1) ) {
 				// +1 and -1 are to include the i-prefix and e-suffix
 				_elementStart = const_cast<unsigned char*>((*ppStart)-1);
 				_elementEnd = const_cast<unsigned char*>((*ppStart) + *pSize + 1);
@@ -123,7 +123,7 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 					// the desired key in the key path in _key.
 					_keyMatch |= 1 << (_level - 1);
 				}
-			} else if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
+			} else if( _lastString && _elementStart == NULL && _level && static_cast<size_t>((1 << _level) - 1) == _keyMatch && !*(_key + _keyLen + 1) ) {
 				_elementStart = const_cast<unsigned char*>(pElementStart);
 				_elementEnd = const_cast<unsigned char*>(*ppStart + *pSize);
 			}
@@ -131,7 +131,7 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 		case DICT :
 		case LIST :
 			// check for "element", record start
-			if( _lastString && _elementStart == NULL && _level && (1 << _level) - 1 == _keyMatch && !*(_key + _keyLen + 1) ) {
+			if( _lastString && _elementStart == NULL && _level && static_cast<size_t>((1 << _level) - 1) == _keyMatch && !*(_key + _keyLen + 1) ) {
 				_elementStart = const_cast<unsigned char*>(*ppStart - 1);
 				_elementLevel = _level;
 			}
