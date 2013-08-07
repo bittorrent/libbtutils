@@ -589,7 +589,8 @@ char* SockAddr::get_arpa() const
 		// b.a.9.8.7.6.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa.
 		in6_addr a = get_addr6();
 #define out a.s6_addr
-		snprintf(buf, sizeof(buf), "%x.%x.%x.%x."
+		snprintf(buf, sizeof(buf),
+			"%x.%x.%x.%x."
 			"%x.%x.%x.%x."
 			"%x.%x.%x.%x."
 			"%x.%x.%x.%x."
@@ -598,14 +599,15 @@ char* SockAddr::get_arpa() const
 			"%x.%x.%x.%x."
 			"%x.%x.%x.%x."
 			"ip6.arpa",
-			out[31], out[30], out[29], out[28],
-			out[27], out[26], out[25], out[24],
-			out[23], out[22], out[21], out[20],
-			out[19], out[18], out[17], out[16],
-			out[15], out[14], out[13], out[12],
-			out[11], out[10], out[9], out[8],
-			out[7], out[6], out[5], out[4],
-			out[3], out[2], out[1], out[0]);
+			out[15] & 0xf, out[15] >> 4, out[14] & 0xf, out[14] >> 4,
+			out[13] & 0xf, out[13] >> 4, out[12] & 0xf, out[12] >> 4,
+			out[11] & 0xf, out[11] >> 4, out[10] & 0xf, out[10] >> 4,
+			out[9] & 0xf, out[9] >> 4, out[8] & 0xf, out[8] >> 4,
+			out[7] & 0xf, out[7] >> 4, out[6] & 0xf, out[6] >> 4,
+			out[5] & 0xf, out[5] >> 4, out[4] & 0xf, out[4] >> 4,
+			out[3] & 0xf, out[3] >> 4, out[2] & 0xf, out[2] >> 4,
+			out[1] & 0xf, out[1] >> 4, out[0] & 0xf, out[0] >> 4
+			);
 #undef out
 	}
 	return strdup(buf);
