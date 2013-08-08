@@ -103,10 +103,6 @@ typedef BencArray<unsigned char> BencodedMem;
 typedef std::map<BencKey, BencEntity> BencodedEntityMap;
 typedef std::vector<BencEntity> BencodedEntityList;
 
-struct ReturnElementRgn {
-	unsigned char *start, *end;
-};
-
 typedef void (*BencVListCallback)(void *user, size_t i, BencEntity *result);
 struct VListData;
 
@@ -244,9 +240,9 @@ public:
 //	BencodedDict* ParseRpcParams(char * paramlist, bool allowmultiple = false);
 
 	static const unsigned char *ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend);
-	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, ReturnElementRgn *rgn);
+	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, std::pair<unsigned char*, unsigned char*> *rgn);
 	static const unsigned char *Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend);
-	static const unsigned char *Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, ReturnElementRgn *rgn);
+	static const unsigned char *Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, std::pair<unsigned char*, unsigned char*> *rgn);
 	bool ParseFlat(BencEntity &ent, IBencParser *pParser, AllocRegime *regime);
 	bool SetParsed( IBencParser::PARSE_T parseResult, const unsigned char *pElement, size_t size, AllocRegime *regime );
 

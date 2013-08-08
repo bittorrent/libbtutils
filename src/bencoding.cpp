@@ -918,14 +918,14 @@ const unsigned char *BencEntity::ParseInPlace(unsigned char *p, BencEntity &ent,
 NOTE:  if there are multiple instances of a key in the benc string, the first
 instance is returned in the region regardless of the key's level in the string.
 */
-const unsigned char* BencEntity::ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char* key, ReturnElementRgn *rgn)
+const unsigned char* BencEntity::ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char* key, std::pair<unsigned char*, unsigned char*> *rgn)
 {
 	assert( rgn );
 	InplaceMemRegime regime;
 	BencParserElement parser(const_cast<unsigned char *>(p), key, pend);
 	if( !BencEntity::DoParse(ent, &parser, &regime) )
 		return NULL;
-	parser.GetElement( &(rgn->start), &( rgn->end ) );
+	parser.GetElement( &(rgn->first), &( rgn->second ) );
 	return parser.GetPos();
 }
 
@@ -933,14 +933,14 @@ const unsigned char* BencEntity::ParseInPlace(const unsigned char *p, BencEntity
 NOTE:  if there are multiple instances of a key in the benc string, the first
 instance is returned in the region regardless of the key's level in the string.
 */
-const unsigned char *BencEntity::Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char* key, ReturnElementRgn *rgn)
+const unsigned char *BencEntity::Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char* key, std::pair<unsigned char*, unsigned char*> *rgn)
 {
 	assert( rgn );
 	AllocateMemRegime regime;
 	BencParserElement parser( const_cast<unsigned char *>(p), key, pend);
 	if( !BencEntity::DoParse(ent, &parser, &regime) )
 		return NULL;
-	parser.GetElement( &(rgn->start), &( rgn->end ) );
+	parser.GetElement( &(rgn->first), &( rgn->second ) );
 	return parser.GetPos();
 }
 
