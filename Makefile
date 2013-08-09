@@ -2,27 +2,36 @@ CXX=g++
 CFLAGS=-DPOSIX -DDEBUG -D_LIB
 CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
 
-SRC=src/RefBase.cpp src/bitfield.cpp src/bloom_filter.cpp src/get_microseconds.cpp \
-		src/inet_ntop.cpp src/sockaddr.cpp src/interlock.cpp src/snprintf.cpp
+SRC=$(addprefix src/, RefBase.cpp bitfield.cpp bloom_filter.cpp \
+		get_microseconds.cpp inet_ntop.cpp sockaddr.cpp interlock.cpp snprintf.cpp)
 
 SRC_BENCODING=$(SRC) src/bencoding.cpp src/bencparser.cpp
 
-SRC_TESTS=unittests/TestBencEntity.cpp unittests/TestBencoding.cpp
+SRC_TESTS=$(addprefix unittests/, TestBencEntity.cpp TestBencoding.cpp)
 
-INCLUDE_TESTS=-Isrc/ -I./ -Ivendor/gtest-1.6.0/include -Ivendor/gmock-1.6.0/include -Ivendor/gtest-1.6.0 -Ivendor/gmock-1.6.0
-LDFLAGS_TESTS=-L./ -lut_utils_broken.so
+SRC_GOOGLE_TEST = \
+	vendor/gtest-1.6.0/src/gtest-all.cc \
+	vendor/gmock-1.6.0/src/gmock-all.cc \
+	vendor/gmock-1.6.0/src/gmock_main.cc 
 
-all: ut_utils.so
+SRC_UNITTESTS = \
+	$(SRC_GOOGLE_TEST) \
+	$(sort $(addprefix unittests/, TestBencEntity.cpp TestBencoding.cpp) )
 
-bencoding: ut_utils_broken.so
+INCLUDE_UNITTESTS=-Isrc/ -I./ -Ivendor/gtest-1.6.0/include -Ivendor/gmock-1.6.0/include -Ivendor/gtest-1.6.0 -Ivendor/gmock-1.6.0
+LDFLAGS_UNITTESTS=-L./ -lututils_broken
+
+all: libututils.so
+
+bencoding: libututils_broken.so
 
 test: unit_tests
 
-ut_utils.so:
+libututils.so:
 	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC)
 
-ut_utils_broken.so:
+libututils_broken.so:
 	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC_BENCODING)
 
-unit_tests:
-	$(CXX) $(CXXFLAGS) $(INCLUDE_TESTS) -o $@ $(SRC_TESTS) 
+unit_tests: libututils_broken.so
+	$(CXX) $(CXXFLAGS) $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
