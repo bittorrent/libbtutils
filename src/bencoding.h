@@ -15,12 +15,11 @@
 //#include "util.h"
 #include "enumtype.h"
 //#include "templates.h"
+#include "utypes.h" // for tstr, ctstr etc.
 
 #ifdef _UNICODE
-typedef std::wchar_t* tstr;
 typedef std::wstring tstring;
 #else
-typedef char* tstr;
 typedef std::string tstring;
 #endif // _UNICODE
 
@@ -95,7 +94,7 @@ public:
 	void Resize(size_t size) { this->_arr.resize(size); }
 	// whyyyy is len in bytes?
 	void SetArray(T *p, size_t len) { assert(len%sizeof(p)==0); this->_arr.assign(p, p + len); }
-	const unsigned char* GetRaw() const {return &(this->_arr[0]);}
+	const unsigned char* GetRaw() const { return (const unsigned char*)&this->_arr[0];}
 };
 
 typedef BencArray<char> BencKey;
@@ -224,7 +223,7 @@ public:
 	char * SerializeAsAscii(size_t* len = NULL) const;
 	char * SerializeByMimeType(const char * mime_type, const char * tag, const char *& encoding, const char * json_callback = NULL);*/
 
-	//int LoadFromFile_Safe(const tstr filename);
+	//int LoadFromFile_Safe(ctstr filename);
 
 	// Parse a list of web RPC params of the form:
 	//  action?param1=val1?param2=val2 ...
@@ -263,7 +262,7 @@ public:
 	BencEntityMem( BencodedMem *pMem ): BencEntity( BENC_STR ){
 		mem = pMem;
 	}
-	BencEntityMem(const tstr memArg, size_t len = ~0);
+	BencEntityMem(ctstr memArg, size_t len = ~0);
 	BencEntityMem(const void *memArg, size_t len = ~0): BencEntity( BENC_STR ){
 		assert(memArg);
 
@@ -287,7 +286,7 @@ public:
 	tstring GetStringT(int encoding, size_t *count) const;
 
 	// Sets a unicode string, internally converts to utf-8
-	void SetStrT(const tstr s);
+	void SetStrT(ctstr s);
 
 	void SetMem(const void *mem, size_t len);
 	void SetMem( BencodedMem *pMem )
@@ -343,7 +342,7 @@ public:
 	int64_t GetInt64(size_t i, int64_t def = 0) const;
 	BencEntity *Append(BencEntity &e);
 	BencEntityMem *AppendString(const char * str, size_t length = -1);
-	BencEntityMem *AppendStringT(const tstr str, size_t length = -1);
+	BencEntityMem *AppendStringT(ctstr str, size_t length = -1);
 	BencEntity *AppendInt(int arg);
 	BencEntity *AppendInt64(int64_t arg);
 	BencodedDict *AppendDict();
@@ -384,7 +383,7 @@ public:
 	char * GetString(const char * key, size_t length) const;
 	int GetInt(const char * key, int def = 0) const;
 	BencEntityMem *InsertString(const char * key, const char * str, int length=-1);
-	BencEntityMem *InsertStringT(const char * key, const tstr tstr);
+	BencEntityMem *InsertStringT(const char * key, ctstr tstr);
 	BencEntityMem *InsertString(const std::string& key, const std::string& str, int length =-1);
 	BencEntity *InsertInt(const char * key, int arg);
 	BencEntity *InsertInt64(const char * key, int64_t arg);

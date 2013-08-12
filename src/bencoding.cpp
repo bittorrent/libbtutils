@@ -52,12 +52,12 @@ char* str_to_utf8(const char * input, size_t *out_len)
 }
 
 #ifdef _UNICODE
-char* EncodeUtf8(const tstr input, size_t *out_len = NULL) { return wstr_to_utf8(input, out_len); }
+char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return wstr_to_utf8(input, out_len); }
 #else
-char* EncodeUtf8(const tstr input, size_t *out_len = NULL) { return str_to_utf8(input, out_len); }
+char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return str_to_utf8(input, out_len); }
 #endif
 
-BencEntityMem::BencEntityMem(const tstr memArg, size_t len): BencEntity( BENC_STR ) {
+BencEntityMem::BencEntityMem(ctstr memArg, size_t len): BencEntity( BENC_STR ) {
 	assert(memArg);
 	std::string utf8(EncodeUtf8(memArg));
 	if(len == static_cast<size_t>(~0))
@@ -725,7 +725,7 @@ bool BencEntityIsValid(unsigned char *b, size_t len, void *userdata)
 	return (BencEntity::Parse(b, *self, bend) == bend);
 }
 
-/*int BencEntity::LoadFromFile_Safe(const tstr filename)
+/*int BencEntity::LoadFromFile_Safe(ctstr filename)
 {
 	return LoadFile_Safe(filename, BencEntityIsValid, this);
 }
@@ -1041,7 +1041,7 @@ void BencEntityMem::SetStr(const char* ss, int len /*= -1*/)
 	}
 }
 
-void BencEntityMem::SetStrT(const tstr ss)
+void BencEntityMem::SetStrT(ctstr ss)
 {
 	assert(bencType == BENC_STR);
 	assert(mem);
@@ -1253,7 +1253,7 @@ BencEntityMem *BencodedList::AppendString(const char* str, size_t length /*=-1*/
 	return (BencEntityMem *) Append( beM );
 }
 
-BencEntityMem *BencodedList::AppendStringT(const tstr str, size_t length /*=-1*/)
+BencEntityMem *BencodedList::AppendStringT(ctstr str, size_t length /*=-1*/)
 {
 	assert(bencType == BENC_LIST);
 	BencEntityMem beM;
@@ -1534,7 +1534,7 @@ BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int 
 	return (BencEntityMem *) Insert( key, beM );
 }
 
-BencEntityMem *BencodedDict::InsertStringT(const char* key, const tstr tstr)
+BencEntityMem *BencodedDict::InsertStringT(const char* key, ctstr tstr)
 {
 	assert(bencType == BENC_DICT);
 	BencEntityMem beM;
