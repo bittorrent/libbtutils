@@ -94,7 +94,7 @@ public:
 	void Resize(size_t size) { this->_arr.resize(size); }
 	// whyyyy is len in bytes?
 	void SetArray(T *p, size_t len) { assert(len%sizeof(p)==0); this->_arr.assign(p, p + len); }
-	const unsigned char* GetRaw() const { return (const unsigned char*)&this->_arr[0];}
+	const char* GetRaw() const { return (const char*)&this->_arr[0];}
 };
 
 typedef BencArray<unsigned char> BencKey;
@@ -272,7 +272,7 @@ public:
 	}
 
 	void SetStr(const char * s, int len = -1);
-	unsigned char *GetRaw(void) const { return &(*mem)[0]; }
+	char const *GetRaw(void) const { return (char const*)&(*mem)[0]; }
 	size_t GetSize(void) const { return mem->GetCount(); }
 	void CopyFrom(const BencEntity& b);
 
@@ -280,7 +280,7 @@ public:
 		if (!(bencType == BENC_STR)) return NULL;
 		if (count) *count = GetSize();
 		//if (mem->IsInplace() && GetSize()) GetRaw()[GetSize()] = 0;
-		return GetSize() ? (char *)GetRaw() : "";
+		return GetSize() ? GetRaw() : "";
 	}
 
 	t_string GetStringT(int encoding, size_t *count) const;
