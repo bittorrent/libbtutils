@@ -512,9 +512,10 @@ void BencodedEmitterBase::Emit(const void *a, size_t len) {
 	}
 #endif
 
-unsigned char* BencodedEmitterBase::GetResult() {
+unsigned char* BencodedEmitterBase::GetResult(size_t* len) {
 	unsigned char* result = static_cast<unsigned char*>(malloc(_emit_buf.size()*sizeof(unsigned char)));
 	memcpy(result, &_emit_buf[0], _emit_buf.size()*sizeof(unsigned char));
+	if (len) *len = _emit_buf.size();
 	_emit_buf.clear();
 	return result;
 }
@@ -660,10 +661,10 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	}
 #endif
 
-unsigned char* SerializeBencEntity(const BencEntity* entity) {
+unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len) {
 	BencodedEmitter emit;
 	emit.EmitEntity(entity);
-	return emit.GetResult();
+	return emit.GetResult(len);
 }
 
 #if 0
@@ -1113,16 +1114,16 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 }
 
 
-tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
+t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (!(bencType == BENC_STR)) return NULL;
 #ifdef _UNICODE
 	size_t tmp = 0;
-	tstring tmps(DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp), adopt_string);
+	t_string tmps(DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp), adopt_string);
 	assert(tmp <= INT_MAX);
 	if (count) *count = tmp;
 	return tmps;
 #else
-	return tstring(GetString(count));
+	return t_string(GetString(count));
 #endif
 }
 
@@ -1171,7 +1172,7 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
-tstring BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
+t_string BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
 	return (pMem?pMem->GetStringT(encoding, length):NULL);
@@ -1333,7 +1334,7 @@ char* BencodedDict::GetStringCopy(const char* key) const
 	return strdup(val);
 }
 
-tstring BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
+t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
 	return (pMem?pMem->GetStringT(encoding, length):NULL);
@@ -1513,7 +1514,7 @@ unsigned char *BencodedDict::Serialize(size_t *len)
 	assert(bencType == BENC_DICT);
 	INVARIANT_CHECK;
 
-	return SerializeBencEntity(this);
+	return SerializeBencEntity(this, len);
 }
 
 BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)

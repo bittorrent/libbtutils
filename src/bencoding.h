@@ -1,7 +1,7 @@
 #ifndef __BENCODING2_H__
 #define __BENCODING2_H__
 
-//#include "btstring.h" // for strncmp_exact
+//#include "bt_string.h" // for strncmp_exact
 //#include "avltree.h"	// Map
 #include <algorithm> // std::mismatch
 #include <cassert>
@@ -18,9 +18,9 @@
 #include "utypes.h" // for tstr, ctstr etc.
 
 #ifdef _UNICODE
-typedef std::wstring tstring;
+typedef std::wstring t_string;
 #else
-typedef std::string tstring;
+typedef std::string t_string;
 #endif // _UNICODE
 
 ENUM_TYPE(BENC_T, uint8) {
@@ -111,7 +111,7 @@ public:
 	BencodedEmitterBase() { _emit_buf.reserve(4096); };
 	void EmitChar(char);
 	void Emit(const void *a, size_t len);
-	unsigned char* GetResult();
+	unsigned char* GetResult(size_t* len);
 	virtual void EmitEntity(const BencEntity *e) = 0;
 };
 
@@ -252,7 +252,7 @@ private:
 	static bool DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *regime);
 };
 
-unsigned char* SerializeBencEntity(const BencEntity* entity);
+unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len);
 
 class BencEntityMem : public BencEntity {
 public:
@@ -283,7 +283,7 @@ public:
 		return GetSize() ? (char *)GetRaw() : "";
 	}
 
-	tstring GetStringT(int encoding, size_t *count) const;
+	t_string GetStringT(int encoding, size_t *count) const;
 
 	// Sets a unicode string, internally converts to utf-8
 	void SetStrT(ctstr s);
@@ -336,7 +336,7 @@ public:
 	BencodedList *GetList(size_t i);
 	const char * GetString(size_t i, size_t *length = NULL) const;
 	// See comment at GetStringT()
-	tstring GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
+	t_string GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
 
 	int GetInt(size_t i, int def = 0) const;
 	int64_t GetInt64(size_t i, int64_t def = 0) const;
@@ -379,7 +379,7 @@ public:
 	char * GetStringCopy(const char * key) const;
 
 	// See comment at GetStringT()
-	tstring GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
+	t_string GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
 	char * GetString(const char * key, size_t length) const;
 	int GetInt(const char * key, int def = 0) const;
 	BencEntityMem *InsertString(const char * key, const char * str, int length=-1);
