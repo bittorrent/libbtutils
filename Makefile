@@ -1,5 +1,5 @@
 CXX=g++
-CFLAGS=-DPOSIX -DDEBUG -D_LIB
+CFLAGS=-DPOSIX -D_DEBUG -D_LIB -g -O0
 CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
 
 SRC=$(addprefix src/, RefBase.cpp bitfield.cpp bloom_filter.cpp \
@@ -35,3 +35,6 @@ libututils_broken.so:
 
 unit_tests: libututils_broken.so
 	$(CXX) $(CXXFLAGS) $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
+
+clean:
+	rm -f libututils.so libututils_broken.so unit_tests

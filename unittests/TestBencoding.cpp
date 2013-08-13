@@ -32,7 +32,7 @@ namespace unittest {
 #define SETTINGS_LENGTH 0x50dc
 
 
-bool Parse2(const unsigned char *p, uint len, BencodedDict &base)
+bool Parse(const unsigned char *p, uint len, BencodedDict &base)
 {
 	EXPECT_TRUE(p);
 	EXPECT_TRUE(len);
@@ -69,170 +69,15 @@ bool Parse2(const unsigned char *p, uint len, BencodedDict &base)
 	*/
 	return true;
 }
-
-
-
-
-void torrent2()
-{
-	// Follows general parsing
-	BencodedDict dict;
-	bool parsed = Parse2((const unsigned char*)torrent2_data, 17115, dict);
-	EXPECT_TRUE(parsed);
 }
 
-void settings()
-{
-	// Follows general parsing
-	BencodedDict dict;
-
-	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
-	// parse the settings
-	EXPECT_TRUE(BencEntity::Parse((const unsigned char*)settings_data,
-											dict,
-											((const unsigned char*) settings_data) + SETTINGS_LENGTH, "info", &rgn));
-	EXPECT_EQ(BENC_DICT, dict.GetType());
-
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
-	EXPECT_EQ(0, memcmp(settings_data, b, SETTINGS_LENGTH));
-	free( b );
-}
-
-
-void settings2()
-{
-	// Follows general parsing
-	BencodedDict dict;
-
-	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
-	// parse the settings
-	EXPECT_TRUE(BencEntity::Parse((const unsigned char*)settings_data,
-											dict,
- 											((const unsigned char*) settings_data) + SETTINGS_LENGTH, "info", &rgn));
-//	EXPECT_TRUE(dict.GetType() == BENC_DICT);
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
-	EXPECT_EQ(0, memcmp(settings_data, b, SETTINGS_LENGTH));
-	//for(int i = 0; i < SETTINGS_LENGTH; i++)
-	//	if( settings_data[i] != b[i] )
-	//		break;
-	free( b );
-}
-
-
-void settings3()
-{
-	// Follows general parsing
-	BencodedDict dict;
-
-	// parse the settings
-	EXPECT_TRUE(BencEntity::ParseInPlace((unsigned char*)settings_data,
-											dict,
- 											((const unsigned char*) settings_data) + SETTINGS_LENGTH));
-//	EXPECT_TRUE(dict.GetType() == BENC_DICT);
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
-	EXPECT_EQ(0, memcmp(settings_data, b, SETTINGS_LENGTH));
-	//for(int i = 0; i < SETTINGS_LENGTH; i++)
-	//	if( settings_data[i] != b[i] )
-	//		break;
-	free( b );
-}
-
-// Basic correctness test
-// This code parses out tracker responses and performs common operations.
-#if OLD_BENC
-void basics()
-{
+TEST(Bencoding, Basics) {
 	static const char sample_scrape[] = "d5:filesd20:7\247!\365'\221\335\320\352\305Q\343\200\344qf\220\316\346\371d8:completei8e10:downloadedi16838e10:incompletei5e4:name17:Fedora-8-Live-ppce20:]\341\022\010E\230\356k\223\363\260`$w\327\357\321\264v2d8:completei36e10:downloadedi45649e10:incompletei8e4:name22:Fedora-8-Live-KDE-i686e20:\301\234\352<DC\367\273\017\342\1\353\306\303\221\257tJ\254\251d8:completei24e10:downloadedi29004e10:incompletei2e4:name20:Fedora-8-Live-x86_64eee";
-
-	tmp = static_cast<unsigned char*>(malloc(sizeof(sample_tracker) * sizeof(char)));
-	EXPECT_TRUE(tmp);
-	memcpy(tmp, sample_tracker, sizeof(sample_tracker));
-	BencodedDict dict;
-	bool ok = (BencEntity::ParseInPlace(tmp, dict, tmp + sizeof(sample_scrape))) ? true : false;
-	EXPECT_TRUE(ok);
-
-	EXPECT_EQ(BENC_DICT, dict.GetType());
-	BencodedDict* files = dict.GetDict("files");
-	EXPECT_TRUE(files);
-	EXPECT_EQ(3, files->GetCount());
-	if (files) {
-		BencodedDict* d = BencEntity::AsDict(&files->dict.list[0].ent);
-		EXPECT_TRUE(d);
-		EXPECT_EQ(BENC_DICT, d->type);
-		EXPECT_EQ(8, d->GetInt("complete", -99));
-		EXPECT_EQ(16838, d->GetInt("downloaded", -99));
-		EXPECT_EQ(5, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-ppc");
-
-		d = BencEntity::AsDict(&files->dict.list[1].ent);
-		EXPECT_TRUE(d);
-		EXPECT_EQ(BENC_DICT, d->type);
-		EXPECT_EQ(36, d->GetInt("complete", -99));
-		EXPECT_EQ(45649, d->GetInt("downloaded", -99));
-		EXPECT_EQ(8, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-KDE-i686");
-
-		d = BencEntity::AsDict(&files->dict.list[2].ent);
-		EXPECT_TRUE(d);
-		EXPECT_EQ(BENC_DICT, d->type);
-		EXPECT_EQ(24, d->GetInt("complete", -99));
-		EXPECT_EQ(29004, d->GetInt("downloaded", -99));
-		EXPECT_EQ(2, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-x86_64");
-	}
-
-	free(tmp);
-
-	static const char sample_tracker[] = "d8:completei36e10:incompletei10e8:intervali1800e5:peers108:E\0210\236\032\342J)K\5'\315D\222\216\026\030:\230\3\334\245\032\341:\010F+N/\301\331}\245\363\235\022\7\031\241\032\341O\317\232\203\260\017Y\365b\022&\232\325\263\344\6\267\"\200\257\015c\032\341U\036\2329\032\341W\3+S\303V\303\270\311\n\032\342N^8CA\361Xz\375Nd\325\246R\t,\032\337Ov\013$\314\377e";
-
-	tmp = static_cast<unsigned char*>(malloc(sizeof(sample_tracker) * sizeof(char)));
-	EXPECT_TRUE(tmp);
-	memcpy(tmp, sample_tracker, sizeof(sample_tracker));
-	BencodedDict dict2;
-	ok = (BencEntity::ParseInPlace(tmp, dict2, tmp + sizeof(sample_tracker))) ? true : false;
-	EXPECT_TRUE(ok);
-
-	EXPECT_EQ(BENC_DICT, dict2.GetType());
-	EXPECT_EQ(1800, dict2.GetInt("interval", -99));
-	EXPECT_EQ(36, dict2.GetInt("complete", -99));
-	EXPECT_EQ(10, dict2.GetInt("incomplete", -99));
-	EXPECT_TRUE(!dict2.GetList("peers"));
-	size_t len;
-	cstr pbin = dict2.GetString("peers", &len);
-	EXPECT_EQ(108, len);
-	EXPECT_TRUE(pbin);
-
-	static const char* peer_addrs[] = {
-		"69.17.48.158:6882", "74.41.75.5:10189", "68.146.142.22:6202",
-		"152.3.220.165:6881", "58.8.70.43:20015", "193.217.125.165:62365",
-		"18.7.25.161:6881", "79.207.154.131:45071", "89.245.98.18:9882",
-		"213.179.228.6:46882", "128.175.13.99:6881", "85.30.154.57:6881",
-		"87.3.43.83:50006", "195.184.201.10:6882", "78.94.56.67:16881",
-		"88.122.253.78:25813", "166.82.9.44:6879", "79.118.11.36:52479"
+	static const char* keys[] = {
+		"7\247!\365'\221\335\320\352\305Q\343\200\344qf\220\316\346\371",
+		"]\341\022\010E\230\356k\223\363\260`$w\327\357\321\264v2",
+		"\301\234\352<DC\367\273\017\342\1\353\306\303\221\257tJ\254\251"
 	};
-
-	EXPECT_EQ(0, len % 6);
-	const uint n = len / 6;
-	EXPECT_EQ(lenof(peer_addrs), n);
-	for (uint i = 0; i < n; ++i, pbin += 6) {
-		const SockAddr ip((unsigned char*)pbin, 6, NULL);
-		SockAddr ip2 = SockAddr::parse_addr(peer_addrs[i]);
-		EXPECT_EQ(ip, ip2);
-	}
-
-	free(tmp);
-}
-#endif	// OLD_BENC
-
-void basics2()
-{
-	static const char sample_scrape[] = "d5:filesd20:7\247!\365'\221\335\320\352\305Q\343\200\344qf\220\316\346\371d8:completei8e10:downloadedi16838e10:incompletei5e4:name17:Fedora-8-Live-ppce20:]\341\022\010E\230\356k\223\363\260`$w\327\357\321\264v2d8:completei36e10:downloadedi45649e10:incompletei8e4:name22:Fedora-8-Live-KDE-i686e20:\301\234\352<DC\367\273\017\342\1\353\306\303\221\257tJ\254\251d8:completei24e10:downloadedi29004e10:incompletei2e4:name20:Fedora-8-Live-x86_64eee";
 
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_scrape)));
 	EXPECT_TRUE(tmp);
@@ -245,6 +90,9 @@ void basics2()
 	BencodedDict* files = dict.GetDict("files");
 	EXPECT_TRUE(files);
 	EXPECT_EQ(static_cast<size_t>(3), files->GetCount());
+	for(int i = 0; i < 3; i++) {
+		EXPECT_TRUE(files->HasKey(keys[i]));
+	}
 	if (files) {
 		BencodedEntityMap::iterator it = files->dict->begin();
 		BencodedDict* d = (BencodedDict*) &it->second;
@@ -253,7 +101,7 @@ void basics2()
 		EXPECT_EQ(8, d->GetInt("complete", -99));
 		EXPECT_EQ(16838, d->GetInt("downloaded", -99));
 		EXPECT_EQ(5, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-ppc");
+		EXPECT_STREQ("Fedora-8-Live-ppc", d->GetString("name"));
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
@@ -262,7 +110,7 @@ void basics2()
 		EXPECT_EQ(36, d->GetInt("complete", -99));
 		EXPECT_EQ(45649, d->GetInt("downloaded", -99));
 		EXPECT_EQ(8, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-KDE-i686");
+		EXPECT_STREQ("Fedora-8-Live-KDE-i686", d->GetString("name"));
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
@@ -271,7 +119,7 @@ void basics2()
 		EXPECT_EQ(24, d->GetInt("complete", -99));
 		EXPECT_EQ(29004, d->GetInt("downloaded", -99));
 		EXPECT_EQ(2, d->GetInt("incomplete", -99));
-		EXPECT_STREQ(d->GetString("name"), "Fedora-8-Live-x86_64");
+		EXPECT_STREQ("Fedora-8-Live-x86_64", d->GetString("name"));
 	}
 
 	free(tmp);
@@ -316,24 +164,7 @@ void basics2()
 	free(tmp);
 }
 
-
-#if OLD_BENC
-// Regression for https://svn.bittorrent.com/utorrent/ticket/770
-// only shows up when run under valgrind and only in release build
-void regression_770()
-{
-	BencEntity b;
-	b.SetStr(NULL);
-	EXPECT_EQ(BENC_STR, b.GetType());
-
-	BencEntity b2;
-	b2.SetStrT(NULL);
-	EXPECT_EQ(BENC_STR, b2.GetType());
-}
-#endif // OLD_BENC
-
-void getstring()
-{
+TEST(Bencoding, String1) {
 	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
 
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_data)));
@@ -365,8 +196,7 @@ void getstring()
 	}
 }
 
-void getstring2()
-{
+TEST(Bencoding, String2) {
 	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
 
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_data)));
@@ -398,55 +228,90 @@ void getstring2()
 	}
 }
 
-#if OLD_BENC
-void copy()
-{
-	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
-	// sizeof(sample_data) includes the terminating zero byte
-	static const size_t sample_len = sizeof(sample_data) - 1;
-	unsigned char* tmp = static_cast<unsigned char*>(malloc(sample_len));
-	EXPECT_TRUE(tmp);
-	memcpy(tmp, sample_data, sample_len);
-
-	// Copy and verify a dict
-	BencodedDict dict;
-	bool ok = (BencEntity::Parse(tmp, dict, tmp + sample_len)) ? true : false;
-	EXPECT_TRUE(ok);
-	tstring value = dict.GetStringT("astring");
-	EXPECT_TRUE(value.size());
-	BencodedDict* d2 = new BencodedDict();
-	EXPECT_TRUE(d2);
-	d2->CopyInto(dict);
-	EXPECT_FALSE(d2->inplace);
-	size_t serialized_len;
-	unsigned char* bytes = d2->Serialize(&serialized_len);
-	EXPECT_EQ(sample_len, serialized_len);
-	/*utassert_failmsg(serialized_len == sample_len,
-		utlogf("serialized_len %d sample_len %d",
-		serialized_len, sample_len));*/
-	EXPECT_EQ(0, memcmp(sample_data, (const char*)bytes, sample_len));
-	/*utassert_failmsg(memcmp(sample_data, (const char*)bytes, sample_len) == 0,
-		utlogf("sample_data %s bytes %s", sample_data, bytes));*/
-	delete d2;
-	d2 = NULL;
-
-	// Copy and verify a string
-	BencEntity s;
-	s.SetStr("foobar");
-	BencEntity* s2 = new BencEntity();
-	s2->CopyInto(s);
-	EXPECT_EQ(BENC_STR, s2->GetType());
-	size_t len;
-	EXPECT_EQ(0, strcmp("foobar", BencEntity::AsString(s2, &len)));
-	delete s2;
-	s2 = NULL;
-
-	free((void*)tmp);
+/*
+TEST(Bencoding, TwoFiles) {
+	unsigned char buffer[32768];
+	FILE* fp = fopen("./unittests/files2.benc", "rb");
+	assert(fp);
 }
-#endif // OLD_BENC
 
-void copy2()
-{
+TEST(Bencoding, AllFiles) {
+}
+
+TEST(Bencoding, InfoSection) {
+}
+*/
+
+TEST(Bencoding, Torrent) {
+	BencodedDict dict;
+	bool parsed = unittest::Parse((const unsigned char*)unittest::torrent_data, 17115, dict);
+	EXPECT_TRUE(parsed);
+}
+
+TEST(Bencoding, Settings1) {
+	// Follows general parsing
+	BencodedDict dict;
+
+	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
+	// parse the settings
+	EXPECT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
+											dict,
+											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
+	EXPECT_EQ(BENC_DICT, dict.GetType());
+	if (dict.GetType() != BENC_DICT)
+		return;
+
+	size_t len = 0;
+	unsigned char *b = dict.Serialize(&len);
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
+	free( b );
+}
+
+TEST(Bencoding, Settings2) {
+	// Follows general parsing
+	BencodedDict dict;
+
+	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
+	// parse the settings
+	EXPECT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
+											dict,
+ 											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
+//	EXPECT_TRUE(dict.GetType() == BENC_DICT);
+	if (dict.GetType() != BENC_DICT)
+		return;
+	size_t len = 0;
+	unsigned char *b = dict.Serialize(&len);
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
+	//for(int i = 0; i < SETTINGS_LENGTH; i++)
+	//	if( unittest::settings_data[i] != b[i] )
+	//		break;
+	free( b );
+}
+
+TEST(Bencoding, Settings3) {
+	// Follows general parsing
+	BencodedDict dict;
+
+	// parse the settings
+	EXPECT_TRUE(BencEntity::ParseInPlace((unsigned char*)unittest::settings_data,
+											dict,
+ 											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH));
+//	EXPECT_TRUE(dict.GetType() == BENC_DICT);
+	if (dict.GetType() != BENC_DICT)
+		return;
+	size_t len = 0;
+	unsigned char *b = dict.Serialize(&len);
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
+	//for(int i = 0; i < SETTINGS_LENGTH; i++)
+	//	if( unittest::settings_data[i] != b[i] )
+	//		break;
+	free( b );
+}
+
+TEST(Bencoding, Copy) {
 	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
 	// sizeof(sample_data) includes the terminating zero byte
 	static const size_t sample_len = sizeof(sample_data) - 1;
@@ -489,30 +354,3 @@ void copy2()
 
 	free((void*)tmp);
 }
-
-};
-
-TEST(Bencoding,All)
-{
-//	unittest::basics();
-
-	unittest::basics2();
-
-//	unittest::torrent();
-	unittest::torrent2();
-
-	unittest::settings();
-
-	unittest::settings2();
-
-	unittest::settings3();
-
-//	unittest::regression_770();
-
-	unittest::getstring();
-	unittest::getstring2();
-
-//	unittest::copy();
-	unittest::copy2();
-}
-

@@ -3,6 +3,7 @@
 #include "invariant_check.hpp"
 //#include "btstr.h"
 #include <stdlib.h> // for _atoi64 or strtoll
+#include <vector>
 //#include "string_type.h"
 //#include "JsonParser.h" // for BencJson
 
@@ -262,22 +263,23 @@ void BencEntity::Print(int indent)
 
 	switch(bencType) {
 	case BENC_INT:
-		btprintf("%Ld", num);
+		printf("%Ld", num);
 		break;
 
 	case BENC_BIGINT:
-		btprintf("%Ld", num);
+		printf("%Ld", num);
 		break;
 
 	case BENC_STR: {
 		char* hex = NeedPrintAsHex((unsigned char *) mem->GetRaw(), mem->GetCount());
 		if (!hex) {
-			btprintf("\"%.*s\"", mem->GetCount(), mem->GetRaw());
+			//btprintf("\"%.*s\"", mem->GetCount(), mem->GetRaw());
+			printf("\"%.*s\"", static_cast<int>(mem->GetCount()), mem->GetRaw());
 		} else {
 			if (strlen(hex) > 200)
-				btprintf("%.200s...", hex);
+				printf("%.200s...", hex);
 			else
-				btprintf("%s", hex);
+				printf("%s", hex);
 			free(hex);
 		}
 		break;
@@ -285,30 +287,31 @@ void BencEntity::Print(int indent)
 
 	case BENC_LIST:
 	case BENC_VLIST:
-		btprintf("[");
+		printf("[");
 		for(i=0; i!=((BencodedList*)this)->GetCount(); i++) {
-			if (i != 0) btprintf(", ");
+			if (i != 0) printf(", ");
 			((BencodedList *) this )->Get(i)->Print(indent);
 		}
-		btprintf("]");
+		printf("]");
 		break;
 
 	case BENC_DICT:
-		btprintf("{");
+		printf("{");
 		i = 0;
 		for(BencodedEntityMap::iterator it = dict->begin();
 			it != dict->end(); it++, i++ ) {
-			if (i != 0) btprintf(", ");
-			btprintf("\n");
-			for(j=0; j!=indent; j++) btprintf("	");
+			if (i != 0) printf(", ");
+			printf("\n");
+			for(j=0; j!=indent; j++) printf("	");
 			unsigned int len  = it->first.GetCount();
-			char* s = StackAlloc(char, len+1);
+			char* s = (char*)malloc(sizeof(char)*(len+1));
 			memcpy(s, it->first.GetRaw(), len);
 			s[len] = 0;
-			btprintf("%s = ", s);
+			printf("%s = ", s);
+			free(s);
 			it->second.Print(indent+1);
 		}
-		btprintf("}");
+		printf("}");
 		break;
 	default:
 		assert(0);
@@ -551,7 +554,8 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 		const BencodedDict *ed = BencEntity::AsDict( e );
 		EmitChar('d');
 		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
-			size_t j = strnlen(&(it->first[0]), it->first.GetCount());
+			size_t j = strnlen((char*)(&(it->first[0])),
+					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
 			Emit(buf, snprintf(buf, sizeof(buf), "%lu:", j));
 			Emit(&(it->first[0]), j);
@@ -873,7 +877,7 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 			return false;
 		}
 
-		BencKey *bencKey = regime->NewKey((char *)pKey, (int)keySize);
+		BencKey *bencKey = regime->NewKey((unsigned char *)pKey, (int)keySize);
 		//std::pair<BencodedEntityMap::iterator, bool> inserted =
 		BencodedEntityMap::value_type value (*bencKey, BencEntity(BENC_VOID));
 		BencodedEntityMap::iterator inserted = dict->insert(lastIt, value);
@@ -963,13 +967,6 @@ bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRe
 	// Don't handle vlist since this is for parsing
 	if (parseResult == IBencParser::BERROR ||
 		(parseResult != IBencParser::LIST && parseResult != IBencParser::DICT)) {
-#if NOT_FINISHED_YET
-		if (ent.inplace && ent.bencType == BENC_STR) {
-			// can not parse string entries in-place
-			ent.InitVoid();
-			return NULL;
-		}
-#endif	// NOT_FINISHED_YET
 		return false;
 	}
 	ent.SetParsed( parseResult, pEnt, entSize, pRegime );
@@ -1293,7 +1290,7 @@ const BencEntity *BencodedDict::Get(const char* key) const
 {
 	assert(bencType == BENC_DICT);
 	assert(dict);
-	BencKey Key( (char *) key, (int)strlen(key));
+	BencKey Key( (unsigned char *) key, (int)strlen(key));
 	BencodedEntityMap::const_iterator it = dict->find( Key );
 	if( it == dict->end() )
 		return NULL;
@@ -1402,10 +1399,10 @@ void BencodedDict::FreeMembers()
 
 
 #ifdef _DEBUG
-bool StrHasElement(vector<char*>& l, const char* s, size_t len)
+bool StrHasElement(std::vector<char*>& l, const char* s, size_t len)
 {
-	for (size_t i = 0; i < l.GetCount(); i++) {
-		if (strncmp_exact(l[i], s, len) == 0)
+	for (size_t i = 0; i < l.size(); i++) {
+		if (memcmp(l[i], s, len) == 0)
 			return true;
 	}
 	return false;
@@ -1447,7 +1444,7 @@ BencEntity *BencodedDict::Insert(const char* key, BencEntity &val)
 	assert(dict);
 	BencKey Key;
 	// This way, Key copies as not inplace (deep copy)
-	Key.SetArray( (char *) key, strlen( key ) );
+	Key.SetArray( (unsigned char *) key, strlen( key ) );
 	// insert will make a deep copy of bKey, but a shallow copy of val,
 	// which we zero out before returning.
 	std::pair<BencodedEntityMap::iterator, bool> result = dict->insert(std::pair<BencKey, BencEntity>(Key, val));
@@ -1506,7 +1503,7 @@ void BencodedDict::Delete(const char* key)
 	assert(dict);
 	BencKey bKey;
 	// Assume we omit the null terminator
-	bKey.SetArray( (char *) key, strlen(key) );
+	bKey.SetArray( (unsigned char *) key, strlen(key) );
 	dict->erase( bKey );
 	//bKey.StealArray();
 }

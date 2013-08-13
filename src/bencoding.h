@@ -97,7 +97,7 @@ public:
 	const unsigned char* GetRaw() const { return (const unsigned char*)&this->_arr[0];}
 };
 
-typedef BencArray<char> BencKey;
+typedef BencArray<unsigned char> BencKey;
 typedef BencArray<unsigned char> BencodedMem;
 typedef std::map<BencKey, BencEntity> BencodedEntityMap;
 typedef std::vector<BencEntity> BencodedEntityList;
@@ -136,7 +136,7 @@ public:
 	class AllocRegime {
 	public:
 		virtual ~AllocRegime(){};	// required for GCC
-		virtual BencKey* NewKey( char *p, int count ) = 0;
+		virtual BencKey* NewKey( unsigned char *p, int count ) = 0;
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) = 0;
 		virtual bool LazyInt(void){ return false; }
 	};
@@ -144,7 +144,7 @@ public:
 	class AllocateMemRegime : virtual public AllocRegime {
 	public:
 		virtual ~AllocateMemRegime(){};	// required for GCC
-		virtual BencKey* NewKey( char *p, int count ) {
+		virtual BencKey* NewKey( unsigned char *p, int count ) {
 			return new BencKey( p, count ); 	// allocate
 		}
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) {
@@ -155,11 +155,11 @@ public:
 	class InplaceMemRegime : virtual public AllocRegime {
 	public:
 		virtual ~InplaceMemRegime(){};	// required for GCC
-		virtual BencKey* NewKey( char *p, int count ) {
+		virtual BencKey* NewKey( unsigned char *p, int count ) {
 			return new BencKey(p, count);
 		}
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) {
-			return new BencodedMem(p, count); 	// inplace
+			return new BencodedMem(p, count); 	// allocate
 		}
 		virtual bool LazyInt(void){ return AllocRegime::LazyInt(); }
 	};

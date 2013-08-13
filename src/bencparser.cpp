@@ -3,6 +3,11 @@
 //#include "btstring.h"
 
 #define READBYTE2(START, END, CURRENT) assert(START <= END); if (START == END) return NULL; CURRENT = *((START)++);
+#ifdef _DEBUG
+#define DEBUG_ASSERT(x) do {assert(x);} while (false)
+#else
+#define DEBUG_ASSERT(x) do {} while (false)
+#endif //__DEBUG
 
 const unsigned char *BencParser::ParseString(size_t *pSize)
 {
@@ -25,8 +30,8 @@ const unsigned char *BencParser::ParseString(size_t *pSize)
 	// See if this string length goes off the end of the buffer or file
 	if(_p > _pEnd) {
 		/*DbgLogf("Can't parse string with length longer than remaining buffer:  %Lu %s",
-			(uint64_t) val, (const unsigned char*) pReturn);
-		DEBUG_ASSERT(0);*/
+			(uint64_t) val, (const unsigned char*) pReturn);*/
+		DEBUG_ASSERT(0);
 		return NULL;	// Error will propagate out of the parser
 	}
 
@@ -53,7 +58,7 @@ IBencParser::PARSE_T  BencParser::ParseNext(const unsigned char **ppElement, siz
 	*pSize = 0;
 	if( _p == _pEnd ) return DONE;
 	if(_p > _pEnd) {
-		//DEBUG_ASSERT(0);
+		DEBUG_ASSERT(0);
 		return BERROR;
 	}
 	unsigned char m = *((_p)++);
