@@ -106,13 +106,13 @@ typedef void (*BencVListCallback)(void *user, size_t i, BencEntity *result);
 struct VListData;
 
 class BencodedEmitterBase {
+protected:
 	std::vector<char> _emit_buf;
 public:
 	BencodedEmitterBase() { _emit_buf.reserve(4096); };
 	void EmitChar(char);
 	void Emit(const void *a, size_t len);
 	unsigned char* GetResult(size_t* len);
-	virtual void EmitEntity(const BencEntity *e) = 0;
 };
 
 class BencodedEmitter : public BencodedEmitterBase {
