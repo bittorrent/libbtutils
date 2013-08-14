@@ -938,7 +938,9 @@ t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (!(bencType == BENC_STR)) return NULL;
 #ifdef _UNICODE
 	size_t tmp = 0;
-	t_string tmps(DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp), adopt_string);
+	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
+	t_string tmps(str);
+	free(str);
 	assert(tmp <= INT_MAX);
 	if (count) *count = tmp;
 	return tmps;
