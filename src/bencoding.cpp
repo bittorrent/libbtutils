@@ -821,9 +821,9 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 
 		// Instead of another item, we have reached the end of this collection
 		if (parseResult == IBencParser::END_E) {
-			if (list->size()) {
-				list->shrink_to_fit();
-			}
+//			if (list->size()) {
+//				list->shrink_to_fit();
+//			}
 
 			*ent = NULL;
 			break;
@@ -1126,35 +1126,6 @@ t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	return t_string(GetString(count));
 #endif
 }
-
-// Hmm, does a BencEntity need to know about RPC format?
-/*
-BencodedDict* BencEntity::ParseRpcParams(char* paramlist, bool allowmultiple)
-{
-	char* action = paramlist;
-	char* param = my_strtok(action, '?');
-
-	//urldecode(action);
-	BencodedDict *action_dict = new BencodedDict();
-	BencodedDict param_dict;
-
-	while (param) {
-		char* next_param = my_strtok(param, '&');
-
-		char* val = my_strtok(param, '=');
-
-		if (!val) break;
-
-		urldecode(val);
-		//urldecode(param);
-		param_dict.AppendMultiple(param, allowmultiple)->SetStr(val);
-		param = next_param;
-	}
-
-	action_dict->Insert(action, param_dict);
-	return action_dict;
-}
-*/
 
 // C++ interface functions
 BencodedDict *BencodedList::GetDict(size_t i)

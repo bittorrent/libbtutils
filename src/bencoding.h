@@ -225,19 +225,6 @@ public:
 
 	//int LoadFromFile_Safe(ctstr filename);
 
-	// Parse a list of web RPC params of the form:
-	//  action?param1=val1?param2=val2 ...
-	// into a dict:
-	//  dict {
-	//	  "action" = dict {
-	//	  "param1" = string "val1"
-	//	  "param2" = string "val2"
-	//	  ...
-	//	  }
-	//  }
-// Hmm, does a BencEntity need to know about RPC format?
-//	BencodedDict* ParseRpcParams(char * paramlist, bool allowmultiple = false);
-
 	static const unsigned char *ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend);
 	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, std::pair<unsigned char*, unsigned char*> *rgn);
 	static const unsigned char *Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend);
