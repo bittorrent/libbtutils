@@ -3,7 +3,9 @@ CFLAGS=-DPOSIX -D_DEBUG -D_LIB -g -O0
 CXXFLAGS=$(CFLAGS) -Wall -Werror
 
 SRC=$(addprefix src/, RefBase.cpp bitfield.cpp bloom_filter.cpp \
-		get_microseconds.cpp inet_ntop.cpp sockaddr.cpp interlock.cpp snprintf.cpp)
+	get_microseconds.cpp inet_ntop.cpp sockaddr.cpp interlock.cpp snprintf.cpp \
+	DecodeEncodedString.cpp \
+)
 
 SRC_BENCODING=$(SRC) src/bencoding.cpp src/bencparser.cpp
 
