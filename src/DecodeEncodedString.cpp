@@ -76,13 +76,6 @@ int DecodeUtf8(cstr utf8, size_t in_len, wchar_t *out_ptr, size_t out_len, bool 
 	}
 }
 
-#ifndef WIN32
-
-enum { CP_UTF8 = 1,
-       CP_ACP = 0 };
-
-#endif
-
 wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *out_len)
 {
 	if (in_len == (size_t) -1) in_len = strlen(encoded);

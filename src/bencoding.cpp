@@ -1,6 +1,7 @@
 //#include "util.h"
 #include "bencoding.h"
 #include "invariant_check.hpp"
+#include "DecodeEncodedString.h"
 //#include "btstr.h"
 #include <stdlib.h> // for _atoi64 or strtoll
 #include <vector>
