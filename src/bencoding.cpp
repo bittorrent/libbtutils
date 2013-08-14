@@ -829,12 +829,12 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 			break;
 		}
 
-		grow((unsigned int)list->size());
-		BencEntity ent;
-		if(ent.SetParsed( parseResult, pElement, (int)elementSize, regime )){
+		grow((unsigned int)(list->size()));
+		*ent = new BencEntity();
+		if((*ent)->SetParsed( parseResult, pElement, (int)elementSize, regime )){
 			// Don't handle vlist since this is for parsing
-			list->push_back(ent);
-			if (ent.bencType == BENC_LIST || ent.bencType == BENC_DICT) {
+			list->push_back(**ent);
+			if ((*ent)->bencType == BENC_LIST || (*ent)->bencType == BENC_DICT) {
 				break;
 			}
 		}
@@ -1097,7 +1097,7 @@ int64_t BencEntityLazyInt::GetInt64(int64_t def /*= 0*/) {
 	if(bencType != BENC_INT_LAZY) return def;
 	BencodedMem *pMem = mem;
 	mem = 0;
-	ParseNum( pMem->GetRaw() );
+	ParseNum( reinterpret_cast<const unsigned char*>(pMem->GetRaw()));
 	delete pMem;
 	bencType = BENC_INT;
 	return BencEntity::GetInt64( def );
