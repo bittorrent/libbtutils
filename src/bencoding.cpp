@@ -820,7 +820,7 @@ bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRe
 	return bReturn;
 }
 
-void BencEntity::SetInt64(int64_t i)
+void BencEntity::SetInt64(int64 i)
 {
 	FreeMembers();
 	bencType = BENC_BIGINT;
@@ -839,7 +839,7 @@ int BencEntity::GetInt(int def /*= 0*/) const {
 	return num;
 }
 
-int64_t BencEntity::GetInt64(int64_t def /*= 0*/) const {
+int64 BencEntity::GetInt64(int64 def /*= 0*/) const {
 	if(bencType != BENC_INT && bencType != BENC_BIGINT) return def;
 	return num;
 }
@@ -912,7 +912,7 @@ int BencEntityLazyInt::GetInt(int def /*= 0*/) {
 
 // Here we do a transformation: once the lazy int gets read/loaded,
 // we are transformed to a regular int
-int64_t BencEntityLazyInt::GetInt64(int64_t def /*= 0*/) {
+int64 BencEntityLazyInt::GetInt64(int64 def /*= 0*/) {
 	assert(bencType == BENC_INT_LAZY);
 	if(bencType != BENC_INT_LAZY) return def;
 	BencodedMem *pMem = mem;
@@ -999,7 +999,7 @@ int BencodedList::GetInt(size_t item, int def) const
 	return e->GetInt(def);
 }
 
-int64_t BencodedList::GetInt64(size_t item, int64_t def) const
+int64 BencodedList::GetInt64(size_t item, int64 def) const
 {
 	assert(bencType == BENC_LIST);
 	assert(list);
@@ -1058,7 +1058,7 @@ BencEntity *BencodedList::AppendInt( int val )
 	beInt.SetInt( val );
 	return Append( beInt );
 }
-BencEntity *BencodedList::AppendInt64( int64_t val )
+BencEntity *BencodedList::AppendInt64( int64 val )
 {
 	assert(bencType == BENC_LIST);
 	BencEntity beInt;
@@ -1149,7 +1149,7 @@ int BencodedDict::GetInt(const char* key, int def) const
 	return e->GetInt(def);
 }
 
-int64_t BencodedDict::GetInt64(const char* key, int64_t def) const
+int64 BencodedDict::GetInt64(const char* key, int64 def) const
 {
 	assert(bencType == BENC_DICT);
 	assert(list);
@@ -1341,7 +1341,7 @@ BencEntity *BencodedDict::InsertInt(const char* key, int val)
 	return Insert( key, beInt );
 }
 
-BencEntity *BencodedDict::InsertInt64(const char* key, int64_t val)
+BencEntity *BencodedDict::InsertInt64(const char* key, int64 val)
 {
 	assert(bencType == BENC_DICT);
 	BencEntity beInt;

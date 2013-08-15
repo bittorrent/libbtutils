@@ -44,6 +44,9 @@
     <ClCompile Include="src/interlock.cpp" />
     <ClCompile Include="src/snprintf.cpp" />
     <ClCompile Include="src/udp_utils.cpp" />
+    <ClCompile Include="src/bencoding.cpp" />
+    <ClCompile Include="src/bencparser.cpp" />
+    <ClCompile Include="src/DecodeEncodedString.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src/RefBase.h" />
@@ -61,6 +64,9 @@
     <ClInclude Include="src/interlock.h" />
     <ClInclude Include="src/snprintf.h" />
     <ClCompile Include="src/udp_utils.h" />
+    <ClCompile Include="src/bencoding.h" />
+    <ClCompile Include="src/bencparser.h" />
+    <ClCompile Include="src/DecodeEncodedString.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{507D2D6B-0616-4D4A-A75A-EC6915B9F952}</ProjectGuid>

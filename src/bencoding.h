@@ -123,7 +123,7 @@ public:
 class BencEntity {
 public:
 	union {
-		int64_t num;
+		int64 num;
 		BencodedMem *mem;
 		// Base member maintained by subclass BencodedList
 		BencodedEntityList *list;
@@ -201,10 +201,10 @@ public:
 
 	BENC_T GetType() const { return bencType; }
 
-	void SetInt64(int64_t i);
+	void SetInt64(int64 i);
 	void SetInt(int i);
 	int GetInt(int def = 0) const;
-	int64_t GetInt64(int64_t def = 0) const;
+	int64 GetInt64(int64 def = 0) const;
 
 //	BencodedList *SetList();
 	BencodedList *SetVList(BencVListCallback callback, size_t count, void *user);
@@ -298,7 +298,7 @@ public:
 		mem = pMem;
 	}
 	int GetInt(int def = 0);
-	int64_t GetInt64(int64_t def = 0);
+	int64 GetInt64(int64 def = 0);
 };
 
 struct VListData {
@@ -326,12 +326,12 @@ public:
 	t_string GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
 
 	int GetInt(size_t i, int def = 0) const;
-	int64_t GetInt64(size_t i, int64_t def = 0) const;
+	int64 GetInt64(size_t i, int64 def = 0) const;
 	BencEntity *Append(BencEntity &e);
 	BencEntityMem *AppendString(const char * str, size_t length = -1);
 	BencEntityMem *AppendStringT(ctstr str, size_t length = -1);
 	BencEntity *AppendInt(int arg);
-	BencEntity *AppendInt64(int64_t arg);
+	BencEntity *AppendInt64(int64 arg);
 	BencodedDict *AppendDict();
 	BencodedList *AppendList();
 	void Delete(size_t i);
@@ -373,11 +373,11 @@ public:
 	BencEntityMem *InsertStringT(const char * key, ctstr tstr);
 	BencEntityMem *InsertString(const std::string& key, const std::string& str, int length =-1);
 	BencEntity *InsertInt(const char * key, int arg);
-	BencEntity *InsertInt64(const char * key, int64_t arg);
+	BencEntity *InsertInt64(const char * key, int64 arg);
 	BencodedDict *InsertDict(const char * key);
 	BencodedList *InsertList(const char * key);
 
-	int64_t GetInt64(const char * key, int64_t def = 0) const;
+	int64 GetInt64(const char * key, int64 def = 0) const;
 	bool HasKey(const char * key) const { return Get(key) != NULL; }
 
 	BencEntity *Insert(const char * key, BencEntity &);
