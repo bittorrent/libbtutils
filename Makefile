@@ -1,6 +1,7 @@
 CXX=g++
 CFLAGS=-DPOSIX -D_DEBUG -D_LIB -g -O0
 CXXFLAGS=$(CFLAGS) -Wall -Werror
+#CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
 
 SRC=$(addprefix src/, RefBase.cpp bitfield.cpp bloom_filter.cpp \
 	get_microseconds.cpp inet_ntop.cpp sockaddr.cpp interlock.cpp snprintf.cpp \
@@ -36,7 +37,7 @@ libututils_broken.so:
 	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC_BENCODING)
 
 unit_tests: libututils_broken.so
-	$(CXX) $(CXXFLAGS) $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
+	$(CXX) $(CXXFLAGS) -std=c++11 $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
 
 clean:
 	rm -f libututils.so libututils_broken.so unit_tests
