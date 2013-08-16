@@ -7,6 +7,7 @@
 #include <vector>
 //#include "string_type.h"
 //#include "JsonParser.h" // for BencJson
+#include "snprintf.h"
 
 char* wstr_to_utf8(const wchar_t * input, size_t *out_len)
 {
