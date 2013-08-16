@@ -3,6 +3,7 @@
 #include "invariant_check.hpp"
 #include "DecodeEncodedString.h"
 //#include "btstr.h"
+#include <climits> //for INT_MAX
 #include <stdlib.h> // for _atoi64 or strtoll
 #include <vector>
 //#include "string_type.h"
