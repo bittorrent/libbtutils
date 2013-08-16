@@ -27,11 +27,10 @@ public:
 	const unsigned char *GetPos() const { return _p; }
 
 protected:
-	const unsigned char *ParseNum(size_t *pSize);
-	const unsigned char *ParseString(size_t *pSize);
-protected:
 	unsigned char *_p;
 	const unsigned char *_pEnd;
+	const unsigned char *ParseNum(size_t *pSize);
+	const unsigned char *ParseString(size_t *pSize);
 };
 
 class BencParserElement : public BencParser{

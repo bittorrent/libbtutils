@@ -1,5 +1,6 @@
 #include "bencparser.h"
 #include <cassert>
+#include <cstdio>
 //#include "btstring.h"
 
 #define READBYTE2(START, END, CURRENT) assert(START <= END); if (START == END) return NULL; CURRENT = *((START)++);

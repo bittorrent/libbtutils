@@ -346,12 +346,12 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	switch(e->bencType) {
 	case BENC_INT:
 		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-		Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%llde", e->num));
 		break;
 
 	case BENC_BIGINT:
 		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-		Emit(buf, snprintf(buf, sizeof(buf), "i%Lde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%llde", e->num));
 		break;
 
 	case BENC_STR: {
@@ -652,9 +652,12 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		grow((unsigned int)(list->size()));
 		*ent = new BencEntity();
 		if((*ent)->SetParsed( parseResult, pElement, (int)elementSize, regime )){
+			int bencType = (*ent)->bencType;
 			// Don't handle vlist since this is for parsing
 			list->push_back(**ent);
-			if ((*ent)->bencType == BENC_LIST || (*ent)->bencType == BENC_DICT) {
+			delete *ent;
+			*ent = &(list->back());
+			if (bencType == BENC_LIST || bencType == BENC_DICT) {
 				break;
 			}
 		}

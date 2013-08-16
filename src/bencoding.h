@@ -90,9 +90,10 @@ public:
 	size_t GetCount() const {return this->_arr.size();}
 	void Clear() {this->_arr.clear();}
 	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count*sizeof(p)); }
-	void AppendTerminated(const T *p, int count) { this->Append(p, count-1); this->Append(0, 1); }
+	void AppendTerminated(const T *p, int count) {
+		this->Append(p, count-1);
+		this->Append((const T*)"\0", 1); }
 	void Resize(size_t size) { this->_arr.resize(size); }
-	// whyyyy is len in bytes?
 	void SetArray(T *p, size_t len) { assert(len%sizeof(p)==0); this->_arr.assign(p, p + len); }
 	const char* GetRaw() const { return (const char*)&this->_arr[0];}
 };
