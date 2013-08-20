@@ -74,6 +74,7 @@ TEST(Bencoding, Basics) {
 		"\301\234\352<DC\367\273\017\342\1\353\306\303\221\257tJ\254\251"
 	};
 
+	const char* name;
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_scrape)));
 	EXPECT_TRUE(tmp);
 	memcpy(tmp, sample_scrape, sizeof(sample_scrape));
@@ -96,7 +97,8 @@ TEST(Bencoding, Basics) {
 		EXPECT_EQ(8, d->GetInt("complete", -99));
 		EXPECT_EQ(16838, d->GetInt("downloaded", -99));
 		EXPECT_EQ(5, d->GetInt("incomplete", -99));
-		EXPECT_STREQ("Fedora-8-Live-ppc", d->GetString("name"));
+		name = "Fedora-8-Live-ppc";
+		EXPECT_EQ(0, memcmp(name, d->GetString("name"), sizeof(name) - 1));
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
@@ -105,7 +107,8 @@ TEST(Bencoding, Basics) {
 		EXPECT_EQ(36, d->GetInt("complete", -99));
 		EXPECT_EQ(45649, d->GetInt("downloaded", -99));
 		EXPECT_EQ(8, d->GetInt("incomplete", -99));
-		EXPECT_STREQ("Fedora-8-Live-KDE-i686", d->GetString("name"));
+		name = "Fedora-8-Live-KDE-i686";
+		EXPECT_EQ(0, memcmp(name, d->GetString("name"), sizeof(name) -1));
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
@@ -114,7 +117,8 @@ TEST(Bencoding, Basics) {
 		EXPECT_EQ(24, d->GetInt("complete", -99));
 		EXPECT_EQ(29004, d->GetInt("downloaded", -99));
 		EXPECT_EQ(2, d->GetInt("incomplete", -99));
-		EXPECT_STREQ("Fedora-8-Live-x86_64", d->GetString("name"));
+		name = "Fedora-8-Live-x86_64";
+		EXPECT_EQ(0, memcmp(name, d->GetString("name"), sizeof(name) -1));
 	}
 
 	free(tmp);
@@ -189,6 +193,7 @@ TEST(Bencoding, String1) {
 			utlogf("Value and length expected %s %d actual %s %d",
 				"avalue", 6, value.c_str(), valuelen));*/
 	}
+	free(tmp);
 }
 
 TEST(Bencoding, String2) {
@@ -221,6 +226,7 @@ TEST(Bencoding, String2) {
 			utlogf("Value and length expected %s %d actual %s %d",
 				"avalue", 6, value.c_str(), valuelen));*/
 	}
+	free(tmp);
 }
 
 TEST(Bencoding, TwoFiles) {
@@ -411,6 +417,7 @@ TEST(Bencoding, Copy) {
 		utlogf("sample_data %s bytes %s", sample_data, bytes));*/
 	delete d2;
 	d2 = NULL;
+	free(bytes);
 
 	// Copy and verify a string
 	BencEntityMem s;

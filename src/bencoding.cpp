@@ -3,6 +3,7 @@
 #include "invariant_check.hpp"
 #include "DecodeEncodedString.h"
 //#include "btstr.h"
+#include <climits> //for INT_MAX
 #include <stdlib.h> // for _atoi64 or strtoll
 #include <vector>
 //#include "string_type.h"
@@ -940,8 +941,8 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 
 t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (!(bencType == BENC_STR)) return NULL;
-#ifdef _UNICODE
 	size_t tmp = 0;
+#ifdef _UNICODE
 	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
 	t_string tmps(str);
 	free(str);
@@ -949,7 +950,9 @@ t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (count) *count = tmp;
 	return tmps;
 #else
-	return t_string(GetString(count));
+	if (count) *count = tmp;
+	const char* str = GetString(&tmp);
+	return t_string(str, tmp);
 #endif
 }
 

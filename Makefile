@@ -1,5 +1,5 @@
 CXX=g++
-CFLAGS=-DPOSIX -D_DEBUG -D_LIB -g -O0
+CFLAGS=-DPOSIX -D_UNICODE -D_DEBUG -D_LIB -g -O0
 CXXFLAGS=$(CFLAGS) -Wall -Werror
 #CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
 
@@ -22,22 +22,17 @@ SRC_UNITTESTS = \
 	$(sort $(addprefix unittests/, TestBencEntity.cpp TestBencoding.cpp) )
 
 INCLUDE_UNITTESTS=-Isrc/ -I./ -Ivendor/gtest-1.6.0/include -Ivendor/gmock-1.6.0/include -Ivendor/gtest-1.6.0 -Ivendor/gmock-1.6.0
-LDFLAGS_UNITTESTS=-L./ -lututils_broken
+LDFLAGS_UNITTESTS=-L./ -lututils
 
 all: libututils.so
-
-bencoding: libututils_broken.so
 
 test: unit_tests
 
 libututils.so:
-	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC)
-
-libututils_broken.so:
 	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC_BENCODING)
 
-unit_tests: libututils_broken.so
+unit_tests: libututils.so
 	$(CXX) $(CXXFLAGS) -std=c++11 $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
 
 clean:
-	rm -f libututils.so libututils_broken.so unit_tests
+	rm -f libututils.so unit_tests
