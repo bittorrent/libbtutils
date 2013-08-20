@@ -35,38 +35,38 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src/sockaddr.cpp" />
-    <ClCompile Include="src/inet_ntop.cpp" />
-    <ClCompile Include="src/RefBase.cpp" />
-    <ClCompile Include="src/bloom_filter.cpp" />
-    <ClCompile Include="src/get_microseconds.cpp" />
-    <ClCompile Include="src/bitfield.cpp" />
-    <ClCompile Include="src/interlock.cpp" />
-    <ClCompile Include="src/snprintf.cpp" />
-    <ClCompile Include="src/udp_utils.cpp" />
-    <ClCompile Include="src/bencoding.cpp" />
-    <ClCompile Include="src/bencparser.cpp" />
-    <ClCompile Include="src/DecodeEncodedString.cpp" />
+    <ClCompile Include="src\sockaddr.cpp" />
+    <ClCompile Include="src\inet_ntop.cpp" />
+    <ClCompile Include="src\RefBase.cpp" />
+    <ClCompile Include="src\bloom_filter.cpp" />
+    <ClCompile Include="src\get_microseconds.cpp" />
+    <ClCompile Include="src\bitfield.cpp" />
+    <ClCompile Include="src\interlock.cpp" />
+    <ClCompile Include="src\snprintf.cpp" />
+    <ClCompile Include="src\udp_utils.cpp" />
+    <ClCompile Include="src\bencoding.cpp" />
+    <ClCompile Include="src\bencparser.cpp" />
+    <ClCompile Include="src\DecodeEncodedString.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src/RefBase.h" />
-    <ClInclude Include="src/inet_ntop.h" />
-    <ClInclude Include="src/sockaddr.h" />
-    <ClInclude Include="src/target.h" />
-    <ClInclude Include="src/utypes.h" />
-    <ClInclude Include="src/endian_utils.h" />
-    <ClInclude Include="src/smart_ptr.h" />
-    <ClInclude Include="src/tailqueue.h" />
-    <ClInclude Include="src/bloom_filter.h" />
-    <ClInclude Include="src/bitfield.h" />
-    <ClInclude Include="src/sha1_hash.h" />
-    <ClInclude Include="src/get_microseconds.h" />
-    <ClInclude Include="src/interlock.h" />
-    <ClInclude Include="src/snprintf.h" />
-    <ClCompile Include="src/udp_utils.h" />
-    <ClCompile Include="src/bencoding.h" />
-    <ClCompile Include="src/bencparser.h" />
-    <ClCompile Include="src/DecodeEncodedString.h" />
+    <ClInclude Include="src\RefBase.h" />
+    <ClInclude Include="src\inet_ntop.h" />
+    <ClInclude Include="src\sockaddr.h" />
+    <ClInclude Include="src\target.h" />
+    <ClInclude Include="src\utypes.h" />
+    <ClInclude Include="src\endian_utils.h" />
+    <ClInclude Include="src\smart_ptr.h" />
+    <ClInclude Include="src\tailqueue.h" />
+    <ClInclude Include="src\bloom_filter.h" />
+    <ClInclude Include="src\bitfield.h" />
+    <ClInclude Include="src\sha1_hash.h" />
+    <ClInclude Include="src\get_microseconds.h" />
+    <ClInclude Include="src\interlock.h" />
+    <ClInclude Include="src\snprintf.h" />
+    <ClCompile Include="src\udp_utils.h" />
+    <ClCompile Include="src\bencoding.h" />
+    <ClCompile Include="src\bencparser.h" />
+    <ClCompile Include="src\DecodeEncodedString.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{507D2D6B-0616-4D4A-A75A-EC6915B9F952}</ProjectGuid>
