@@ -63,10 +63,10 @@
     <ClInclude Include="src\get_microseconds.h" />
     <ClInclude Include="src\interlock.h" />
     <ClInclude Include="src\snprintf.h" />
-    <ClCompile Include="src\udp_utils.h" />
-    <ClCompile Include="src\bencoding.h" />
-    <ClCompile Include="src\bencparser.h" />
-    <ClCompile Include="src\DecodeEncodedString.h" />
+    <ClInclude Include="src\udp_utils.h" />
+    <ClInclude Include="src\bencoding.h" />
+    <ClInclude Include="src\bencparser.h" />
+    <ClInclude Include="src\DecodeEncodedString.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{507D2D6B-0616-4D4A-A75A-EC6915B9F952}</ProjectGuid>

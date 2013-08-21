@@ -1,13 +1,9 @@
-//#include "util.h"
 #include "bencoding.h"
 #include "invariant_check.hpp"
 #include "DecodeEncodedString.h"
-//#include "btstr.h"
 #include <climits> //for INT_MAX
 #include <stdlib.h> // for _atoi64 or strtoll
 #include <vector>
-//#include "string_type.h"
-//#include "JsonParser.h" // for BencJson
 #include "snprintf.h"
 
 char* wstr_to_utf8(const wchar_t * input, size_t *out_len)

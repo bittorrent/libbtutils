@@ -260,7 +260,12 @@ public:
 	}
 
 	void SetStr(const char * s, int len = -1);
-	char const *GetRaw(void) const { return (char const*)&(*mem)[0]; }
+
+	// make sure we don't access element 0 in an empty array
+	// because that's not allowed (and triggers assertions when
+	// debug iterators are enabled).
+	char const *GetRaw(void) const { return mem->GetCount() == 0 ? NULL : (char const*)&(*mem)[0]; }
+
 	size_t GetSize(void) const { return mem->GetCount(); }
 	void CopyFrom(const BencEntity& b);
 

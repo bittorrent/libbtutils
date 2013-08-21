@@ -69,7 +69,9 @@ struct static_initialization
 	}
 } dummy_static_initializer;
 
-int64 abs64(int64 x) { return x < 0 ? -x : x; }
+namespace {
+	int64 abs64(int64 x) { return x < 0 ? -x : x; }
+}
 
 uint64 get_microseconds()
 {
