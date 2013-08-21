@@ -106,7 +106,7 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 		len = MultiByteToWideChar(encoding, 0, encoded, in_len, t, in_len);
 		if (0 == len && CP_ACP != encoding)
 			len = MultiByteToWideChar(CP_ACP, 0, encoded, in_len, t, in_len);
-#elif defined POSIX
+#else
 		// See man pages for mbstowcs mbstowcs_l multibyte xlocale mbsnrtowcs
 		mbstate_t ps;
 		memset(&ps, 0, sizeof(ps));
@@ -124,8 +124,6 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 			// to the last character that underwent successful conversion.
 //			DbgLogf("DecodeEncodedString encountered an error in mbsnrtowcs and only partially decoded the string. Continuing...");
 		}
-#else
-#error "Can't handle non-Win32 non-POSIX platform"
 #endif
 	}
 OK:
