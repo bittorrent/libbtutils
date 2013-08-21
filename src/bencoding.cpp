@@ -1133,7 +1133,7 @@ char* BencodedDict::GetStringCopy(const char* key) const
 t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
-	return (pMem?pMem->GetStringT(encoding, length):NULL);
+	return (pMem?pMem->GetStringT(encoding, length):_T(""));
 }
 
 char* BencodedDict::GetString(const char* key, size_t length) const
