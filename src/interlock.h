@@ -3,29 +3,6 @@
 
 #include "utypes.h" // for LONG
 
-// GCC 4.3 (and before) define macro _GLIBCXX_ATOMIC_BUILTINS
-// GCC 4.4 and after define macros _GLIBCXX_ATOMIC_BUILTINS_[1|2|4|8] and don't define _GLIBCXX_ATOMIC_BUILTINS
-// 2013 02 13 - updates on newer gcc versions
-// GCC 4.6, from looking at compiler output logs, looks like it behaves like gcc 4.3 and before
-// GCC 4.7 defines macro _GLIBCXX_ATOMIC_BUILTINS, and not the _[1|2|4|8] ones
-
-// AVOID_GLIBCXX_ATOMIC_BUILTINS macro defined on compiler command line
-// originating from makefile if the system libraries on the target platform
-// do not correctly implement the gcc atomic memory access functions
-// (see http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html)
-// This could be the case for some embedded devices.
-
-#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 3)) && defined(_GLIBCXX_ATOMIC_BUILTINS) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
-// Case for gcc 4.7 and later, and gcc 4.3 and before
-#define USE_GLIBCXX_ATOMIC_BUILTINS 1
-#elif _GLIBCXX_ATOMIC_BUILTINS_4 && ((!defined _LP64) || _GLIBCXX_ATOMIC_BUILTINS_8) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
-// Case for gcc 4.4 - 4.6
-#define USE_GLIBCXX_ATOMIC_BUILTINS 1
-#else
-// Roll our own atomic operations
-#define USE_GLIBCXX_ATOMIC_BUILTINS 0
-#endif
-
 #ifdef WIN32
 
 #include <windows.h>
@@ -108,7 +85,34 @@ inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void 
 	return old;
 }
 
-#elif USE_GLIBCXX_ATOMIC_BUILTINS
+#elif defined POSIX
+
+#include <ext/atomicity.h>
+
+// GCC 4.3 (and before) define macro _GLIBCXX_ATOMIC_BUILTINS
+// GCC 4.4 and after define macros _GLIBCXX_ATOMIC_BUILTINS_[1|2|4|8] and don't define _GLIBCXX_ATOMIC_BUILTINS
+// 2013 02 13 - updates on newer gcc versions
+// GCC 4.6, from looking at compiler output logs, looks like it behaves like gcc 4.3 and before
+// GCC 4.7 defines macro _GLIBCXX_ATOMIC_BUILTINS, and not the _[1|2|4|8] ones
+
+// AVOID_GLIBCXX_ATOMIC_BUILTINS macro defined on compiler command line
+// originating from makefile if the system libraries on the target platform
+// do not correctly implement the gcc atomic memory access functions
+// (see http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html)
+// This could be the case for some embedded devices.
+
+#if ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 3)) && defined(_GLIBCXX_ATOMIC_BUILTINS) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
+// Case for gcc 4.7 and later, and gcc 4.3 and before
+#define USE_GLIBCXX_ATOMIC_BUILTINS 1
+#elif _GLIBCXX_ATOMIC_BUILTINS_4 && ((!defined _LP64) || _GLIBCXX_ATOMIC_BUILTINS_8) && !defined AVOID_GLIBCXX_ATOMIC_BUILTINS
+// Case for gcc 4.4 - 4.6
+#define USE_GLIBCXX_ATOMIC_BUILTINS 1
+#else
+// Roll our own atomic operations
+#define USE_GLIBCXX_ATOMIC_BUILTINS 0
+#endif
+
+#if USE_GLIBCXX_ATOMIC_BUILTINS
 
 inline LONG InterlockedAdd(LONG* ptr, LONG value) {
 	return __sync_add_and_fetch(ptr, value);
@@ -254,7 +258,7 @@ inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void 
 	return result;
 }
 
-#endif
+#endif // not USE_GLIBCXX_ATOMIC_BUILTINS
 
 /* TODO: enable gcc __i386__ version after testing it */
 #if 0 // defined (__GNUC__) && defined (__i386__)
@@ -295,4 +299,8 @@ inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 
 #endif
 
-#endif//_INTERLOCKED_H_
+#else
+#error "Can't handle this platform"
+#endif // platform
+
+#endif // _INTERLOCKED_H_
