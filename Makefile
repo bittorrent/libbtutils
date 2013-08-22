@@ -66,6 +66,7 @@ endif
 # -pipe - use pipes instead of temporary files for comm between compilation stages
 # -Wall - enable (almost) all warnings
 # -Werror - make all warnings into errors
+# -O - optimization level
 UTILS_COMMON_FLAGS = \
 	-c \
 	-MD \
@@ -73,6 +74,7 @@ UTILS_COMMON_FLAGS = \
 	-pipe \
 	-Wall \
 	-Werror \
+	-O$(OPTIMIZE)
 
 # -std - specify the language standard
 UTILS_CXX_FLAGS = \
