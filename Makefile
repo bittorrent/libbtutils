@@ -1,38 +1,240 @@
-CXX=g++
-CFLAGS=-DPOSIX -D_UNICODE -D_DEBUG -D_LIB -g -O0
-CXXFLAGS=$(CFLAGS) -Wall -Werror
-#CXXFLAGS=$(CFLAGS) -std=c++11 -Wall -Werror
+# Makefile for utorrent utils
 
-SRC=$(addprefix src/, RefBase.cpp bitfield.cpp bloom_filter.cpp \
-	get_microseconds.cpp inet_ntop.cpp sockaddr.cpp interlock.cpp snprintf.cpp \
+#
+# Host detection
+#
+
+include host.mk
+ifeq ($(HOST),)
+$(error "Can't identify host")
+endif
+
+#
+# Target specification
+#
+
+TARGET_ANDROID = android
+
+$(info Host $(HOST))
+ifeq ($(TARGET),)
+$(info Using default target of $(HOST) (same as host))
+TARGET = $(HOST)
+else
+ifneq ($(TARGET),$(HOST_LINUX))
+ifneq ($(TARGET),$(HOST_MAC))
+ifneq ($(TARGET),$(HOST_CYGWIN))
+ifneq ($(TARGET),$(HOST_FREEBSD))
+ifneq ($(TARGET),$(TARGET_ANDROID))
+$(error Invalid target: '$(TARGET)'. Valid targets: $(HOST_LINUX), $(HOST_MAC), $(HOST_CYGWIN), $(HOST_FREEBSD), $(TARGET_ANDROID) (e.g. make TARGET=$(HOST)))
+endif
+endif
+endif
+endif
+endif
+$(info Target $(TARGET))
+endif
+
+#
+# Platform Setup
+#
+
+export TARGET
+include platform.mk
+ifeq ($(PLATFORM_FLAGS),)
+$(error "Can't initialize for target $(TARGET)")
+endif
+
+#
+# Build setup
+#
+
+export CONFIG
+export CHARSET
+export OPTIMIZE
+include buildconfig.mk
+ifeq ($(CONFIG),)
+$(error "Can't initialize configuration (CONFIG)")
+endif
+ifeq ($(CHARSET),)
+$(error "Can't initialize configuration (CHARSET)")
+endif
+ifeq ($(OPTIMIZE),)
+$(error "Can't initialize configuration (OPTIMIZE)")
+endif
+
+# -c - compile/assemble source files, but do not link
+# -MD - output dependencies to a file located with the object file
+# -g - provide debugging information in OS's native format (for gdb)
+# -pipe - use pipes instead of temporary files for comm between compilation stages
+# -Wall - enable (almost) all warnings
+# -Werror - make all warnings into errors
+UTILS_COMMON_FLAGS = \
+	-c \
+	-MD \
+	-g \
+	-pipe \
+	-Wall \
+	-Werror \
+
+# -std - specify the language standard
+UTILS_CXX_FLAGS = \
+	-std=c++11
+
+ifeq ($(CHARSET),$(CHARSET_UNICODE))
+UTILS_COMMON_FLAGS += -D_UNICODE
+endif
+
+OUTDIR_PREFIX = obj-
+OUTDIR = $(OUTDIR_PREFIX)$(CONFIG)-$(CHARSET)-$(OPTIMIZE)
+
+LD_SYSTEM_SHLIBFLAGS = -lpthread -lm
+
+ifeq ($(TARGET),$(HOST_LINUX))
+# -lrt is for clock_gettime() - see its man page
+LD_SYSTEM_SHLIBFLAGS += -lrt
+endif
+
+# Include all added compile flags in CFLAGS and CXXFLAGS
+UTILS_CFLAGS = $(UTILS_COMMON_FLAGS) $(PLATFORM_FLAGS)
+UTILS_CXXFLAGS = $(UTILS_COMMON_FLAGS) $(PLATFORM_FLAGS) $(UTILS_CXX_FLAGS)
+# Android doesn't like CFLAGS modified in this file
+ifeq ($(TARGET),$(TARGET_ANDROID))
+LOCAL_CFLAGS += $(UTILS_CFLAGS)
+LOCAL_CXXFLAGS += $(UTILS_CXXFLAGS)
+endif
+
+#
+# Library sources and products
+#
+
+SRC_DIR = src
+LIBSRCS = $(sort $(addprefix $(SRC_DIR)/, \
 	DecodeEncodedString.cpp \
+	RefBase.cpp \
+	bencoding.cpp \
+	bencparser.cpp \
+	bitfield.cpp \
+	bloom_filter.cpp \
+	get_microseconds.cpp \
+	inet_ntop.cpp \
+	interlock.cpp \
+	snprintf.cpp \
+	sockaddr.cpp \
+))
+
+LIBBASENAME = ututils
+LIBNAME = lib$(LIBBASENAME).so
+LIBOBJS = $(patsubst %.cpp, $(OUTDIR)/%.o, $(LIBSRCS))
+LIBOBJDIR = $(OUTDIR)/$(SRC_DIR)
+LIBDESTDIR = $(OUTDIR)
+OBJDESTLIB = $(LIBDESTDIR)/$(LIBNAME)
+
+LIBRARY_CXXFLAGS = -fPIC
+LIBRARY_BUILDFLAGS = -shared
+
+#
+# Unit tests sources and products
+#
+
+GTEST_VERSION = 1.6.0
+GOOGLE_TEST_DIR = vendor/gtest-$(GTEST_VERSION)/src
+GOOGLE_MOCK_DIR = vendor/gmock-$(GTEST_VERSION)/src
+SRCS_GOOGLE_TEST = $(addprefix $(GOOGLE_TEST_DIR)/, \
+	gtest-all.cc \
 )
+SRCS_GOOGLE_MOCK = $(addprefix $(GOOGLE_MOCK_DIR)/, \
+	gmock-all.cc \
+	gmock_main.cc \
+)
+OBJS_GOOGLE_TEST = $(patsubst %.cc, $(OUTDIR)/%.o, $(SRCS_GOOGLE_TEST))
+OBJS_GOOGLE_MOCK = $(patsubst %.cc, $(OUTDIR)/%.o, $(SRCS_GOOGLE_MOCK))
+OUTPUT_GOOGLE_TEST_DIR = $(OUTDIR)/$(GOOGLE_TEST_DIR)
+OUTPUT_GOOGLE_MOCK_DIR = $(OUTDIR)/$(GOOGLE_MOCK_DIR)
 
-SRC_BENCODING=$(SRC) src/bencoding.cpp src/bencparser.cpp
+UNITTESTS_DIR = unittests
+LIBUNITTESTOBJDIR = $(OUTDIR)/$(UNITTESTS_DIR)
+SRCS_TESTS = $(addprefix $(UNITTESTS_DIR)/, \
+	TestBencEntity.cpp \
+	TestBencoding.cpp \
+)
+OBJS_TESTS = $(patsubst %.cpp, $(OUTDIR)/%.o, $(SRCS_TESTS))
+UNITTESTS_EXE_NAME = unit_tests
+UT_EXE_DEST = $(LIBUNITTESTOBJDIR)/$(UNITTESTS_EXE_NAME)
 
-SRC_TESTS=$(addprefix unittests/, TestBencEntity.cpp TestBencoding.cpp)
+SRCS_UNITTESTS = \
+	$(SRCS_GOOGLE_TEST) \
+	$(SRCS_TESTS)
 
-SRC_GOOGLE_TEST = \
-	vendor/gtest-1.6.0/src/gtest-all.cc \
-	vendor/gmock-1.6.0/src/gmock-all.cc \
-	vendor/gmock-1.6.0/src/gmock_main.cc 
+OBJS_UNITTESTS = $(OBJS_TESTS) $(OBJS_GOOGLE_TEST) $(OBJS_GOOGLE_MOCK)
 
-SRC_UNITTESTS = \
-	$(SRC_GOOGLE_TEST) \
-	$(sort $(addprefix unittests/, TestBencEntity.cpp TestBencoding.cpp) )
+INCLUDE_UNITTESTS = \
+	-I$(SRC_DIR)/ \
+	-Ivendor/gtest-$(GTEST_VERSION)/include \
+	-Ivendor/gtest-$(GTEST_VERSION) \
+	-Ivendor/gmock-$(GTEST_VERSION)/include \
+	-Ivendor/gmock-$(GTEST_VERSION)
 
-INCLUDE_UNITTESTS=-Isrc/ -I./ -Ivendor/gtest-1.6.0/include -Ivendor/gmock-1.6.0/include -Ivendor/gtest-1.6.0 -Ivendor/gmock-1.6.0
-LDFLAGS_UNITTESTS=-L./ -lututils
+LD_COMPONENT_SHLIBFLAGS = -L$(LIBDESTDIR) -l$(LIBBASENAME)
+LD_SHLIB_FLAGS = $(LD_COMPONENT_SHLIBFLAGS) $(LD_SYSTEM_SHLIBFLAGS)
 
-all: libututils.so
+#
+# Rules
+#
 
-test: unit_tests
+.phony: all test
 
-libututils.so:
-	$(CXX) $(CXXFLAGS) -shared -o $@ $(SRC_BENCODING)
+all: $(OUTDIR)/$(LIBNAME)
 
-unit_tests: libututils.so
-	$(CXX) $(CXXFLAGS) -std=c++11 $(INCLUDE_UNITTESTS) $(LDFLAGS_UNITTESTS) -o $@ $(SRC_UNITTESTS) 
+test: $(UT_EXE_DEST)
+	env LD_LIBRARY_PATH=$(LIBDESTDIR) $(UT_EXE_DEST)
+
+$(OBJDESTLIB): $(LIBOBJS)
+	$(CXX) -o $@ $(LIBRARY_BUILDFLAGS) $(LIBOBJS)
+
+$(UT_EXE_DEST): $(OBJDESTLIB) $(OBJS_UNITTESTS) $(filter-out $(wildcard $(LIBUNITTESTOBJDIR)), $(LIBUNITTESTOBJDIR))
+	$(CXX) -o $@ $(OBJS_UNITTESTS) $(LD_SHLIB_FLAGS)
+
+# Output directories
+
+$(OUTDIR):
+	mkdir -p $@
+
+$(LIBOBJDIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
+	mkdir -p $@
+
+$(LIBUNITTESTOBJDIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
+	mkdir -p $@
+
+$(OUTPUT_GOOGLE_TEST_DIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
+	mkdir -p $@
+
+$(OUTPUT_GOOGLE_MOCK_DIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
+	mkdir -p $@
+
+#
+# Implicit rules
+#
+
+$(LIBOBJS): $(LIBOBJDIR)/%.o: $(SRC_DIR)/%.cpp $(filter-out $(wildcard $(LIBOBJDIR)), $(LIBOBJDIR))
+	$(CXX) $(UTILS_CXXFLAGS) $(LIBRARY_CXXFLAGS) -o $@ $<
+
+$(OBJS_TESTS): $(LIBUNITTESTOBJDIR)/%.o: $(UNITTESTS_DIR)/%.cpp $(filter-out $(wildcard $(LIBUNITTESTOBJDIR)), $(LIBUNITTESTOBJDIR))
+	$(CXX) $(UTILS_CXXFLAGS) $(INCLUDE_UNITTESTS) -o $@ $<
+
+$(OBJS_GOOGLE_TEST): $(OUTPUT_GOOGLE_TEST_DIR)/%.o: $(GOOGLE_TEST_DIR)/%.cc $(filter-out $(wildcard $(OUTPUT_GOOGLE_TEST_DIR)), $(OUTPUT_GOOGLE_TEST_DIR))
+	$(CXX) $(UTILS_CXXFLAGS) $(INCLUDE_UNITTESTS) -o $@ $<
+
+$(OBJS_GOOGLE_MOCK): $(OUTPUT_GOOGLE_MOCK_DIR)/%.o: $(GOOGLE_MOCK_DIR)/%.cc $(filter-out $(wildcard $(OUTPUT_GOOGLE_MOCK_DIR)), $(OUTPUT_GOOGLE_MOCK_DIR))
+	$(CXX) $(UTILS_CXXFLAGS) $(INCLUDE_UNITTESTS) -o $@ $<
+
+#
+# Clean rules
+#
+
+.phony: clean
 
 clean:
-	rm -f libututils.so unit_tests
+	rm -rf $(OUTDIR)
+
+cleanall:
+	rm -rf $(OUTDIR_PREFIX)*
