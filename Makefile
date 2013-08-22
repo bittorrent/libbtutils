@@ -1,5 +1,3 @@
-# Makefile for utorrent utils
-
 #
 # Host detection
 #

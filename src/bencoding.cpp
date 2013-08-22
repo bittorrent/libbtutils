@@ -107,6 +107,15 @@ BencEntity::BencEntity(const BencEntity& be)
 	MoveFrom( const_cast<BencEntity&>( be ) );
 }
 
+BencEntity& BencEntity::operator=(const BencEntity& be) {
+	if(this != &be) {
+		FreeMembers();
+		ZeroOut();
+		MoveFrom( const_cast<BencEntity&>(be));
+	}
+	return *this;
+}
+
 void BencEntity::CopyFrom(const BencEntity& b)
 {
 	switch (b.bencType) {
@@ -988,8 +997,6 @@ void BencodedList::Delete(size_t i)
 {
 	assert(bencType == BENC_LIST);
 	assert(list);
-	BencEntity *d = Get(i);
-	d->~BencEntity();
 	list->erase(list->begin() + i);
 }
 

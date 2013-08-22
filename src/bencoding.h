@@ -182,9 +182,9 @@ public:
 		ZeroOut();
 	}
 	BencEntity(const BencEntity&);
+	BencEntity& operator=(const BencEntity&);
 	void MoveFrom(BencEntity&);
-//	BencEntity &ListGet(size_t i) const;
-//
+
 	void Print(int indent = 0);
 	void CopyFrom(const BencEntity& b);
 	void ZeroOut();

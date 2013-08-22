@@ -424,3 +424,15 @@ TEST(Bencoding, Copy) {
 
 	free((void*)tmp);
 }
+
+TEST(Bencoding, DeleteStringsFromList) {
+	BencodedList list;
+	static const unsigned char sample_data[] = "l1:a1:b1:c1:de";
+	static const size_t sample_len = sizeof(sample_data) - 1;
+	bool ok = (BencEntity::Parse(sample_data, list, sample_data + sample_len)) ? true : false;
+	ASSERT_TRUE(ok);
+	while(list.GetCount() > 0) {
+		EXPECT_EQ(BENC_STR, list.Get(0)->GetType());
+		list.Delete(0);
+	}
+}
