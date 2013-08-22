@@ -1,0 +1,10 @@
+
+SOURCES = RefBase bencoding bencparser get_microseconds interlock snprintf
+udp_utils DecodeEncodedString bitfield bloom_filter inet_ntop sockaddr ;
+
+lib ut_utils : src/$(SOURCES).cpp
+	: <include>src
+	: <link>static
+	: <include>src
+	;
+
