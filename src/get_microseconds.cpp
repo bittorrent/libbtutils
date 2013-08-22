@@ -30,21 +30,6 @@ uint64 get_microseconds()
 	// gettimeofday by over 20,000us or 20ms.
 	return ((tick - start_tick) * sTimebaseInfo.numer / sTimebaseInfo.denom) / 1000;
 }
-#elif (_POSIX_TIMERS && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0) && defined(CLOCK_MONOTONIC)) || defined(ANDROID)
-
-#include <time.h>
-
-uint64 get_microseconds()
-{
-	timespec t;
-	int status = clock_gettime(CLOCK_MONOTONIC, &t);
-#ifdef _DEBUG
-	if (status) DbgLogf("clock_gettime returned %d - error %d %s", status, errno, ::strerror(errno));
-#endif
-	assert(status == 0);
-	uint64 tick = uint64(t.tv_sec) * 1000000 + uint64(t.tv_nsec) / 1000;
-	return tick;
-}
 #elif defined WIN32
 
 #include <windows.h>
@@ -104,10 +89,54 @@ uint64 get_microseconds()
 	return ret;
 }
 
+#elif defined POSIX
+// Non-OSX POSIX
+#include <unistd.h>	// For the POSIX clock definitions (and, unfortunately, a lot else)
+#include <time.h>	// For clock_gettime(), CLOCK_MONOTONIC
 
+#if (_POSIX_TIMERS && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0) && defined(CLOCK_MONOTONIC)) || defined(ANDROID)
+#include <errno.h>	// for errno
+#include <string.h>	// for strerror()
+
+uint64 get_microseconds()
+{
+	timespec t;
+	int status = clock_gettime(CLOCK_MONOTONIC, &t);
+#ifdef _DEBUG
+	// TODO:  we need logging in utils
+	//if (status)
+		//DbgLogf("clock_gettime returned %d - error %d %s", status, errno, ::strerror(errno));
+#endif
+	assert(status == 0);
+	uint64 tick = uint64(t.tv_sec) * 1000000 + uint64(t.tv_nsec) / 1000;
+	return tick;
+}
 #else
-#warning "Using non-monotonic function gettimeofday() in get_microseconds()"
 // Fallback
+
+// Some diagnostics, since we'd prefer that platforms provide a monotonic clock
+#if _POSIX_TIMERS
+#pragma message ("_POSIX_TIMERS defined")
+#else
+#pragma message ("_POSIX_TIMERS not defined or zero")
+#endif
+#if defined(_POSIX_MONOTONIC_CLOCK)
+#pragma message ("_POSIX_MONOTONIC_CLOCK defined")
+#else
+#pragma message ("_POSIX_MONOTONIC_CLOCK not defined")
+#endif
+#if _POSIX_MONOTONIC_CLOCK >= 0
+#pragma message ("_POSIX_MONOTONIC_CLOCK >= 0")
+#else
+#pragma message ("_POSIX_MONOTONIC_CLOCK not >= 0 or not defined")
+#endif
+#if defined(CLOCK_MONOTONIC)
+#pragma message ("CLOCK_MONOTONIC defined")
+#else
+#pragma message ("CLOCK_MONOTONIC not defined")
+#endif // defined(CLOCK_MONOTONIC)
+
+#pragma message ("Using non-monotonic function gettimeofday() in get_microseconds()")
 
 #include <sys/time.h>
 
@@ -124,7 +153,11 @@ uint64 get_microseconds()
 
 	return uint64(t.tv_sec - start_time) * 1000000 + (t.tv_usec);
 }
-#endif
+#endif // Big ol' expression about _POSIX_MONOTONIC_CLOCK etc.
+
+#else
+#error "Can't handle this platform"
+#endif // POSIX
 
 uint64 get_milliseconds()
 {
