@@ -1,6 +1,7 @@
 #include "DecodeEncodedString.h"
 #include <string.h> // for strlen
 #include <assert.h>
+#include <stdlib.h> // for malloc, realloc
 
 int DecodeUtf8(cstr utf8, size_t in_len, wchar_t *out_ptr, size_t out_len, bool *invalid, size_t *consumed)
 {
