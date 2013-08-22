@@ -94,7 +94,7 @@ public:
 		this->Append(p, count-1);
 		this->Append((const T*)"\0", 1); }
 	void Resize(size_t size) { this->_arr.resize(size); }
-	void SetArray(T *p, size_t len) { assert(len%sizeof(p)==0); this->_arr.assign(p, p + len); }
+	void SetArray(T *p, size_t len) { assert(len%sizeof(T)==0); this->_arr.assign(p, p + len / sizeof(T)); }
 	const char* GetRaw() const { return (const char*)&this->_arr[0];}
 };
 
