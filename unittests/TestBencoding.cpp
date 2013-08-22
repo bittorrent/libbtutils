@@ -8,16 +8,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#ifdef ANDROID
-#include "../util.h"
-#else
-#include "util.h"
-#endif // ANDROID
 #include "bencoding.h"
-//#include "btstr.h"
 #include "sockaddr.h"
-//#include "strfmt.h"
-//#include "sha.h"
 #include "ut_bencoding_data.h"
 
 #define utlogf(fmt,...) string_fmt(fmt ,##__VA_ARGS__)
