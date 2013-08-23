@@ -160,6 +160,7 @@ LIBUNITTESTOBJDIR = $(OUTDIR)/$(UNITTESTS_DIR)
 SRCS_TESTS = $(addprefix $(UNITTESTS_DIR)/, \
 	TestBencEntity.cpp \
 	TestBencoding.cpp \
+	TestBitField.cpp \
 	TestBloomFilter.cpp \
 	TestGetMicroseconds.cpp \
 	TestSha1Hash.cpp \
