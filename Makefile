@@ -60,6 +60,12 @@ ifeq ($(OPTIMIZE),)
 $(error "Can't initialize configuration (OPTIMIZE)")
 endif
 
+#
+# Compile and linkage setup
+#
+
+# Compile flags
+
 # -c - compile/assemble source files, but do not link
 # -MD - output dependencies to a file located with the object file
 # -g - provide debugging information in OS's native format (for gdb)
@@ -77,7 +83,7 @@ UTILS_COMMON_FLAGS = \
 	-O$(OPTIMIZE)
 
 # -std - specify the language standard
-UTILS_CXX_FLAGS = \
+UTILS_CXXONLY_FLAGS = \
 	-std=c++11
 
 ifeq ($(CHARSET),$(CHARSET_UNICODE))
@@ -91,6 +97,8 @@ endif
 OUTDIR_PREFIX = obj-
 OUTDIR = $(OUTDIR_PREFIX)$(CONFIG)-$(CHARSET)-$(OPTIMIZE)
 
+# Link flags
+
 LD_SYSTEM_SHLIBFLAGS = -lpthread -lm
 
 ifeq ($(TARGET),$(HOST_LINUX))
@@ -100,8 +108,9 @@ endif
 
 # Include all added compile flags in CFLAGS and CXXFLAGS
 UTILS_CFLAGS = $(UTILS_COMMON_FLAGS) $(PLATFORM_FLAGS)
-UTILS_CXXFLAGS = $(UTILS_COMMON_FLAGS) $(PLATFORM_FLAGS) $(UTILS_CXX_FLAGS)
-# Android doesn't like CFLAGS modified in this file
+UTILS_CXXFLAGS = $(UTILS_COMMON_FLAGS) $(PLATFORM_FLAGS) $(UTILS_CXXONLY_FLAGS)
+# Android doesn't like CFLAGS/CXXFLAGS modified in this file.
+# It may be useful to avoid setting LOCAL_ flags here - see later.
 ifeq ($(TARGET),$(TARGET_ANDROID))
 LOCAL_CFLAGS += $(UTILS_CFLAGS)
 LOCAL_CXXFLAGS += $(UTILS_CXXFLAGS)
@@ -190,6 +199,8 @@ LD_SHLIB_FLAGS = $(LD_COMPONENT_SHLIBFLAGS) $(LD_SYSTEM_SHLIBFLAGS)
 # Rules
 #
 
+# Build/test rules
+
 .phony: all test
 
 all: $(OUTDIR)/$(LIBNAME)
@@ -203,7 +214,12 @@ $(OBJDESTLIB): $(LIBOBJS)
 $(UT_EXE_DEST): $(OBJDESTLIB) $(OBJS_UNITTESTS) $(filter-out $(wildcard $(LIBUNITTESTOBJDIR)), $(LIBUNITTESTOBJDIR))
 	$(CXX) -o $@ $(OBJS_UNITTESTS) $(LD_SHLIB_FLAGS)
 
-# Output directories
+# Output directory creation rules
+
+# $(filter-out $(wildcard $(directorymacro)), $(directorymacro)) establishes
+# a dependency on a directory that doesn't already exist, so that if the
+# directory exists, the associated mkdir command won't be executed,
+# which would prevent a clean no-op when nothing really needs doing.
 
 $(OUTDIR):
 	mkdir -p $@
@@ -220,9 +236,7 @@ $(OUTPUT_GOOGLE_TEST_DIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
 $(OUTPUT_GOOGLE_MOCK_DIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
 	mkdir -p $@
 
-#
 # Implicit rules
-#
 
 $(LIBOBJS): $(LIBOBJDIR)/%.o: $(SRC_DIR)/%.cpp $(filter-out $(wildcard $(LIBOBJDIR)), $(LIBOBJDIR))
 	$(CXX) $(UTILS_CXXFLAGS) $(LIBRARY_CXXFLAGS) -o $@ $<
@@ -236,11 +250,9 @@ $(OBJS_GOOGLE_TEST): $(OUTPUT_GOOGLE_TEST_DIR)/%.o: $(GOOGLE_TEST_DIR)/%.cc $(fi
 $(OBJS_GOOGLE_MOCK): $(OUTPUT_GOOGLE_MOCK_DIR)/%.o: $(GOOGLE_MOCK_DIR)/%.cc $(filter-out $(wildcard $(OUTPUT_GOOGLE_MOCK_DIR)), $(OUTPUT_GOOGLE_MOCK_DIR))
 	$(CXX) $(UTILS_CXXFLAGS) $(INCLUDE_UNITTESTS) -o $@ $<
 
-#
 # Clean rules
-#
 
-.phony: clean
+.phony: clean cleanall
 
 clean:
 	rm -rf $(OUTDIR)
