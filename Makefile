@@ -160,6 +160,7 @@ LIBUNITTESTOBJDIR = $(OUTDIR)/$(UNITTESTS_DIR)
 SRCS_TESTS = $(addprefix $(UNITTESTS_DIR)/, \
 	TestBencEntity.cpp \
 	TestBencoding.cpp \
+	TestSha1Hash.cpp \
 )
 OBJS_TESTS = $(patsubst %.cpp, $(OUTDIR)/%.o, $(SRCS_TESTS))
 UNITTESTS_EXE_NAME = unit_tests
