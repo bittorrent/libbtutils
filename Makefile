@@ -163,6 +163,7 @@ SRCS_TESTS = $(addprefix $(UNITTESTS_DIR)/, \
 	TestBloomFilter.cpp \
 	TestGetMicroseconds.cpp \
 	TestSha1Hash.cpp \
+	TestSockAddr.cpp \
 )
 OBJS_TESTS = $(patsubst %.cpp, $(OUTDIR)/%.o, $(SRCS_TESTS))
 UNITTESTS_EXE_NAME = unit_tests
