@@ -89,7 +89,7 @@ public:
 	}
 	size_t GetCount() const {return this->_arr.size();}
 	void Clear() {this->_arr.clear();}
-	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count*sizeof(p)); }
+	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count*sizeof(T)); }
 	void AppendTerminated(const T *p, int count) {
 		this->Append(p, count-1);
 		this->Append((const T*)"\0", 1); }
