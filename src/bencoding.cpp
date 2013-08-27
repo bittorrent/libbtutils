@@ -364,7 +364,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
 		//Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
-		Emit(buf, snprintf(buf, sizeof(buf), "%lu:", me->GetSize()));
+		Emit(buf, snprintf(buf, sizeof(buf), "%llu:", (uint64) me->GetSize()));
 		Emit(me->GetRaw(), me->GetSize());
 		break;
 	}
@@ -385,7 +385,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			Emit(buf, snprintf(buf, sizeof(buf), "%lu:", j));
+			Emit(buf, snprintf(buf, sizeof(buf), "%llu:", (uint64) j));
 			Emit(&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
