@@ -230,8 +230,11 @@ $(UT_EXE_DEST): $(OBJDESTUNSTRIPPEDLIB) $(OBJS_UNITTESTS) $(filter-out $(wildcar
 $(OUTDIR):
 	mkdir -p $@
 
+ifneq ($(UNSTRIPPEDLIBDESTDIR),$(LIBOBJDIR))
 $(UNSTRIPPEDLIBDESTDIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
 	mkdir -p $@
+
+endif
 
 $(LIBOBJDIR): $(filter-out $(wildcard $(OUTDIR)), $(OUTDIR))
 	mkdir -p $@
