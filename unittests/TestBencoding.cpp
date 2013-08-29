@@ -33,7 +33,7 @@ void Parse(const unsigned char *p, uint len, BencodedDict &base)
 
 	// parse the torrent file
 //	EXPECT_TRUE(base.GetType() == BENC_VOID);
-	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info", &rgn));
+	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info\0", &rgn));
 	ASSERT_EQ(BENC_DICT, base.GetType());
 
 	EXPECT_GE(rgn.first, p);
