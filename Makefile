@@ -64,6 +64,13 @@ endif
 # Compile and linkage setup
 #
 
+# Show system on which we build, gcc version and machine name. Will be useful when
+# looking at log output of failed compilation.
+$(info Building on $(shell uname -a))
+$(info gcc version: $(shell $(CC) -dumpversion))
+$(info gcc machine: $(shell $(CC) -dumpmachine))
+$(info )
+
 # Compile flags
 
 # -c - compile/assemble source files, but do not link
