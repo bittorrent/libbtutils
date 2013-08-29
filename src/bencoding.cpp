@@ -790,7 +790,6 @@ const unsigned char *BencEntity::Parse(const unsigned char *p, BencEntity &ent, 
 
 bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRegime)
 {
-	fprintf(stderr, "Parsing bencoded entity.\n");
 	bool bReturn = false;
 	ent.FreeMembers();
 	const unsigned char *pEnt;
