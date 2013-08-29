@@ -4,7 +4,7 @@
 
 const char *inet_ntop(int af, const void *src, char *dest, size_t length);
 
-#if ((!defined NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN))
+#if defined(_WIN32_WINNT) && _WIN32_WINNT <= 0x501
 int inet_pton(int af, const char* src, void* dest);
 #endif
 
