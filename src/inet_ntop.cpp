@@ -51,6 +51,8 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 	return result == SOCKET_ERROR ? NULL : dest;
 }
 
+#if ((!defined NTDDI_VERSION) || (NTDDI_VERSION < NTDDI_LONGHORN))
+
 int inet_pton(int af, const char* src, void* dest)
 {
 	if (af != AF_INET && af != AF_INET6)
@@ -87,5 +89,7 @@ int inet_pton(int af, const char* src, void* dest)
 
 	return result == SOCKET_ERROR ? -1 : 1;
 }
+#endif
+
 #endif // WIN32
 
