@@ -85,7 +85,7 @@ inline void *InterlockedCompareExchangePointer(void **ptr, void *newvalue, void 
 	return old;
 }
 
-#elif defined POSIX
+#elif defined __GNUC__ || defined POSIX
 
 #include <ext/atomicity.h>
 
