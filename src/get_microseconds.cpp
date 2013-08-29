@@ -89,7 +89,8 @@ uint64 get_microseconds()
 	return ret;
 }
 
-#elif defined POSIX
+#else
+
 // Non-OSX POSIX
 #include <unistd.h>	// For the POSIX clock definitions (and, unfortunately, a lot else)
 #include <time.h>	// For clock_gettime(), CLOCK_MONOTONIC
@@ -155,9 +156,7 @@ uint64 get_microseconds()
 }
 #endif // Big ol' expression about _POSIX_MONOTONIC_CLOCK etc.
 
-#else
-#error "Can't handle this platform"
-#endif // POSIX
+#endif
 
 uint64 get_milliseconds()
 {
