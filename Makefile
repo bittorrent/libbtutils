@@ -86,7 +86,6 @@ UTILS_COMMON_FLAGS = \
 	-g \
 	-pipe \
 	-Wall \
-	-Werror \
 	-O$(OPTIMIZE)
 
 # -std - specify the language standard

@@ -271,11 +271,11 @@ void BencEntity::Print(bool oneline, int indent)
 
 	switch(bencType) {
 	case BENC_INT:
-		printf("%Ld", num);
+		printf("%" PRId64, num);
 		break;
 
 	case BENC_BIGINT:
-		printf("%Ld", num);
+		printf("%" PRId64, num);
 		break;
 
 	case BENC_STR: {
@@ -352,19 +352,16 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 
 	switch(e->bencType) {
 	case BENC_INT:
-		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-		Emit(buf, snprintf(buf, sizeof(buf), "i%llde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64"e", e->num));
 		break;
 
 	case BENC_BIGINT:
-		//Emit(buf, btsnprintf(buf, lenof(buf), "i%Lde", e->num));
-		Emit(buf, snprintf(buf, sizeof(buf), "i%llde", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64"e", e->num));
 		break;
 
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
-		//Emit(buf, btsnprintf(buf, lenof(buf), "%d:", me->GetSize()));
-		Emit(buf, snprintf(buf, sizeof(buf), "%llu:", (uint64) me->GetSize()));
+		Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
 		Emit(me->GetRaw(), me->GetSize());
 		break;
 	}
@@ -385,7 +382,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			Emit(buf, snprintf(buf, sizeof(buf), "%llu:", (uint64) j));
+			Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
 			Emit(&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
