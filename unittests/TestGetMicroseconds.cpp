@@ -21,9 +21,6 @@ TEST(GetMicrosecondsClassTest, TestMonotonicClock)
 	unsigned long long first_value = 0;
 	unsigned long long value = get_microseconds();
 
-	// Ensure clock function not returning zero
-	EXPECT_TRUE(value > 0)
-		<< "Initial value of microsecond clock not greater than zero";
 	first_value = value;
 	for (unsigned long long tick_index = 0; tick_index < REPEAT_COUNT; ++tick_index) {
 		value = get_microseconds();
