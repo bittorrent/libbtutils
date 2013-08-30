@@ -1,6 +1,15 @@
 #ifndef __ENDIAN_UTILS_H__
 #define __ENDIAN_UTILS_H__
 
+#include "target.h" // for BT_LITTLE_ENDIAN
+// Including target.h here prevents a bug where there are
+// two compilations where BT_LITTLE_ENDIAN have different values,
+// because endian_utils.h is included but target.h was not included
+// in the compile of a source file,
+// and the linker selects the wrong set of endian_utils, thus
+// resulting in incorrect results.
+// To avoid this, this implementation probably shouldn't be inlined
+// but should be in an implementation file.
 #include <string.h> // for memcpy
 
 inline uint64 ReadBE64(const void *p)

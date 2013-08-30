@@ -2,8 +2,12 @@
 SOURCES = RefBase bencoding bencparser get_microseconds interlock snprintf
 udp_utils DecodeEncodedString bitfield bloom_filter inet_ntop sockaddr ;
 
+lib rt : : <name>rt ;
+
 lib ut_utils : src/$(SOURCES).cpp
-	: <include>src
+	: # requirements
+	<include>src
+	<target-os>linux:<library>rt # required for clock_gettime
 	: <link>static
 	: <include>src
 	;

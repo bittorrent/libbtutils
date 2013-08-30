@@ -33,7 +33,7 @@ void Parse(const unsigned char *p, uint len, BencodedDict &base)
 
 	// parse the torrent file
 //	EXPECT_TRUE(base.GetType() == BENC_VOID);
-	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info", &rgn));
+	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info\0", &rgn));
 	ASSERT_EQ(BENC_DICT, base.GetType());
 
 	EXPECT_GE(rgn.first, p);
@@ -418,7 +418,9 @@ TEST(Bencoding, Copy) {
 	s2->CopyFrom(s);
 	EXPECT_EQ(BENC_STR, s2->GetType());
 	size_t len;
-	EXPECT_EQ(0, strcmp("foobar", ((BencEntityMem *) s2)->GetString(&len)));
+	const char* copied = ((BencEntityMem *) s2)->GetString(&len);
+	EXPECT_EQ(static_cast<size_t>(7), len); // 7 due to terminating null
+	EXPECT_EQ(0, strncmp("foobar", copied, len));
 	delete s2;
 	s2 = NULL;
 

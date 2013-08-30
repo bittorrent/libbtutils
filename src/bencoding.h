@@ -67,7 +67,7 @@ public:
 		this->_arr = b._arr;
 	}
 	BencArray( T *p, int count ) {
-		this->_arr.assign(p, p + count * sizeof(T));
+		this->_arr.assign(p, p + count);
 	}
 	bool operator<(const BencArray<T>& arg) const {
 		return (this->_arr<arg._arr)?true:false;
@@ -89,10 +89,13 @@ public:
 	}
 	size_t GetCount() const {return this->_arr.size();}
 	void Clear() {this->_arr.clear();}
-	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count*sizeof(p)); }
+	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count); }
 	void AppendTerminated(const T *p, int count) {
-		this->Append(p, count-1);
-		this->Append((const T*)"\0", 1); }
+		this->Append(p, count);
+		// this will intentionally fail to compile with T's lacking an assignment operator
+		// it is intended to be used primarily with chars and wchars
+		T empty = 0;
+		this->Append(&empty, 1); }
 	void Resize(size_t size) { this->_arr.resize(size); }
 	void SetArray(T *p, size_t len) { assert(len%sizeof(T)==0); this->_arr.assign(p, p + len / sizeof(T)); }
 	const char* GetRaw() const { return (const char*)&this->_arr[0];}
