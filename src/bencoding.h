@@ -185,7 +185,7 @@ public:
 	BencEntity& operator=(const BencEntity&);
 	void MoveFrom(BencEntity&);
 
-	void Print(int indent = 0);
+	void Print(bool oneline = false, int indent = 0);
 	void CopyFrom(const BencEntity& b);
 	void ZeroOut();
 

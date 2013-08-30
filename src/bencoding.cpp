@@ -263,7 +263,7 @@ static char* NeedPrintAsHex(unsigned char *mem, int len)
 	return NULL;
 }
 
-void BencEntity::Print(int indent)
+void BencEntity::Print(bool oneline, int indent)
 {
 
 	unsigned int i;
@@ -298,7 +298,7 @@ void BencEntity::Print(int indent)
 		printf("[");
 		for(i=0; i!=((BencodedList*)this)->GetCount(); i++) {
 			if (i != 0) printf(", ");
-			((BencodedList *) this )->Get(i)->Print(indent);
+			((BencodedList *) this )->Get(i)->Print(oneline, indent);
 		}
 		printf("]");
 		break;
@@ -309,7 +309,7 @@ void BencEntity::Print(int indent)
 		for(BencodedEntityMap::iterator it = dict->begin();
 			it != dict->end(); it++, i++ ) {
 			if (i != 0) printf(", ");
-			printf("\n");
+			if (!oneline) printf("\n");
 			for(j=0; j!=indent; j++) printf("	");
 			unsigned int len  = it->first.GetCount();
 			char* s = (char*)malloc(sizeof(char)*(len+1));
@@ -317,7 +317,7 @@ void BencEntity::Print(int indent)
 			s[len] = 0;
 			printf("%s = ", s);
 			free(s);
-			it->second.Print(indent+1);
+			it->second.Print(oneline, indent+1);
 		}
 		printf("}");
 		break;
