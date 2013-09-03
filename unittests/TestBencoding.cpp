@@ -76,7 +76,8 @@ TEST(Bencoding, DHT) {
 	};
 
 	BencEntity dict;
-	bool ok = (BencEntity::ParseInPlace(msg, dict, msg + sizeof(msg))) ? true : false;
+	std::pair<unsigned char*, unsigned char*> region;
+	bool ok = (BencEntity::ParseInPlace(msg, dict, msg + sizeof(msg), "a\0v\0", &region)) ? true : false;
 	EXPECT_TRUE(ok);
 	ASSERT_EQ(BENC_DICT, dict.GetType());
 
