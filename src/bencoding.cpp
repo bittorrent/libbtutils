@@ -595,7 +595,7 @@ bool BencEntity::SetParsed( IBencParser::PARSE_T parseResult, const unsigned cha
 			break;
 		}
 		case IBencParser::STRING : {
-			BencEntityMem beM(regime->NewMem((unsigned char *) pElement, (int)size));
+			BencEntityMem beM(regime->NewStr((unsigned char *) pElement, (int)size));
 			MoveFrom(beM);
 			break;
 		}
@@ -739,7 +739,8 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 
 const unsigned char *BencEntity::ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend)
 {
-	InplaceMemRegime regime;
+	// InplaceMemRegime regime;
+	AllocateMemRegime regime; // in place not supported yet
 	BencParser parser( const_cast<unsigned char *>(p), pend );
 	if(! BencEntity::DoParse(ent, &parser, &regime))
 		return NULL;
@@ -753,7 +754,8 @@ instance is returned in the region regardless of the key's level in the string.
 const unsigned char* BencEntity::ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char* key, std::pair<unsigned char*, unsigned char*> *rgn)
 {
 	assert( rgn );
-	InplaceMemRegime regime;
+	// InplaceMemRegime regime;
+	AllocateMemRegime regime; // in place not supported yet
 	BencParserElement parser(const_cast<unsigned char *>(p), key, pend);
 	if( !BencEntity::DoParse(ent, &parser, &regime) )
 		return NULL;

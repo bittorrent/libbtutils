@@ -142,6 +142,7 @@ public:
 		virtual ~AllocRegime(){};	// required for GCC
 		virtual BencKey* NewKey( unsigned char *p, int count ) = 0;
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) = 0;
+		virtual BencodedMem* NewStr( unsigned char *p, int count ) = 0;
 		virtual bool LazyInt(void){ return false; }
 	};
 
@@ -154,6 +155,13 @@ public:
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) {
 			return new BencodedMem( p, count ); 	// allocate
 		}
+		virtual BencodedMem* NewStr( unsigned char *p, int count ) {
+			// null terminate the string
+			BencodedMem* ret = new BencodedMem( p, count + 1); // allocate
+			(*ret)[ret->GetCount()-1] = 0;
+			ret->Resize(count);
+			return ret;
+		}
 	};
 
 	class InplaceMemRegime : virtual public AllocRegime {
@@ -163,6 +171,9 @@ public:
 			return new BencKey(p, count);
 		}
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) {
+			return new BencodedMem(p, count); 	// allocate
+		}
+		virtual BencodedMem* NewStr( unsigned char *p, int count ) {
 			return new BencodedMem(p, count); 	// allocate
 		}
 		virtual bool LazyInt(void){ return AllocRegime::LazyInt(); }
