@@ -21,6 +21,19 @@ struct sha1_hash {
 		return *this;
 	}
 
+	bool is_all_zero() const
+	{
+		for (int i = 0; i < sizeof(value); ++i)
+			if (value[i] != 0) return false;
+		return true;
+	}
+
+	void clear()
+	{
+		for (int i = 0; i < sizeof(value); ++i)
+			value[i] = 0;
+	}
+
 	sha1_hash &operator=(const byte *input)
 	{
 		if (input)
