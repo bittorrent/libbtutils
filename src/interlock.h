@@ -47,11 +47,9 @@ inline LONG InterlockedAdd(LONG * ptr, LONG value) {
 	return OSAtomicAdd32Barrier((int32_t)value, (int32_t*)ptr);
 }
 
-#ifdef _LP64
-inline long long int InterlockedAdd(long long int * ptr, long long int value) {
+inline long long int InterlockedAdd64(long long int * ptr, long long int value) {
 	return OSAtomicAdd64Barrier(value, ptr);
 }
-#endif
 
 inline LONG InterlockedIncrement(LONG * ptr) {
 	return OSAtomicIncrement32Barrier((int32_t*)ptr);
@@ -118,40 +116,38 @@ inline LONG InterlockedAdd(LONG* ptr, LONG value) {
 	return __sync_add_and_fetch(ptr, value);
 }
 
-#ifdef _LP64
-inline long long int InterlockedAdd(long long int * ptr, long long int value) {
+inline long long int InterlockedAdd64(long long int * ptr, long long int value) {
 	return __sync_add_and_fetch(ptr, value);
 }
-#endif // _LP64
 
 inline LONG InterlockedIncrement(LONG* ptr) {
 	return __sync_add_and_fetch(ptr, 1);
 }
 
-#ifdef _LP64
-inline long long int InterlockedIncrement(long long int * ptr) {
+inline long long int InterlockedIncrement64(long long int * ptr) {
 	return __sync_add_and_fetch(ptr, 1);
 }
-#endif // _LP64
 
 inline LONG InterlockedDecrement(LONG* ptr) {
 	return __sync_sub_and_fetch(ptr, 1);
 }
 
-#ifdef _LP64
-inline long long int InterlockedDecrement(long long int * ptr) {
+inline long long int InterlockedDecrement64(long long int * ptr) {
 	return __sync_sub_and_fetch(ptr, 1);
 }
-#endif // _LP64
 
 inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	return __sync_lock_test_and_set(ptr, value);
 }
 
-#ifdef _LP64
-inline LONG InterlockedExchange(long long int *ptr, long long int value) {
+inline LONG InterlockedExchange64(long long int *ptr, long long int value) {
 	return __sync_lock_test_and_set(ptr, value);
 }
+
+#ifdef _LP64
+#define InterlockedAddPointer InterlockedAdd64
+#else
+#define InterlockedAddPointer InterlockedAdd
 #endif // _LP64
 
 inline void *InterlockedExchangePointer(void **ptr, void *value) {
@@ -179,8 +175,7 @@ inline LONG InterlockedAdd(LONG* ptr, LONG value) {
 	return rval;
 }
 
-#ifdef _LP64
-inline long long int InterlockedAdd(long long int * ptr, long long int value) {
+inline long long int InterlockedAdd64(long long int * ptr, long long int value) {
 	long long int rval;
 	pthread_mutex_lock(&g_interlocked_mutex);
 	*ptr += value;
@@ -188,7 +183,6 @@ inline long long int InterlockedAdd(long long int * ptr, long long int value) {
 	pthread_mutex_unlock(&g_interlocked_mutex);
 	return rval;
 }
-#endif // _LP64
 
 inline LONG InterlockedIncrement(LONG* ptr) {
 	LONG rval;
@@ -199,18 +193,15 @@ inline LONG InterlockedIncrement(LONG* ptr) {
 	return rval;
 }
 
-#ifdef _LP64
-inline long long int InterlockedIncrement(long long int * ptr) {
+inline long long int InterlockedIncrement64(long long int * ptr) {
 	return __sync_add_and_fetch(ptr, 1);
 }
-#endif // _LP64
 
 inline LONG InterlockedDecrement(LONG* ptr) {
 	return __sync_sub_and_fetch(ptr, 1);
 }
 
-#ifdef _LP64
-inline long long int InterlockedDecrement(long long int * ptr) {
+inline long long int InterlockedDecrement64(long long int * ptr) {
 	long long int rval;
 	pthread_mutex_lock(&g_interlocked_mutex);
 	*ptr -= 1;
@@ -218,7 +209,6 @@ inline long long int InterlockedDecrement(long long int * ptr) {
 	pthread_mutex_unlock(&g_interlocked_mutex);
 	return rval;
 }
-#endif // _LP64
 
 inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	LONG res;
@@ -229,8 +219,7 @@ inline LONG InterlockedExchange(LONG *ptr, LONG value) {
 	return res;
 }
 
-#ifdef _LP64
-inline LONG InterlockedExchange(long long int *ptr, long long int value) {
+inline LONG InterlockedExchange64(long long int *ptr, long long int value) {
 	long long int res;
 	pthread_mutex_lock(&g_interlocked_mutex);
 	res = *ptr;
@@ -238,7 +227,6 @@ inline LONG InterlockedExchange(long long int *ptr, long long int value) {
 	pthread_mutex_unlock(&g_interlocked_mutex);
 	return res;
 }
-#endif // _LP64
 
 inline void *InterlockedExchangePointer(void **ptr, void *value) {
 	void * res;
