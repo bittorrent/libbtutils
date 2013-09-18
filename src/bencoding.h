@@ -95,7 +95,12 @@ public:
 		// this will intentionally fail to compile with T's lacking an assignment operator
 		// it is intended to be used primarily with chars and wchars
 		T empty = 0;
-		this->Append(&empty, 1); }
+		this->Append(&empty, 1);
+		// the null terminator should not be considered part
+		// of the string. It should not be saved when encoding
+		// this into a bencoded buffer.
+		this->Resize(count);
+	}
 	void Resize(size_t size) { this->_arr.resize(size); }
 	void SetArray(T *p, size_t len) { assert(len%sizeof(T)==0); this->_arr.assign(p, p + len / sizeof(T)); }
 	const char* GetRaw() const { return (const char*)&this->_arr[0];}
