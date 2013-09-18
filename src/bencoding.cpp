@@ -59,7 +59,9 @@ char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return str_to_utf8(input
 
 BencEntityMem::BencEntityMem(ctstr memArg, size_t len): BencEntity( BENC_STR ) {
 	assert(memArg);
-	std::string utf8(EncodeUtf8(memArg));
+	char* utf8_encoded = EncodeUtf8(memArg);
+	std::string utf8(utf8_encoded);
+	free(utf8_encoded);
 	if(len == static_cast<size_t>(~0))
 		len = utf8.size();
 	mem = new BencodedMem( (unsigned char *) utf8.c_str(), static_cast<int>(len) );
@@ -233,7 +235,8 @@ BencEntity *BencodedList::Get(size_t i) const
 {
 	assert (bencType == BENC_LIST || bencType == BENC_VLIST);
 	if (bencType == BENC_LIST) {
-		return &(*list)[i];
+		assert(i < (list->size()));
+		return (i < (list->size())) ? &(*list)[i] : NULL;
 	}
 	else {
 		if (vlist->focus != i) {
