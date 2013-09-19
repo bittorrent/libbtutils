@@ -8,6 +8,7 @@ lib ut_utils : src/$(SOURCES).cpp
 	: # requirements
 	<include>src
 	<target-os>linux:<library>rt # required for clock_gettime
+	<target-os>windows:<define>WIN32
 	: <link>static
 	: <include>src
 	;

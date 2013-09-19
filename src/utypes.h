@@ -4,7 +4,10 @@
 #include <ctype.h>
 
 #if defined WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
+
 #include <tchar.h> // for _T
 #endif
 
