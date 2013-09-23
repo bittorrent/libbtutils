@@ -23,14 +23,14 @@ struct sha1_hash {
 
 	bool is_all_zero() const
 	{
-		for (int i = 0; i < sizeof(value); ++i)
+		for (unsigned int i = 0; i < sizeof(value); ++i)
 			if (value[i] != 0) return false;
 		return true;
 	}
 
 	void clear()
 	{
-		for (int i = 0; i < sizeof(value); ++i)
+		for (unsigned int i = 0; i < sizeof(value); ++i)
 			value[i] = 0;
 	}
 

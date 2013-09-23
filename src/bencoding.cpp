@@ -982,7 +982,7 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 t_string BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
-	return (pMem?pMem->GetStringT(encoding, length):NULL);
+	return (pMem?pMem->GetStringT(encoding, length):_T(""));
 }
 
 // This is one of the weird places.  The members of e
