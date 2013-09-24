@@ -947,7 +947,7 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 
 
 t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
-	if (!(bencType == BENC_STR)) return NULL;
+	if (!(bencType == BENC_STR)) return _T("");
 	size_t tmp = 0;
 #ifdef _UNICODE
 	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
@@ -982,7 +982,8 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 t_string BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
-	return (pMem?pMem->GetStringT(encoding, length):_T(""));
+	if (pMem == NULL) return _T("");
+	return pMem->GetStringT(encoding, length);
 }
 
 // This is one of the weird places.  The members of e
@@ -1142,7 +1143,8 @@ char* BencodedDict::GetStringCopy(const char* key) const
 t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
-	return (pMem?pMem->GetStringT(encoding, length):_T(""));
+	if (pMem == NULL) return _T("");
+	return pMem->GetStringT(encoding, length);
 }
 
 char* BencodedDict::GetString(const char* key, size_t length) const
