@@ -45,6 +45,7 @@ class BencodedList;
 class BencodedDict;
 
 // This is just because the key is char and the data is byte
+// TODO: This should _really_ just be a std::string
 template< typename T > class BencArray
 {
 protected:
@@ -62,47 +63,55 @@ public:
 	using LList<T>::Free;
 	*/
 
-	BencArray() {}
+	BencArray() { Clear(); }
 	BencArray( const BencArray<T> &b ) {
-		this->_arr = b._arr;
+		// BencArrays must always be null terminated
+		assert(b._arr.size() >= 1);
+		_arr = b._arr;
 	}
 	BencArray( T *p, int count ) {
-		this->_arr.assign(p, p + count);
+		_arr.reserve(count + 1);
+		_arr.assign(p, p + count);
+		_arr.push_back(0);
 	}
 	bool operator<(const BencArray<T>& arg) const {
-		return (this->_arr<arg._arr)?true:false;
-		/*std::pair<T*, T*> match;
-		match = std::mismatch(this->_arr.begin(), this->_arr.end(), arg._arr.begin());
-		if (match.first == match.second)
-			return (this->_arr.size() < arg._arr.size())?true:false;
-		return (match.first < match.second)?true:false;*/
+		return _arr < arg._arr;
 	}
 	BencArray<T>& operator=(const BencArray<T>& arg) {
-		this->_arr = arg._arr;
+		assert(arg._arr.size() >= 1);
+		_arr = arg._arr;
 		return *this;
 	}
 	T& operator[] (size_t index) {
-		return this->_arr[index];
+		return _arr[index];
 	}
 	const T& operator[] (size_t index) const {
-		return this->_arr[index];
+		return _arr[index];
 	}
-	size_t GetCount() const {return this->_arr.size();}
-	void Clear() {this->_arr.clear();}
-	void Append(const T *p, int count) { this->_arr.insert(this->_arr.end(), p, p + count); }
+	// -1 is to disregard the null terminator
+	size_t GetCount() const {return _arr.size()-1;}
+	void Clear() { _arr.clear(); _arr.push_back(0); }
+	void Append(const T *p, int count)
+	{
+		assert(_arr.size() >= 1);
+		// remove null terminator
+		_arr.reserve(_arr.size() + count);
+		_arr.erase(_arr.end()-1);
+		_arr.insert(_arr.end(), p, p + count);
+		// null terminate
+		_arr.push_back(0);
+	}
 	void AppendTerminated(const T *p, int count) {
 		this->Append(p, count);
-		// this will intentionally fail to compile with T's lacking an assignment operator
-		// it is intended to be used primarily with chars and wchars
-		T empty = 0;
-		this->Append(&empty, 1);
-		// the null terminator should not be considered part
-		// of the string. It should not be saved when encoding
-		// this into a bencoded buffer.
-		this->Resize(count);
 	}
-	void Resize(size_t size) { this->_arr.resize(size); }
-	void SetArray(T *p, size_t len) { assert(len%sizeof(T)==0); this->_arr.assign(p, p + len / sizeof(T)); }
+	void Resize(size_t size) { _arr.resize(size+1); _arr[size] = 0; }
+	void SetArray(T *p, size_t len)
+	{
+		assert(len % sizeof(T) == 0);
+		_arr.reserve(len / sizeof(T) + 1);
+		_arr.assign(p, p + len / sizeof(T));
+		_arr.push_back(0);
+	}
 	const char* GetRaw() const { return (const char*)&this->_arr[0];}
 };
 
@@ -155,7 +164,7 @@ public:
 	public:
 		virtual ~AllocateMemRegime(){};	// required for GCC
 		virtual BencKey* NewKey( unsigned char *p, int count ) {
-			return new BencKey( p, count ); 	// allocate
+			return new BencKey(p, count); // allocate
 		}
 		virtual BencodedMem* NewMem( unsigned char *p, int count ) {
 			return new BencodedMem( p, count ); 	// allocate
