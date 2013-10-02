@@ -882,6 +882,7 @@ void BencEntityMem::SetStrT(ctstr ss)
 		assert(pEncoded);
 		assert((int)len >= 0);
 		mem->SetArray((unsigned char *) pEncoded, len);
+		free(pEncoded);
 	}
 }
 
