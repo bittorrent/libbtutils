@@ -3,7 +3,7 @@
 
 #include <ctype.h>
 
-#if defined WIN32
+#if defined _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef WIN32_LEAN_AND_MEAN
@@ -29,7 +29,7 @@ typedef unsigned long long uint64;
 typedef long long int64;
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 typedef int32 LONG;
 typedef uint32 ULONG;
 typedef uint32 DWORD;
@@ -48,7 +48,7 @@ static_assert (4 == sizeof(uint32), "sizeof uint32 is not 4");
 
 /* _T("txt") evaluates to either ascii string in non-unicode builds or unicode
    string in unicode builds */
-#if defined WIN32 && defined _MSC_VER
+#if defined _WIN32 && defined _MSC_VER
   /* _T is defined in tchar.h */
   typedef TCHAR tchar;
 #else
