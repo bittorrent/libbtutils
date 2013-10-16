@@ -1,6 +1,10 @@
 #ifndef _TARGET_H__
 #define _TARGET_H__
 
+#ifdef ANDROID
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
+
 // Define BT_LITTLE_ENDIAN to be 1 for a LE target and 0 for BE.
 // Use #if BT_LITTLE_ENDIAN and !BT_LITTLE_ENDIAN to check for endianness.
 #if defined(BYTE_ORDER)
