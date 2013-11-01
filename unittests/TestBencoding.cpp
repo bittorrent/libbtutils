@@ -29,7 +29,7 @@ void Parse(const unsigned char *p, uint len, BencodedDict &base)
 	ASSERT_TRUE(p);
 	ASSERT_TRUE(len);
 
-	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
+	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 
 	// parse the torrent file
 //	EXPECT_TRUE(base.GetType() == BENC_VOID);
@@ -83,6 +83,36 @@ TEST(Bencoding, DHT) {
 
 	std::string command = BencEntity::AsDict(&dict)->GetString("q");
 	EXPECT_EQ(command, "find_node");
+}
+
+TEST(Bencoding, Multikey) {
+	static const char msg[] = "d1:b1:c1:rd1:s1:t1:v6:potatoee";
+
+	BencEntity dict;
+	std::pair<unsigned char*, unsigned char*> region;
+	std::vector<const char*> keys;
+	keys.push_back("a\0v\0");
+	keys.push_back("r\0v\0");
+	bool ok = (BencEntity::ParseInPlace(reinterpret_cast<const unsigned char*>(msg), dict, reinterpret_cast<const unsigned char*>(msg) + sizeof(msg), keys, &region)) ? true : false;
+	EXPECT_TRUE(ok);
+	ASSERT_EQ(BENC_DICT, dict.GetType());
+	EXPECT_GE(reinterpret_cast<const char*>(region.first), msg);
+	EXPECT_GE(region.second, region.first);
+	EXPECT_EQ(0, memcmp(region.first, "6:potato", region.second - region.first));
+	keys.clear();
+	keys.push_back("r\0v\0");
+	keys.push_back("a\0v\0");
+	ok = (BencEntity::ParseInPlace(reinterpret_cast<const unsigned char*>(msg), dict, reinterpret_cast<const unsigned char*>(msg) + sizeof(msg), keys, &region)) ? true : false;
+	EXPECT_TRUE(ok);
+	ASSERT_EQ(BENC_DICT, dict.GetType());
+	EXPECT_EQ(0, memcmp(region.first, "6:potato", region.second - region.first));
+	keys.clear();
+	keys.push_back("r\0v\0");
+	keys.push_back("b\0");
+	ok = (BencEntity::ParseInPlace(reinterpret_cast<const unsigned char*>(msg), dict, reinterpret_cast<const unsigned char*>(msg) + sizeof(msg), keys, &region)) ? true : false;
+	EXPECT_TRUE(ok);
+	ASSERT_EQ(BENC_DICT, dict.GetType());
+	EXPECT_EQ(0, memcmp(region.first, "1:c", region.second - region.first));
 }
 
 TEST(Bencoding, Basics) {
@@ -354,7 +384,7 @@ TEST(Bencoding, Settings1) {
 	// Follows general parsing
 	BencodedDict dict;
 
-	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
+	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 	// parse the settings
 	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
 											dict, ((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
@@ -375,7 +405,7 @@ TEST(Bencoding, Settings2) {
 	// Follows general parsing
 	BencodedDict dict;
 
-	std::pair<unsigned char*, unsigned char*> rgn = {NULL,NULL};
+	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 	// parse the settings
 	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
 											dict,

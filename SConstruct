@@ -4,7 +4,7 @@ cflags = '-DPOSIX -D_UNICODE -D_DEBUG -D_LIB -g -O0'
 
 env = Environment(
 		CCFLAGS = cflags,
-		CXXFLAGS = cflags + ' -std=c++11 -Wall -Werror -fno-strict-aliasing'
+		CXXFLAGS = cflags + ' -Wall -Werror -fno-strict-aliasing'
 		)
 #without this stock path would get used, thus /usr/bin/g++ would get invoked
 env['ENV']['PATH'] = os.environ['PATH']

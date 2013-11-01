@@ -2,6 +2,7 @@
 #define __BENCPARSER_H__
 
 #include <cstring>
+#include <vector>
 
 class IBencParser {
 public:
@@ -40,23 +41,26 @@ public:
 	// Each part of this compound string is used as a key in a dictionary to
 	// find.
 	// Example:
-	// _key = "foo\0bar\0"
+	// key = "foo\0bar\0"
 	// d3:aaad...3:bar14:does not match...e3:food...3:bar10:does match...e...e
 	// Yields "10:does match" in _elementStart ... _elementEnd.
 	BencParserElement(unsigned char *p, const char *key, const unsigned char *pEnd) :
-		BencParser( p , pEnd ),
-		_level(0),
-		_elementLevel(0),
-		_elementStart(NULL),
-		_elementEnd(NULL),
-		_lastString(NULL),
-		_key(key),
-		_origKey(key),
+		BencParser( p , pEnd ), _level(0), _elementLevel(0), _elementStart(NULL),
+		_elementEnd(NULL), _lastString(NULL), _origKey(NULL),
 		_keyMatch(0), // Because we'll match the key in a dictionary
-		_keyLevel(0) 
+		_keyLevel(0), _keyLen(0), _key(NULL)
 		{
-			_keyLen = strlen(_key);
+			_keys.push_back(key);
 		}
+	// `keys` will lazily match the first key it can
+	// guaranteed to be at least as lazy as the developer who wrote it, so use with
+	// caution
+	BencParserElement(unsigned char *p, std::vector<const char*> const &keys, const unsigned char *pEnd) :
+		BencParser( p , pEnd ), _level(0), _elementLevel(0), _elementStart(NULL),
+		_elementEnd(NULL), _lastString(NULL), _keys(keys), _origKey(NULL),
+		_keyMatch(0), // Because we'll match the key in a dictionary
+		_keyLevel(0), _keyLen(0), _key(NULL)
+		{}
 	virtual ~BencParserElement(){};		// GCC
 	PARSE_T ParseNext( const unsigned char **ppStart, size_t *pSize, bool isKey = true );
 	void GetElement( unsigned char **ppElementStart, unsigned char **ppElementEnd ) const;
@@ -65,10 +69,12 @@ protected:
 	int _elementLevel;	// Level on which we first encountered "Info" string
 	unsigned char *_elementStart, *_elementEnd;
 	const unsigned char *_lastString;
-	const char *_key, *_origKey;
-	size_t _keyLen, _lastSize;
+	std::vector<const char*> _keys; // all keys we could match
+	const char *_origKey;
 	size_t _keyMatch; // Last matched key
 	size_t _keyLevel; // Last time we had a key
+	size_t _keyLen, _lastSize;
+	const char *_key; // pointer to the key we're currently expecting to match
 };
 
 #endif	// __BENCPARSER_H__

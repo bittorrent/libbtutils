@@ -790,6 +790,28 @@ const unsigned char *BencEntity::Parse(const unsigned char *p, BencEntity &ent, 
 	return parser.GetPos();
 }
 
+const unsigned char *BencEntity::ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, std::vector<const char*> const &keys, std::pair<unsigned char*, unsigned char*> *rgn)
+{
+	assert( rgn );
+	AllocateMemRegime regime;
+	BencParserElement parser( const_cast<unsigned char *>(p), keys, pend);
+	if( !BencEntity::DoParse(ent, &parser, &regime) )
+		return NULL;
+	parser.GetElement( &(rgn->first), &( rgn->second ) );
+	return parser.GetPos();
+}
+
+const unsigned char *BencEntity::Parse(const unsigned char *p, BencEntity &ent, const unsigned char *pend, std::vector<const char*> const &keys, std::pair<unsigned char*, unsigned char*> *rgn)
+{
+	assert( rgn );
+	AllocateMemRegime regime;
+	BencParserElement parser( const_cast<unsigned char *>(p), keys, pend);
+	if( !BencEntity::DoParse(ent, &parser, &regime) )
+		return NULL;
+	parser.GetElement( &(rgn->first), &( rgn->second ) );
+	return parser.GetPos();
+}
+
 bool BencEntity::DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *pRegime)
 {
 	bool bReturn = false;
