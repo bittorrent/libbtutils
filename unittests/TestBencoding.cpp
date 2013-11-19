@@ -318,6 +318,21 @@ TEST(Bencoding, MoreNestedDictionary) {
 	free( serialized );
 }
 
+// out bdecoder doesn't support this!
+/*
+TEST(Bencoding, plain_string) {
+	unsigned char buffer[] = "4:abab";
+	BencodedDict b;
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_EQ(BENC_STR, b.GetType());
+	size_t len = 0;
+	unsigned char *serialized = b.Serialize(&len);
+	EXPECT_EQ(sizeof(buffer) - 1, len);
+	EXPECT_EQ(0, memcmp(serialized, buffer, sizeof(buffer) - 1));
+	free( serialized );
+}
+*/
+
 /*
 TEST(Bencoding, InfoSection) {
 	unsigned char buffer[32768];
