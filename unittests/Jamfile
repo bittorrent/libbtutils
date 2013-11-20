@@ -1,0 +1,46 @@
+import testing ;
+import modules ;
+
+BOOST_ROOT = [ modules.peek : BOOST_ROOT ] ;
+use-project /boost : $(BOOST_ROOT) ;
+use-project /ut_utils : .. ;
+
+GTEST_ROOT = ../vendor/gtest-1.6.0 ;
+GMOCK_ROOT = ../vendor/gmock-1.6.0 ;
+
+project
+	: requirements
+	<source>$(GTEST_ROOT)/src/gtest-all.cc
+	<source>$(GMOCK_ROOT)/src/gmock-all.cc
+	<source>$(GMOCK_ROOT)/src/gmock_main.cc
+	<define>_DEBUG_DHT=1
+#	<define>ENABLE_SRP=1
+	<library>/ut_utils//ut_utils/<link>static
+	<library>/boost//system/<link>static
+
+	<include>$(GTEST_ROOT)/include
+	<include>$(GMOCK_ROOT)/include
+	<include>$(GTEST_ROOT)
+	<include>$(GMOCK_ROOT)
+	<define>GTEST_USE_OWN_TR1_TUPLE=1
+
+	<include>../src
+	<include>/opt/local/include
+
+	<toolset>clang:<cxxflags>-Wno-invalid-source-encoding
+	<toolset>clang:<cxxflags>-Wno-multichar
+	<toolset>clang:<cxxflags>-Wno-unused-private-field
+#	<warnings-as-errors>on
+	;
+
+test-suite utils-tests :
+	[ run TestBencEntity.cpp ]
+	[ run TestBencoding.cpp ]
+	[ run TestBitField.cpp ]
+	[ run TestBloomFilter.cpp ]
+	[ run TestGetMicroseconds.cpp ]
+	[ run TestSha1Hash.cpp ]
+	[ run TestSockAddr.cpp ]
+	;
+
+
