@@ -319,8 +319,7 @@ TEST(Bencoding, MoreNestedDictionary) {
 }
 
 // out bdecoder doesn't support this!
-/*
-TEST(Bencoding, plain_string) {
+TEST(Bencoding, DISABLED_plain_string) {
 	unsigned char buffer[] = "4:abab";
 	BencodedDict b;
 	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
@@ -331,10 +330,8 @@ TEST(Bencoding, plain_string) {
 	EXPECT_EQ(0, memcmp(serialized, buffer, sizeof(buffer) - 1));
 	free( serialized );
 }
-*/
 
-/*
-TEST(Bencoding, InfoSection) {
+TEST(Bencoding, DISABLED_InfoSection) {
 	unsigned char buffer[32768];
 	memset(buffer, 0, 32768);
 	FILE* fp = fopen("./unittests/info.benc", "rb");
@@ -349,7 +346,7 @@ TEST(Bencoding, InfoSection) {
 	EXPECT_EQ(read, len);
 	EXPECT_EQ(0, memcmp(serialized, buffer, read));
 	free( serialized );
-}*/
+}
 
 TEST(Bencoding, Torrent) {
 	BencodedDict dict;
