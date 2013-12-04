@@ -1350,7 +1350,7 @@ unsigned char *BencodedDict::Serialize(size_t *len)
 BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)
 {
 	// contiguous if string length > 0
-	assert(!key.empty() && !str.empty());
+	assert(!key.empty());
 	return InsertString(&(key[0]), &(str[0]), length);
 }
 
