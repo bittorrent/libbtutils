@@ -27,9 +27,9 @@ public:
 	}
 
 	smart_ptr & operator=(smart_ptr const & r) {
-		if(ptr != r.ptr) {
-			if(r.ptr) r.ptr->AddRef();
-			if(ptr) ptr->Release();
+		if (ptr != r.ptr) {
+			if (r.ptr) r.ptr->AddRef();
+			if (ptr) ptr->Release();
 			ptr = r.ptr;
 		}
 		return *this;
@@ -37,8 +37,8 @@ public:
 
 	smart_ptr & operator=(Interface* p) {
 		if(ptr != p) {
-			if(p) p->AddRef();
-			if(ptr) ptr->Release();
+			if (p) p->AddRef();
+			if (ptr) ptr->Release();
 			ptr = p;
 		}
 		return *this;
@@ -46,8 +46,8 @@ public:
 
 	template<class Y> smart_ptr & operator=(smart_ptr<Y> const & r) {
 		if(ptr != r.ptr) {
-			if(r.ptr) r.ptr->AddRef();
-			if(ptr) ptr->Release();
+			if (r.ptr) r.ptr->AddRef();
+			if (ptr) ptr->Release();
 			ptr = r.ptr;
 		}
 		return *this;
@@ -55,7 +55,7 @@ public:
 
 	template<class Y> smart_ptr(smart_ptr<Y> const & r) {
 		ptr = r.get();
-		if(ptr) ptr->AddRef();
+		if (ptr) ptr->AddRef();
 	}
 
 	Interface* operator->() const { return ptr; }
@@ -74,6 +74,8 @@ public:
 
 	void reset(Interface* p = NULL)
 	{
+		// Exempt p == ptr since ptr would be released (and maybe deleted) before it is addref'd back
+		if (p == ptr) return;
 		if (ptr) ptr->Release();
 		ptr = p;
 		if (ptr) ptr->AddRef();

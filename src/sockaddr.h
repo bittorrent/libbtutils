@@ -248,7 +248,11 @@ static inline ctstr basic_tfmt(const SockAddr& sa) { return _T("%A"); }
 
 bool ParseCIDR(cstr s, SockAddr *pfrom, SockAddr *pto);
 
-struct PACKED TinyAddr {
+struct
+#ifndef LEAKCHECK
+	PACKED
+#endif
+	TinyAddr {
 	union {
 		uint32 ip;
 		SockAddr* sa;

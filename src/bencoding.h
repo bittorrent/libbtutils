@@ -246,14 +246,6 @@ public:
 	static BencEntityMem *AsBencString(BencEntity *e) { return e && e->bencType == BENC_STR ? (BencEntityMem*)e : NULL; }
 	static const BencEntityMem *AsBencString(const BencEntity *e) { return e && e->bencType == BENC_STR ? (BencEntityMem*)e : NULL; }
 
-/*	unsigned char *SerializeAsText(size_t *len = NULL) const;
-	char * SerializeAsXML(const char * tag, size_t* len = NULL) const;
-	char * SerializeAsJson(size_t* len = NULL) const;
-	char * SerializeAsAscii(size_t* len = NULL) const;
-	char * SerializeByMimeType(const char * mime_type, const char * tag, const char *& encoding, const char * json_callback = NULL);*/
-
-	//int LoadFromFile_Safe(ctstr filename);
-
 	static const unsigned char *ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend);
 	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, const char *key, std::pair<unsigned char*, unsigned char*> *rgn);
 	static const unsigned char *ParseInPlace(const unsigned char *p, BencEntity &ent, const unsigned char *pend, std::vector<const char *> const &keys, std::pair<unsigned char*, unsigned char*> *rgn);
