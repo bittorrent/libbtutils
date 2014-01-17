@@ -234,7 +234,7 @@ in6_addr parse_ip_v6(cstr ip_v6, bool *valid)
 	return a;
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 SockAddr SockAddr::make_mapped_v4() const
 {
 	if (is_mapped_v4())
@@ -257,7 +257,7 @@ SockAddr SockAddr::make_mapped_v4() const
 }
 #endif
 
-#if !defined WIN32 || defined __WINE__
+#if !defined _WIN32 || defined __WINE__
 // True if this is a mapped v4 address
 bool SockAddr::is_mapped_v4() const
 {
@@ -272,7 +272,7 @@ bool SockAddr::is_mapped_v4() const
 }
 #endif
 
-#if !defined WIN32 || !defined _MSC_VER
+#if !defined _WIN32 || !defined _MSC_VER
 SockAddr SockAddr::make_v4() const
 {
 	if (isv4())

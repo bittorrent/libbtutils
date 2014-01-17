@@ -570,7 +570,7 @@ bool BencEntityIsValid(unsigned char *b, size_t len, void *userdata)
 
 void BencEntity::ParseNum(const unsigned char *p)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	// _strtoi64 does not exist in the old msvcrt.dll,
 	// so we can't use it here
 	SetInt64(_atoi64((const char*)p));

@@ -1,7 +1,7 @@
 #ifndef __SOCKADDR_H__
 #define __SOCKADDR_H__
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -60,7 +60,7 @@ struct PACKED SockAddr {
 #define _sin6w _in._in6w
 #define _sin6d _in._in6d
 
-#if defined WIN32 && defined _MSC_VER
+#if defined _WIN32 && defined _MSC_VER
 	// Winsock2 doesn't support mapped v4, so we use mapping to
 	// store v4 addresses and infer family from the prefix.
 	int get_family() const { return is_mapped_v4() ? AF_INET : AF_INET6; }
@@ -111,7 +111,7 @@ struct PACKED SockAddr {
 
 	// True if this is a mapped v4 address
 	bool is_mapped_v4() const
-#if defined WIN32 && defined _MSC_VER
+#if defined _WIN32 && defined _MSC_VER
 	{
 		return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6) != 0;
 	}
@@ -122,7 +122,7 @@ struct PACKED SockAddr {
 	// Return v4 address portion in host byte order
 	uint32 get_addr4() const
 	{
-#if !defined WIN32
+#if !defined _WIN32
 		if (is_mapped_v4())
 			return make_v4().get_addr4();
 #endif

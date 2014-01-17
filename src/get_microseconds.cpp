@@ -30,7 +30,7 @@ uint64 get_microseconds()
 	// gettimeofday by over 20,000us or 20ms.
 	return ((tick - start_tick) * sTimebaseInfo.numer / sTimebaseInfo.denom) / 1000;
 }
-#elif defined WIN32
+#elif defined _WIN32
 
 #include <windows.h>
 

@@ -1,7 +1,7 @@
 
 // This is a standard function, but windows doesn't provide it
 // that's why we only need this on windows
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -51,6 +51,11 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 	return result == SOCKET_ERROR ? NULL : dest;
 }
 
+#if defined _WIN32 && !defined _WIN32_WINNT
+#error _WIN32_WINNT must be defined, otherwise we don't know which windows \
+	version we're building for
+#endif
+
 #if defined(_WIN32_WINNT) && _WIN32_WINNT <= 0x501
 
 int inet_pton(int af, const char* src, void* dest)
@@ -91,5 +96,5 @@ int inet_pton(int af, const char* src, void* dest)
 }
 #endif
 
-#endif // WIN32
+#endif // _WIN32
 

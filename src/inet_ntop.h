@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef WIN32
+#ifdef _WIN32
 
 const char *inet_ntop(int af, const void *src, char *dest, size_t length);
 

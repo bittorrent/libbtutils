@@ -15,7 +15,7 @@
 #  else
 #    error "Unable to determine byte order based on value of BYTE_ORDER"
 #  endif
-#elif defined(WIN32)
+#elif defined(_WIN32)
 #  define BT_LITTLE_ENDIAN 1
 #else
 #  error "Unable to determine byte order"

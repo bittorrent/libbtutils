@@ -1,7 +1,7 @@
 #ifndef _UTORRENT_REFBASE_H_
 #define _UTORRENT_REFBASE_H_
 
-#ifdef WIN32
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h> // for STDMETHODCALLTYPE
 #undef WIN32_LEAN_AND_MEAN

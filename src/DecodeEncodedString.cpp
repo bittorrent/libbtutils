@@ -103,7 +103,7 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 		}
 
 		// Otherwise perform operating system-specific decode
-#ifdef WIN32
+#ifdef _WIN32
 		len = MultiByteToWideChar(encoding, 0, encoded, in_len, t, in_len);
 		if (0 == len && CP_ACP != encoding)
 			len = MultiByteToWideChar(CP_ACP, 0, encoded, in_len, t, in_len);
