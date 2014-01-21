@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 typedef sockaddr_storage SOCKADDR_STORAGE;
-#endif // POSIX
+#endif // _WIN32
 
 #include <stdlib.h> // for NULL
 #include <assert.h>
