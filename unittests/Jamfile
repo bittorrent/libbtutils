@@ -8,6 +8,8 @@ use-project /ut_utils : .. ;
 GTEST_ROOT = ../vendor/gtest-1.6.0 ;
 GMOCK_ROOT = ../vendor/gmock-1.6.0 ;
 
+lib pthread : : <name>pthread <link>shared ;
+
 project
 	: requirements
 	<source>$(GTEST_ROOT)/src/gtest-all.cc
@@ -18,6 +20,7 @@ project
 #	<define>ENABLE_SRP=1
 	<library>/ut_utils//ut_utils/<link>static
 	<library>/boost//system/<link>static
+	<target-os>linux:<library>pthread
 
 	<include>$(GTEST_ROOT)/include
 	<include>$(GMOCK_ROOT)/include
