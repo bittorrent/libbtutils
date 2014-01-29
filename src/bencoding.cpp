@@ -355,11 +355,11 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 
 	switch(e->bencType) {
 	case BENC_INT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64"e", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_BIGINT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64"e", e->num));
+		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_STR: {

@@ -70,7 +70,7 @@ static void sockaddr_construct_v4(const char * const addrport, const uint32 addr
 	sockaddr_test_v4(sa_v4, addr, port, addr_type);
 }
 
-TEST(SockAddrClassTest, TestConstruction)
+TEST(SockAddr, TestConstruction)
 {
 	// Default constructor
 	SockAddr sa_default;
@@ -103,7 +103,7 @@ TEST(SockAddrClassTest, TestConstruction)
 	// SockAddr(const byte* p, size_t len, bool* success);
 }
 
-TEST(SockAddrClassTest, TestComparison)
+TEST(SockAddr, TestComparison)
 {
 	bool is_valid = false;
 
@@ -155,7 +155,7 @@ TEST(SockAddrClassTest, TestComparison)
 	EXPECT_TRUE(sa_low != sa_med);
 }
 
-TEST(SockAddrClassTest, TestStorage)
+TEST(SockAddr, TestStorage)
 {
 	// Set up the SockAddr from which to derive SOCKADDR_STORAGE
 	bool is_valid = false;
@@ -182,5 +182,24 @@ TEST(SockAddrClassTest, TestStorage)
 	EXPECT_TRUE(test_ip_a == sa_ss.get_addr4());
 	EXPECT_TRUE(!sa_ss.is_loopback());
 	EXPECT_TRUE(!sa_ss.is_addr_any());
+}
+
+TEST(SockAddr, parse_invalid_ipv6)
+{
+	bool valid = false;
+	// pass in a string that's longer than 200 bytes (the internal buffer)
+	SockAddr s = SockAddr::parse_addr(
+		"[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
+		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]", &valid);
+	EXPECT_FALSE(valid);
+	EXPECT_FALSE(true);
 }
 

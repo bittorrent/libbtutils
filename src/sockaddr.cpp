@@ -422,6 +422,7 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 		// IPv6, rfc2732 style
 		char addr[200];
 		strncpy(addr, addrspec, sizeof(addr));
+		addr[199] = 0;
 		str end = (str)strrchr(addr, ']');
 		if (end) {
 			*end++ = 0;
