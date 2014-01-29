@@ -667,6 +667,9 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 			if (bencType == BENC_LIST || bencType == BENC_DICT) {
 				break;
 			}
+		} else {
+			delete *ent;
+			*ent = NULL;
 		}
 	}
 
