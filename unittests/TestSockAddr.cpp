@@ -200,6 +200,5 @@ TEST(SockAddr, parse_invalid_ipv6)
 		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
 		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]", &valid);
 	EXPECT_FALSE(valid);
-	EXPECT_FALSE(true);
 }
 
