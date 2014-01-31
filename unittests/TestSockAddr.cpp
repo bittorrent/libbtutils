@@ -1,8 +1,10 @@
 #include <iostream>
-
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "sockaddr.h"
+//#include "../src/sockaddr.h"
+#include <vector>
+#include <arpa/inet.h>
 
 //
 // This test was converted from the old utassert style unit test.
@@ -29,6 +31,71 @@ enum AddrType
 	AT_LOOPBACK = 1,
 	AT_ANY = 2
 };
+
+static std::vector<const char*> ip_cstr
+{
+    "0.255.0.255",
+    "255.0.255.0",
+    "0.0.0.0",
+    "0.0.255.255",
+    "[1::ffff:ffff]",
+    "[a0cb:f::]",
+    "0.0.0.255"
+};
+
+static std::vector <const char*> return_chars
+{
+    "255.0.255.0.in-addr.arpa",
+    "0.255.0.255.in-addr.arpa",
+    "0.0.0.0.in-addr.arpa",
+    "255.255.0.0.in-addr.arpa",
+   
+    "f.f.f.f.f.f.f.f."
+    "0.0.0.0.0.0.0.0."
+    "0.0.0.0.0.0.0.0."
+    "0.0.0.0.1.0.0.0."
+    "ip6.arpa",
+   
+    "0.0.0.0.0.0.0.0."
+    "0.0.0.0.0.0.0.0."
+    "0.0.0.0.0.0.0.0."
+    "f.0.0.0.b.c.0.a."
+    "ip6.arpa",
+    "255.0.0.0.in-addr.arpa"
+};
+
+void match_strings(std::string in_str, std::string out_str)
+{
+    if (in_str[0] == '[') //inet_ntop doesn't add square bracket around returned string
+        out_str = "[" + out_str + "]";
+    EXPECT_EQ(in_str, out_str);
+}
+
+TEST(SockAddr, get_arpa)
+{
+    int buf_len = 500;
+    char buf[buf_len];
+    SockAddr sockaddr;
+    for (int i=0; i<ip_cstr.size(); ++i)
+    {
+        sockaddr = SockAddr::parse_addr(ip_cstr[i]);
+        in6_addr addr6 = sockaddr.get_addr6();
+        SOCKADDR_STORAGE sstore = sockaddr.get_sockaddr_storage();
+        if(sockaddr.isv6())
+        {
+            in6_addr addr6 = sockaddr.get_addr6();
+            EXPECT_TRUE(inet_ntop(AF_INET6,&addr6,buf,buf_len));
+        }
+        else
+        {
+            uint32 addr4 = sockaddr.get_addr4();
+            EXPECT_TRUE(inet_ntop(AF_INET,&addr4,buf,buf_len));
+        }
+        //std::cout << buf << std::endl;
+        match_strings(ip_cstr[i], buf);
+        EXPECT_STREQ(return_chars[i], sockaddr.get_arpa());
+    }
+}
 
 static void sockaddr_test_v4(const SockAddr & sa_v4, const uint32 addr, const uint16 port, const AddrType addr_type)
 {
