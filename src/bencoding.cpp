@@ -1161,8 +1161,9 @@ char* BencodedDict::GetStringCopy(const char* key) const
 {
 	size_t len;
 	const BencEntityMem *pMem = AsBencString(Get(key));
-	const char* val = pMem?pMem->GetString(&len):NULL;
-	assert(!val || val[len] == 0);
+	if (!pMem) return NULL;
+	const char* val = pMem->GetString(&len);
+	assert(val[len] == 0);
 	return strdup(val);
 }
 
