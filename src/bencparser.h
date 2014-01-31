@@ -73,7 +73,7 @@ protected:
 	const char *_origKey;
 	size_t _keyMatch; // Last matched key
 	size_t _keyLevel; // Last time we had a key
-	size_t _keyLen, _lastSize;
+	size_t _keyLen;
 	const char *_key; // pointer to the key we're currently expecting to match
 };
 

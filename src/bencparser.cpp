@@ -122,7 +122,6 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 			if (isKey && _level > 0) 
 			{
 				_lastString = *ppStart;
-				_lastSize = *pSize;
 				// We mark a key match if we were parsing a key position, and the string matches in length and content
 				if (_keyMatch == 0) {
 					for (std::vector<const char*>::const_iterator k = _keys.begin(); k != _keys.end(); k++) {
@@ -153,7 +152,6 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 				_elementLevel = _level;
 			}
 			_lastString = 0;
-			_lastSize = 0;
 			// _keyLen == 0 means that we've exceeded the length of our key path, but we're in a deeper structure
 			// in bencoding.  We need to remember how far until we walk back into the key.
 			if (_keyLen == 0) {
