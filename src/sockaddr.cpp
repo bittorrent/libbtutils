@@ -574,7 +574,7 @@ char* SockAddr::get_arpa() const
 		// 1.2.3.4
 		// is
 		// 4.3.2.1.in-addr.arpa
-		uint32 a = get_addr4();
+		uint32 a = _sin4;
 		const unsigned char* out = (const unsigned char*)&a;
 		snprintf(buf, sizeof(buf), "%u.%u.%u.%u.in-addr.arpa",
 			out[3], out[2], out[1], out[0]);

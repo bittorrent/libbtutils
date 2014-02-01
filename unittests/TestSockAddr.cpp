@@ -51,16 +51,16 @@ static std::vector <const char*> return_chars
     "255.255.0.0.in-addr.arpa",
    
     "f.f.f.f.f.f.f.f."
-    "0.0.0.0.0.0.0.0."
-    "0.0.0.0.0.0.0.0."
-    "0.0.0.0.1.0.0.0."
-    "ip6.arpa",
+	    "0.0.0.0.0.0.0.0."
+	    "0.0.0.0.0.0.0.0."
+	    "0.0.0.0.1.0.0.0."
+	    "ip6.arpa",
    
     "0.0.0.0.0.0.0.0."
-    "0.0.0.0.0.0.0.0."
-    "0.0.0.0.0.0.0.0."
-    "f.0.0.0.b.c.0.a."
-    "ip6.arpa",
+	    "0.0.0.0.0.0.0.0."
+	    "0.0.0.0.0.0.0.0."
+	    "f.0.0.0.b.c.0.a."
+	    "ip6.arpa",
     "255.0.0.0.in-addr.arpa"
 };
 
@@ -78,7 +78,9 @@ TEST(SockAddr, get_arpa)
     SockAddr sockaddr;
     for (int i=0; i<ip_cstr.size(); ++i)
     {
-        sockaddr = SockAddr::parse_addr(ip_cstr[i]);
+        bool ok = false;
+        sockaddr = SockAddr::parse_addr(ip_cstr[i], &ok);
+        ASSERT_TRUE(ok);
         in6_addr addr6 = sockaddr.get_addr6();
         SOCKADDR_STORAGE sstore = sockaddr.get_sockaddr_storage();
         if(sockaddr.isv6())
@@ -88,7 +90,7 @@ TEST(SockAddr, get_arpa)
         }
         else
         {
-            uint32 addr4 = sockaddr.get_addr4();
+            uint32 addr4 = htonl(sockaddr.get_addr4());
             EXPECT_TRUE(inet_ntop(AF_INET,&addr4,buf,buf_len));
         }
         //std::cout << buf << std::endl;
