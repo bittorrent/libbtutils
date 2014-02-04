@@ -76,34 +76,41 @@ void match_strings(std::string in_str, std::string out_str)
 
 TEST(SockAddr, get_arpa)
 {
-    const int buf_len = 500;
-    char buf[buf_len];
-    SockAddr sockaddr;
-    for (int i=0; i<ip_cstr.size(); ++i)
-    {
-        bool ok = false;
-        sockaddr = SockAddr::parse_addr(ip_cstr[i], &ok);
-        ASSERT_TRUE(ok);
-        in6_addr addr6 = sockaddr.get_addr6();
-        SOCKADDR_STORAGE sstore = sockaddr.get_sockaddr_storage();
-#if _WIN32_WINNT >= 0x0600
-        if(sockaddr.isv6())
-        {
-            in6_addr addr6 = sockaddr.get_addr6();
-            EXPECT_TRUE(inet_ntop(AF_INET6,&addr6,buf,buf_len));
-        }
-        else
-        {
-            uint32 addr4 = htonl(sockaddr.get_addr4());
-            EXPECT_TRUE(inet_ntop(AF_INET,&addr4,buf,buf_len));
-        }
-        //std::cout << buf << std::endl;
-        match_strings(ip_cstr[i], buf);
-        char * arpa = sockaddr.get_arpa();
-        EXPECT_STREQ(return_chars[i], arpa);
-        free(arpa);
+#ifdef _WIN32
+	WSADATA d;
+	WSAStartup(MAKEWORD(2, 2), &d);
 #endif
-    }
+	const int buf_len = 500;
+	char buf[buf_len];
+	SockAddr sockaddr;
+	for (int i=0; i<ip_cstr.size(); ++i)
+	{
+		bool ok = false;
+		sockaddr = SockAddr::parse_addr(ip_cstr[i], &ok);
+		ASSERT_TRUE(ok) << "Failed to parse: " << ip_cstr[i];
+		in6_addr addr6 = sockaddr.get_addr6();
+		SOCKADDR_STORAGE sstore = sockaddr.get_sockaddr_storage();
+#if _WIN32_WINNT >= 0x0600
+		if(sockaddr.isv6())
+		{
+			in6_addr addr6 = sockaddr.get_addr6();
+			EXPECT_TRUE(inet_ntop(AF_INET6,&addr6,buf,buf_len));
+		}
+		else
+		{
+			uint32 addr4 = htonl(sockaddr.get_addr4());
+			EXPECT_TRUE(inet_ntop(AF_INET,&addr4,buf,buf_len));
+		}
+		//std::cout << buf << std::endl;
+		match_strings(ip_cstr[i], buf);
+		char * arpa = sockaddr.get_arpa();
+		EXPECT_STREQ(return_chars[i], arpa);
+		free(arpa);
+#endif
+	}
+#ifdef _WIN32
+	WSACleanup();
+#endif
 }
 
 static void sockaddr_test_v4(const SockAddr & sa_v4, const uint32 addr, const uint16 port, const AddrType addr_type)
