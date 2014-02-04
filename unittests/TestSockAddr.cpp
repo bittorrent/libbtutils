@@ -101,8 +101,8 @@ TEST(SockAddr, get_arpa)
         match_strings(ip_cstr[i], buf);
         char * arpa = sockaddr.get_arpa();
         EXPECT_STREQ(return_chars[i], arpa);
-#endif
         free(arpa);
+#endif
     }
 }
 
