@@ -231,7 +231,6 @@ in6_addr parse_ip_v6(cstr ip_v6, bool *valid)
 	int r = inet_pton(AF_INET6, ip_v6, &a);
 	if (valid)
 		*valid = (bool)(r == 1);
-	DWORD e = WSAGetLastError();
 	return a;
 }
 
