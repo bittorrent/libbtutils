@@ -61,7 +61,7 @@ TEST(BloomFilterClassTest, TestInsertions)
 			hashValues[hashIndex][SHA1_DIGESTSIZE - 1] = (byte) hashIndex;
 			// Muck with early part of values to avoid false positives.
 			// Commenting out this line results in lots of false positives.
-			hashValues[hashIndex][0] = (byte) (index + 1 % INDEX_LIMIT);
+			hashValues[hashIndex][0] = (byte) ((index + 1) % INDEX_LIMIT);
 		}
 
 		// Load the bloom filter with the included hashes

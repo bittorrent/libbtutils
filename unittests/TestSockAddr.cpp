@@ -2,9 +2,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "sockaddr.h"
-//#include "../src/sockaddr.h"
 #include <vector>
+#ifdef _WIN32
+#include <Ws2tcpip.h>
+#else
 #include <arpa/inet.h>
+#endif
 
 //
 // This test was converted from the old utassert style unit test.
@@ -73,7 +76,7 @@ void match_strings(std::string in_str, std::string out_str)
 
 TEST(SockAddr, get_arpa)
 {
-    int buf_len = 500;
+    const int buf_len = 500;
     char buf[buf_len];
     SockAddr sockaddr;
     for (int i=0; i<ip_cstr.size(); ++i)
@@ -83,6 +86,7 @@ TEST(SockAddr, get_arpa)
         ASSERT_TRUE(ok);
         in6_addr addr6 = sockaddr.get_addr6();
         SOCKADDR_STORAGE sstore = sockaddr.get_sockaddr_storage();
+#if _WIN32_WINNT >= 0x0600
         if(sockaddr.isv6())
         {
             in6_addr addr6 = sockaddr.get_addr6();
@@ -96,6 +100,7 @@ TEST(SockAddr, get_arpa)
         //std::cout << buf << std::endl;
         match_strings(ip_cstr[i], buf);
         EXPECT_STREQ(return_chars[i], sockaddr.get_arpa());
+#endif
     }
 }
 

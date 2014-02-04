@@ -92,7 +92,7 @@ inline void WriteBEFloat(const void *p, float v)
 inline uint32 ReadBE32(const void *p)
 {
 	byte *pp = (byte*)p;
-	return (pp[0] << 24) | (pp[1] << 16) | (pp[2] << 8) | (pp[3] << 0);
+	return ((pp[0] << 24) | (pp[1] << 16) | (pp[2] << 8) | (pp[3] << 0)) & 0xffffffff;
 }
 
 inline uint16 ReadBE16(const void *p)
@@ -104,17 +104,17 @@ inline uint16 ReadBE16(const void *p)
 inline void WriteBE32(void *p, uint32 x)
 {
 	byte *pp = (byte*)p;
-	pp[0] = (byte)(x >> 24);
-	pp[1] = (byte)(x >> 16);
-	pp[2] = (byte)(x >> 8);
-	pp[3] = (byte)(x >> 0);
+	pp[0] = (byte)((x >> 24) & 0xff);
+	pp[1] = (byte)((x >> 16) & 0xff);
+	pp[2] = (byte)((x >> 8) & 0xff);
+	pp[3] = (byte)((x >> 0) & 0xff);
 }
 
 inline void WriteBE16(void *p, uint16 x)
 {
 	byte *pp = (byte*)p;
-	pp[0] = (byte)(x >> 8);
-	pp[1] = (byte)(x >> 0);
+	pp[0] = (byte)((x >> 8) & 0xff);
+	pp[1] = (byte)((x >> 0) & 0xff);
 }
 #endif
 
