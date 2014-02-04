@@ -35,7 +35,7 @@ enum AddrType
 	AT_ANY = 2
 };
 
-static std::vector<const char*> ip_cstr
+static const std::vector<const char*> ip_cstr
 {
     "0.255.0.255",
     "255.0.255.0",
@@ -46,7 +46,7 @@ static std::vector<const char*> ip_cstr
     "0.0.0.255"
 };
 
-static std::vector <const char*> return_chars
+static const std::vector <const char*> return_chars
 {
     "255.0.255.0.in-addr.arpa",
     "0.255.0.255.in-addr.arpa",
@@ -99,8 +99,10 @@ TEST(SockAddr, get_arpa)
         }
         //std::cout << buf << std::endl;
         match_strings(ip_cstr[i], buf);
-        EXPECT_STREQ(return_chars[i], sockaddr.get_arpa());
+        char * arpa = sockaddr.get_arpa();
+        EXPECT_STREQ(return_chars[i], arpa);
 #endif
+        free(arpa);
     }
 }
 
