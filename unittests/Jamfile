@@ -15,7 +15,6 @@ project
 	<source>$(GTEST_ROOT)/src/gtest-all.cc
 	<source>$(GMOCK_ROOT)/src/gmock-all.cc
 	<source>$(GMOCK_ROOT)/src/gmock_main.cc
-	<define>_WIN32_WINNT=0x0501
 	<define>_DEBUG_DHT=1
 #	<define>ENABLE_SRP=1
 	<library>/ut_utils//ut_utils/<link>static

@@ -11,11 +11,9 @@ lib ut_utils : src/$(SOURCES).cpp
 	  <target-os>linux:<library>rt # required for clock_gettime
 	  <target-os>windows:<define>WIN32
 	  <target-os>windows:<library>ws2
-	  <define>_WIN32_WINNT=0x0501
 	: # default build
 	  <link>static
 	: # usage-reuirements
 	  <include>src
-	  <define>_WIN32_WINNT=0x0501
 	;
 
