@@ -52,8 +52,8 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 }
 
 #if defined _WIN32 && !defined _WIN32_WINNT
-#error _WIN32_WINNT must be defined, otherwise we don't know which windows \
-	version we're building for
+#error _WIN32_WINNT must be defined, otherwise we do not know which windows \
+	version we are building for
 #endif
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT <= 0x501
