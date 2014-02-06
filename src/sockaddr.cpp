@@ -225,7 +225,7 @@ uint32 parse_ip(cstr ip, bool *valid)
 	return r;
 }
 
-#if defined _WIN32 && _WIN32_WINNT < 0x600
+#if defined _WIN32 && _WIN32_WINNT < 0x501
 // This function didn't appear in windows until vista.
 // so we need to defined it ourselves here
 int inet_pton(int af, const char* src, void* dest)
