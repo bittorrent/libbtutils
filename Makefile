@@ -210,9 +210,11 @@ LD_SHLIB_FLAGS = $(LD_COMPONENT_SHLIBFLAGS) $(LD_SYSTEM_SHLIBFLAGS)
 
 # Build/test rules
 
-.phony: all test
+.phony: all test product
 
 all: $(OBJDESTLIB) $(UT_EXE_DEST)
+
+product: $(OBJDESTLIB)
 
 test: $(UT_EXE_DEST)
 	env LD_LIBRARY_PATH=$(UNSTRIPPEDLIBDESTDIR) $<
