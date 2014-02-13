@@ -80,8 +80,10 @@ TEST(SockAddr, get_arpa)
 	WSADATA d;
 	WSAStartup(MAKEWORD(2, 2), &d);
 #endif
+#if _WIN32_WINNT >= 0x0600
 	const int buf_len = 500;
 	char buf[buf_len];
+#endif
 	SockAddr sockaddr;
 	for (int i=0; i<ip_cstr.size(); ++i)
 	{
@@ -283,5 +285,43 @@ TEST(SockAddr, parse_invalid_ipv6)
 		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:"
 		 "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]", &valid);
 	EXPECT_FALSE(valid);
+}
+
+TEST(SockAddr, TestTinyAddr)
+{
+	bool is_valid = false;
+	uint32 test_ip_med = parse_ip(ADDR_V4_MED, &is_valid);
+	EXPECT_TRUE(is_valid);
+
+	is_valid = false;
+	uint32 test_ip_low = parse_ip(ADDR_V4_LOW, &is_valid);
+	EXPECT_TRUE(is_valid);
+
+	TinyAddr ta_default;
+	// TODO:  why does TinyAddr default to port 1?
+	// TODO:  expose default port value in TinyAddr as static const uint16
+	EXPECT_EQ(ta_default.get_port(), 1);
+	SockAddr sa_default = (SockAddr) ta_default;
+	EXPECT_EQ(sa_default, ta_default);
+
+	TinyAddr ta_portset;
+	static const uint16 samplePort = 1000;
+	ta_portset.set_port(samplePort);
+	EXPECT_EQ(ta_portset.get_port(), samplePort);
+	SockAddr sa_portset = (SockAddr) ta_portset;
+	EXPECT_EQ(sa_portset, ta_portset);
+
+	SockAddr sa_low(test_ip_low, TEST_PORT);
+	TinyAddr ta_low(sa_low);
+
+	SockAddr sa_med(test_ip_med, TEST_PORT);
+	TinyAddr ta_med(sa_med);
+
+	EXPECT_EQ(ta_med, sa_med);
+	EXPECT_TRUE(!(ta_low == sa_med)); // no operator!= on TinyAddr
+	EXPECT_TRUE(!(ta_low == ta_med)); // no operator!= on TinyAddr
+	SockAddr sa_med_copied = (SockAddr) ta_med;
+	EXPECT_EQ(sa_med_copied, sa_med);
+	EXPECT_NE(sa_low, sa_med);
 }
 
