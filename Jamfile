@@ -11,6 +11,7 @@ lib ut_utils : src/$(SOURCES).cpp
 	  <target-os>linux:<library>rt # required for clock_gettime
 	  <target-os>windows:<define>WIN32
 	  <target-os>windows:<library>ws2
+     <toolset>gcc:<cxxflags>-Wno-invalid-offsetof
 	: # default build
 	  <link>static
 	: # usage-reuirements

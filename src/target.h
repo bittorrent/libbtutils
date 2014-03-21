@@ -1,7 +1,7 @@
 #ifndef _TARGET_H__
 #define _TARGET_H__
 
-#ifdef ANDROID
+#if defined ANDROID && !defined BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
 #endif
 
