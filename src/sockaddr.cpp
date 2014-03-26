@@ -6,6 +6,10 @@
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
 #include "snprintf.h" // for snprintf
 
+#ifdef _WIN32
+#include <ws2tcpip.h> // for inet_pton
+#endif
+
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;
 in6_addr SockAddr::_in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
@@ -225,9 +229,9 @@ uint32 parse_ip(cstr ip, bool *valid)
 	return r;
 }
 
-#if defined _WIN32 && _WIN32_WINNT < 0x501
+#if defined _WIN32 && NTDDI_VERSION < NTDDI_LONGHORN
 // This function didn't appear in windows until vista.
-// so we need to defined it ourselves here
+// so we need to define it ourselves here
 int inet_pton(int af, const char* src, void* dest)
 {
 	if (af != AF_INET && af != AF_INET6)
