@@ -77,13 +77,13 @@ uint64 get_microseconds()
 	// abstraction layers where the processors are not correctly
 	// synchronized so each processor can return a different value
 	// similar to rdtsc. See comments in Time_Initialize() above.
-	int64 ret = (int64(counter) - int64(startPerformanceCounter)) / counterPerMicrosecond;
+	int64 ret = (int64)((int64(counter) - int64(startPerformanceCounter)) / counterPerMicrosecond);
 	// if the QPC clock leaps more than one second off GetTickCount64()
 	// something is seriously fishy. Adjust QPC to stay monotonic
 	int64 tick_diff = tick - startGetTickCount;
 	if (abs64(ret / 100000 - tick_diff / 100) > 10) {
-		startPerformanceCounter -= int64(tick_diff * 1000 - ret) * counterPerMicrosecond;
-		ret = (counter - startPerformanceCounter) / counterPerMicrosecond;
+		startPerformanceCounter -= (int64)(int64(tick_diff * 1000 - ret) * counterPerMicrosecond);
+		ret = (int64)((counter - startPerformanceCounter) / counterPerMicrosecond);
 	}
 
 	return ret;

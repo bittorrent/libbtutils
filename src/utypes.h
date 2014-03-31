@@ -43,8 +43,8 @@ static_assert (4 == sizeof(int32), "sizeof int32 is not 4");
 static_assert (4 == sizeof(uint32), "sizeof uint32 is not 4");
 #endif
 
-#undef INT64_MAX
-#define INT64_MAX 0x7fffffffffffffffLL
+//#undef INT64_MAX
+//#define INT64_MAX 0x7fffffffffffffffLL
 
 /* _T("txt") evaluates to either ascii string in non-unicode builds or unicode
    string in unicode builds */

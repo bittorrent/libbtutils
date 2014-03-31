@@ -93,7 +93,7 @@ int bloom_filter::estimate_count() const
 {
 	const int c = (std::min)(count_zeroes(), _size - 1);
 	const int m = _size;
-	return log(c / float(m)) / (2.f * log(1.f - 1.f/m));
+	return (int)(log(c / float(m)) / (2.f * log(1.f - 1.f/m)));
 }
 
 bool bloom_filter::test(sha1_hash const& k) const
