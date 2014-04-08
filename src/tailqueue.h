@@ -2,10 +2,6 @@
 #define TAILQUEUE_H
 
 #include <stddef.h> // for offsetof()
-#ifdef __WINE__
-#undef offsetof
-#define offsetof(type, member)  __builtin_offsetof (type, member)
-#endif // __WINE__
 
 template<typename T, size_t offs>  class TailQueueX {
 public:
