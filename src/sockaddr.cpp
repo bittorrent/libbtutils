@@ -306,7 +306,9 @@ SockAddr SockAddr::make_mapped_v4() const
 // True if this is a mapped v4 address
 bool SockAddr::is_mapped_v4() const
 {
-	if (get_family() != AF_INET6) return false;
+        if (get_family() != AF_INET6) {
+            return false;
+        }
 	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6) != 0;
 }
 #endif
