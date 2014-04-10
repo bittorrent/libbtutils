@@ -302,18 +302,14 @@ SockAddr SockAddr::make_mapped_v4() const
 }
 #endif
 
-#if !defined _WIN32 || defined __WINE__
+#if !defined _WIN32
 // True if this is a mapped v4 address
 bool SockAddr::is_mapped_v4() const
 {
-	if (get_family() != AF_INET6)
-		return false;
-#if defined __WINE__
-	// IN6_IS_ADDR_V4MAPPED macro not defined on Wine
-	return _sin6d[0] == 0 && _sin6d[1] == 0 && _sin6w[4] == 0 && _sin6w[5] == 0xffff;
-#else
+        if (get_family() != AF_INET6) {
+            return false;
+        }
 	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6) != 0;
-#endif // __WINE__
 }
 #endif
 
