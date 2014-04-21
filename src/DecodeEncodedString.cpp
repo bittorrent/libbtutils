@@ -2,6 +2,7 @@
 #include <string.h> // for strlen
 #include <assert.h>
 #include <stdlib.h> // for malloc, realloc
+#include <limits.h> // INT_MAX
 
 int DecodeUtf8(cstr utf8, size_t in_len, wchar_t *out_ptr, size_t out_len, bool *invalid, size_t *consumed)
 {
@@ -81,8 +82,11 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 {
 	if (in_len == (size_t) -1) in_len = strlen(encoded);
 
+	assert(in_len < INT_MAX);
+	if (in_len >= INT_MAX) return NULL;
+
 	wchar_t *t = (wchar_t*)malloc(sizeof(wchar_t) * (in_len + 1));
-	size_t len = in_len;
+	int len = in_len;
 
 	if (in_len != 0) {
 		// TODO: For POSIX, look at repercussions of setting CP_ACP in
@@ -118,7 +122,7 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 #else
 		len = mbsnrtowcs(t, &in_p, in_len, (in_len + 1) * sizeof(wchar_t), &ps);
 #endif // ANDROID
-		if (len == (size_t)-1) // error
+		if (len == -1) // error
 			len = 0;
 		else if (in_p != 0) {
 			// There was an error decoding this string.  in_p now points

@@ -286,13 +286,13 @@ void BencEntity::Print(bool oneline, int indent)
 		if (!hex) {
 			//btprintf("\"%.*s\"", mem->GetCount(), mem->GetRaw());
 			printf("\"%.*s\"", static_cast<int>(mem->GetCount()), mem->GetRaw());
-		} else {
-			if (strlen(hex) > 200)
-				printf("%.200s...", hex);
-			else
-				printf("%s", hex);
-			free(hex);
+			break;
 		}
+		if (strlen(hex) > 200)
+			printf("%.200s...", hex);
+		else
+			printf("%s", hex);
+		delete[] hex;
 		break;
 	}
 
