@@ -717,6 +717,9 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		BencodedEntityMap::iterator inserted = dict->insert(lastIt, value);
 		delete bencKey;
 
+		// Point to the one in our dict
+		*ent = const_cast<BencEntity *>( &(inserted->second) );
+
 		// Check whether the dict has
 		// duplicate keys, either from a previous instance,
 		// or because the serialized dict being read has dupes.
@@ -725,12 +728,12 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		// (e.g. DHT queries, settings file updates, etc.
 		// this actually happens in the wild when broken DHT nodes
 		// sends invalid dht messages
-		if(inserted == lastIt) {
+		if((*ent)->bencType != BENC_VOID){
+			// This means some other entry had this same label already
+			dict->erase(inserted);
 			return false;
 		}
 
-		// Point to the one in our dict
-		*ent = const_cast<BencEntity *>( &(inserted->second) );
 		//Assign it the parsed value/type
 		(*ent)->SetParsed( parseResult, pElement, elementSize, regime );
 		// Don't handle vlist since this is for parsing
