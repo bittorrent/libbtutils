@@ -1,6 +1,5 @@
 
-// This is a standard function, but windows doesn't provide it
-// that's why we only need this on windows
+// Versions of windows before Vista don't provide inet_pton or inet_ntop
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -10,7 +9,7 @@
 
 #include "inet_ntop.h"
 
-const char *inet_ntop(int af, const void *src, char *dest, size_t length)
+const char *bt_inet_ntop(int af, const void *src, char *dest, size_t length)
 {
 	if (af != AF_INET && af != AF_INET6)
 	{
@@ -51,14 +50,7 @@ const char *inet_ntop(int af, const void *src, char *dest, size_t length)
 	return result == SOCKET_ERROR ? NULL : dest;
 }
 
-#if defined _WIN32 && !defined _WIN32_WINNT
-#error _WIN32_WINNT must be defined, otherwise we do not know which windows \
-	version we are building for
-#endif
-
-#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x501
-
-int inet_pton(int af, const char* src, void* dest)
+int bt_inet_pton(int af, const char* src, void* dest)
 {
 	if (af != AF_INET && af != AF_INET6)
 	{
@@ -94,7 +86,6 @@ int inet_pton(int af, const char* src, void* dest)
 
 	return result == SOCKET_ERROR ? -1 : 1;
 }
-#endif
 
 #endif // _WIN32
 

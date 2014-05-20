@@ -6,9 +6,12 @@
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
 #include "snprintf.h" // for snprintf
 
-#ifdef _WIN32
-#include <ws2tcpip.h> // for inet_pton
-#endif
+
+#include "libutp_inet_ntop.h" // inetDefined in libutp. See  the (LONG) comment there
+
+//#ifdef _WIN32
+//#include <ws2tcpip.h> // for inet_pton
+//#endif
 
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;
@@ -229,51 +232,14 @@ uint32 parse_ip(cstr ip, bool *valid)
 	return r;
 }
 
-#if defined _WIN32 && NTDDI_VERSION < NTDDI_LONGHORN
-// This function didn't appear in windows until vista.
-// so we need to define it ourselves here
-int inet_pton(int af, const char* src, void* dest)
-{
-	if (af != AF_INET && af != AF_INET6)
-	{
-		return -1;
-	}
-
-	SOCKADDR_STORAGE address;
-	int address_length = sizeof(SOCKADDR_STORAGE);
-	int result = WSAStringToAddressA((char*)(src), af, 0,
-									 (sockaddr*)(&address),
-									 &address_length);
-
-	if (af == AF_INET)
-	{
-		if (result != SOCKET_ERROR)
-		{
-			sockaddr_in* ipv4_address =(sockaddr_in*)(&address);
-			memcpy(dest, &ipv4_address->sin_addr, sizeof(in_addr));
-		}
-		else if (strcmp(src, "255.255.255.255") == 0)
-		{
-			((in_addr*)(dest))->s_addr = INADDR_NONE;
-		}
-	}
-	else // AF_INET6
-	{
-		if (result != SOCKET_ERROR)
-		{
-			sockaddr_in6* ipv6_address = (sockaddr_in6*)(&address);
-			memcpy(dest, &ipv6_address->sin6_addr, sizeof(in6_addr));
-		}
-	}
-
-	return result == SOCKET_ERROR ? -1 : 1;
-}
-#endif
+// inet_pton is defined in libutp/libutp_inet_ntop.cpp
+// We have to define it, because this function didn't appear in windows until vista,
+// and uTorrent still ships on XP.
 
 in6_addr parse_ip_v6(cstr ip_v6, bool *valid)
 {
 	in6_addr a = IN6ADDR_ANY_INIT;
-	int r = inet_pton(AF_INET6, ip_v6, &a);
+	int r = INET_PTON(AF_INET6, ip_v6, &a);
 	if (valid)
 		*valid = (bool)(r == 1);
 	return a;
