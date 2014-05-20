@@ -9,10 +9,6 @@
 
 #include "libutp_inet_ntop.h" // inetDefined in libutp. See  the (LONG) comment there
 
-//#ifdef _WIN32
-//#include <ws2tcpip.h> // for inet_pton
-//#endif
-
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;
 in6_addr SockAddr::_in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
