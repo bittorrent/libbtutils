@@ -204,13 +204,22 @@ INCLUDE_UNITTESTS = \
 LD_COMPONENT_SHLIBFLAGS = -L$(UNSTRIPPEDLIBDESTDIR) -l$(LIBBASENAME)
 LD_SHLIB_FLAGS = $(LD_COMPONENT_SHLIBFLAGS) $(LD_SYSTEM_SHLIBFLAGS)
 
+# Valgrind testing
+
+VALGRIND_LOG = $(OUTDIR)/$(UNITTESTS_EXE_NAME).valgrind.log
+VALGRIND_ARGS = \
+	--tool=memcheck \
+	--leak-check=yes \
+	--log-file=$(VALGRIND_LOG) \
+	--error-exitcode=1
+
 #
 # Rules
 #
 
 # Build/test rules
 
-.phony: all test product
+.phony: all test product vgtest
 
 all: $(OBJDESTLIB) $(UT_EXE_DEST)
 
@@ -218,6 +227,18 @@ product: $(OBJDESTLIB)
 
 test: $(UT_EXE_DEST)
 	env LD_LIBRARY_PATH=$(UNSTRIPPEDLIBDESTDIR) $<
+
+vgtest: $(UT_EXE_DEST)
+	env LD_LIBRARY_PATH=$(UNSTRIPPEDLIBDESTDIR) valgrind $(VALGRIND_ARGS) $<
+	@echo "Checking for 'Invalid free'"
+	@grep "Invalid free" $(VALGRIND_LOG) ; SEARCH_RESULT=$$? ; if [ $$SEARCH_RESULT -eq 1 ] ; then exit 0 ; else exit 1 ; fi
+	@echo "Checking for 'Invalid write of size'"
+	@grep "Invalid write of size" $(VALGRIND_LOG) ; SEARCH_RESULT=$$? ; if [ $$SEARCH_RESULT -eq 1 ] ; then exit 0 ; else exit 1 ; fi
+	@echo "Checking for 'Process terminating with default action of signal'"
+	@grep "Process terminating with default action of signal" $(VALGRIND_LOG) ; SEARCH_RESULT=$$? ; if [ $$SEARCH_RESULT -eq 1 ] ; then exit 0 ; else exit 1 ; fi
+	@echo "Checking for 'Bad permissions for mapped region at address'"
+	@grep "Bad permissions for mapped region at address" $(VALGRIND_LOG) ; SEARCH_RESULT=$$? ; if [ $$SEARCH_RESULT -eq 1 ] ; then exit 0 ; else exit 1 ; fi
+	@echo "No error strings found in $(VALGRIND_LOG)"
 
 $(OBJDESTLIB): $(OBJDESTUNSTRIPPEDLIB)
 	strip -S -o $@ $<
