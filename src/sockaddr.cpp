@@ -7,7 +7,12 @@
 #include "snprintf.h" // for snprintf
 
 
+#ifdef _MSC_VER
 #include "libutp_inet_ntop.h" // inetDefined in libutp. See  the (LONG) comment there
+#else
+#include <arpa/inet.h> // for inet_ntop, inet_pton
+#define INET_PTON inet_pton
+#endif // WIN32
 
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;
