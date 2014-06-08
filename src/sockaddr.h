@@ -210,7 +210,7 @@ struct PACKED SockAddr {
 	bool operator!=(const SockAddr& rhs) const { return !(*this == rhs); }
 
 	bool ip_eq(const SockAddr& rhs) const { return memcmp(&_in, &rhs._in, sizeof(_in)) == 0; }
-	int ip_compare(const SockAddr& rhs) const;
+	int64 ip_compare(const SockAddr& rhs) const;
 
 	static SockAddr round_up(SockAddr ip, const SockAddr &mask);
 
@@ -220,7 +220,7 @@ struct PACKED SockAddr {
 	bool operator>=(const SockAddr& rhs) const { return compare(rhs) >= 0; }
 	bool operator<=(const SockAddr& rhs) const { return compare(rhs) <= 0; }
 
-	int compare(const SockAddr& rhs) const;
+	int64 compare(const SockAddr& rhs) const;
 
 	// Default constructor.  If v6 isn't enabled, creates a v4 (0,0) endpoint.
 	// Otherwise creates a v6 (::0,0) endpoint.
