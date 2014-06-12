@@ -29,9 +29,12 @@ const unsigned char *BencParser::ParseString(size_t *pSize)
 	if (_pEnd - _p < val) {
 		/*DbgLogf("Can't parse string with length longer than remaining buffer:  %Lu %s",
 			(uint64_t) val, (const unsigned char*) pReturn);*/
-		DEBUG_ASSERT(0);
+
+		// Tests in TestBencEntity.cpp cover this case
+		// DEBUG_ASSERT(0);
 		return NULL;	// Error will propagate out of the parser
 	}
+
 	unsigned char *pReturn = _p;
 	*pSize = val;
 	_p += val;

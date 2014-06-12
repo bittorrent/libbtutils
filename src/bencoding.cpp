@@ -673,7 +673,7 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 		}
 	}
 
-	return true;
+	return (parseResult != IBencParser::BERROR);
 }
 
  bool BencodedDict::ResumeDict(IBencParser *pParser, BencEntity **ent, AllocRegime *regime )
@@ -743,7 +743,7 @@ bool BencodedList::ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegim
 
 		lastIt = inserted;
 	}
-	return(parseResult != IBencParser::BERROR);
+	return (parseResult != IBencParser::BERROR);
 }
 
 const unsigned char *BencEntity::ParseInPlace(unsigned char *p, BencEntity &ent, const unsigned char *pend)
