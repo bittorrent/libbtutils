@@ -322,7 +322,7 @@ bool SockAddr::operator==(const SockAddr& rhs) const
 	return ip_eq(rhs);
 }
 
-int SockAddr::ip_compare(const SockAddr& rhs) const
+int64 SockAddr::ip_compare(const SockAddr& rhs) const
 {
 	// Both need to be either v4/mapped or v6 to be equal
 	const int i = can_make_v4() - rhs.can_make_v4();
@@ -330,7 +330,7 @@ int SockAddr::ip_compare(const SockAddr& rhs) const
 
 	// If both are mapped or v4, compare v4 addr
 	if (can_make_v4()) {
-		return make_v4().get_addr4() - rhs.make_v4().get_addr4();
+		return int64(make_v4().get_addr4()) - int64(rhs.make_v4().get_addr4());
 	}
 
 	// Otherwise compare v6 addr
@@ -340,12 +340,12 @@ int SockAddr::ip_compare(const SockAddr& rhs) const
 	return memcmp(_sin6, rhs._sin6, sizeof(_sin6));
 }
 
-int SockAddr::compare(const SockAddr& rhs) const
+int64 SockAddr::compare(const SockAddr& rhs) const
 {
 	if (&rhs == this)
 		return 0;
 
-	const int i = ip_compare(rhs);
+	const int64 i = ip_compare(rhs);
 	if (i) return i;
 
 	return _port - rhs._port;
