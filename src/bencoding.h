@@ -17,7 +17,7 @@
 //#include "templates.h"
 #include "utypes.h" // for tstr, ctstr etc.
 
-#include "refbase.h" // for BencEntity RefBase
+#include "RefBase.h" // for BencEntity RefBase
 
 #ifdef _UNICODE
 typedef std::wstring t_string;
