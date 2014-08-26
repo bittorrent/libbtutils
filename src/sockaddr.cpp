@@ -6,15 +6,17 @@
 #include "snprintf.h" // for snprintf
 
 
-// inet.h: for inet_ntop, inet_pton is handled separately
-// because inet_pton was introduced in windows post-XP, and
+// inet.h: inet_ntop, inet_pton are defined in inet_ntop.h 
+// because inet_pton was introduced in windows after XP, and
 // we need to build and link on that target as well.
-#ifndef _MSC_VER
-#include <arpa/inet.h>
-#define bt_inet_ntop inet_ntop
-#define bt_inet_pton inet_pton
-#else
+#ifdef _MSC_VER
 #include "inet_ntop.h"
+#define INET_PTON bt_inet_pton
+#define INET_NTOP bt_inet_ntop
+#else
+#include <arpa/inet.h>
+#define INET_PTON inet_pton
+#define INET_NTOP inet_ntop
 #endif
 
 // Set by Network_Initialize if system supports IPv6
@@ -243,7 +245,7 @@ uint32 parse_ip(cstr ip, bool *valid)
 in6_addr parse_ip_v6(cstr ip_v6, bool *valid)
 {
 	in6_addr a = IN6ADDR_ANY_INIT;
-	int r = bt_inet_pton(AF_INET6, ip_v6, &a);
+	int r = INET_PTON(AF_INET6, ip_v6, &a);
 	if (valid)
 		*valid = (bool)(r == 1);
 	return a;
