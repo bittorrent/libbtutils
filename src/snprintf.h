@@ -12,8 +12,10 @@
 // MinGW uses microsofts runtime
 #if defined _MSC_VER || defined __MINGW32__
 #define PRId64 "I64d"
-#else
+#define PRIu64 "I64u"
+#elif !defined PRId64
 #define PRId64 "lld"
+#define PRIu64 "llu"
 #endif
 #endif
 
