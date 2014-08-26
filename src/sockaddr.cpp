@@ -2,7 +2,6 @@
 
 #include <string.h> // for memcpy
 #include <algorithm> // for std::min
-#include "inet_ntop.h"
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
 #include "snprintf.h" // for snprintf
 
@@ -12,6 +11,10 @@
 // we need to build and link on that target as well.
 #ifndef _MSC_VER
 #include <arpa/inet.h>
+#define bt_inet_ntop inet_ntop
+#define bt_inet_pton inet_pton
+#else
+#include "inet_ntop.h"
 #endif
 
 // Set by Network_Initialize if system supports IPv6
