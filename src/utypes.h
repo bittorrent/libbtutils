@@ -36,6 +36,11 @@ typedef uint32 DWORD;
 typedef uint64 ULONGLONG;
 #endif
 
+#ifdef ANDROID
+typedef int64 LONGLONG;
+#define INT64_MAX 0x7fffffffffffffffLL
+#endif
+
 #if __cplusplus > 199711L
 static_assert (8 == sizeof(uint64), "sizeof uint64 is not 8");
 static_assert (8 == sizeof(int64), "sizeof int64 is not 8");
@@ -59,6 +64,8 @@ static_assert (4 == sizeof(uint32), "sizeof uint32 is not 4");
   #define _T(x) x
   #endif
 #endif /* _T */
+
+#define _W(x) L##x
 
 typedef const tchar * ctstr;
 typedef tchar * tstr;
