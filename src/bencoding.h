@@ -350,8 +350,11 @@ public:
 
 	BencEntity *Get(size_t i) const;
 	size_t GetCount() const;
-	BencodedDict *GetDict(size_t i);
-	BencodedList *GetList(size_t i);
+	BencodedDict* GetDict(size_t i);
+	BencodedDict const *GetDict(size_t i) const;
+	BencodedList* GetList(size_t i);
+	BencodedList const *GetList(size_t i) const;
+
 	const char * GetString(size_t i, size_t *length = NULL) const;
 	// See comment at GetStringT()
 	t_string GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
@@ -376,22 +379,26 @@ private:
 	BencodedList(const BencodedList&);
 };
 
+// TODO: make all these classes consistent! If it's not supposed to be
+// copyable, make it non-copy-assignable. Make them all movable!
 class BencodedDict : public BencEntity {
 public:
 	BencodedDict(): BencEntity( BENC_DICT ){ dict = new BencodedEntityMap(); }
 
 	size_t GetCount() const { return dict->size(); }
-	const BencEntity *Get(const char * key) const;
+	const BencEntity *Get(const char * key, int len = -1) const;
 
 	// Same as above, except with de-const wrappage
-	BencEntity* Get(const char * key) {
+	BencEntity* Get(const char * key, int len = -1) {
 		const BencodedDict* me = static_cast<const BencodedDict*>(this);
-		return const_cast<BencEntity*>(me->Get(key));
+		return const_cast<BencEntity*>(me->Get(key, len));
 	}
 
-	BencodedDict *GetDict(const char * key);
-	BencodedList *GetList(const char * key);
-	const char * GetString(const char * key, size_t *length = NULL) const;
+	BencodedDict* GetDict(const char* key, int len = -1);
+	BencodedDict const* GetDict(const char* key, int len = -1) const;
+	BencodedList* GetList(const char* key, int len = -1);
+	BencodedList const* GetList(const char* key, int len = -1) const;
+	const char* GetString(const char* key, size_t *length = NULL) const;
 
 	// Like GetString, but returns a malloc'ed copy
 	char * GetStringCopy(const char * key) const;
@@ -405,13 +412,15 @@ public:
 	BencEntityMem *InsertString(const std::string& key, const std::string& str, int length =-1);
 	BencEntity *InsertInt(const char * key, int arg);
 	BencEntity *InsertInt64(const char * key, int64 arg);
-	BencodedDict *InsertDict(const char * key);
-	BencodedList *InsertList(const char * key);
+	BencodedDict *InsertDict(const char * key, int len = -1);
+	BencodedList *InsertList(const char * key, int len = -1);
 
 	int64 GetInt64(const char * key, int64 def = 0) const;
-	bool HasKey(const char * key) const { return Get(key) != NULL; }
+	bool HasKey(const char * key, int len = -1) const { return Get(key, len) != NULL; }
 
-	BencEntity *Insert(const char * key, BencEntity &);
+	BencEntity *Insert(const char* key, int len, BencEntity& e);
+	BencEntity *Insert(const char* key, BencEntity& e)
+	{ return Insert(key, -1, e); }
 	BencEntityMem *AppendMultiple(char * key, bool allowmultiple = true);
 	void Delete(const char * key);
 	void CopyFrom(const BencEntity& b);
