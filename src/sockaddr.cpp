@@ -2,17 +2,22 @@
 
 #include <string.h> // for memcpy
 #include <algorithm> // for std::min
-#include "inet_ntop.h"
 #include "endian_utils.h" // for ReadBE*() and WriteBE*()
 #include "snprintf.h" // for snprintf
 
 
+// inet.h: inet_ntop, inet_pton are defined in inet_ntop.h 
+// because inet_pton was introduced in windows after XP, and
+// we need to build and link on that target as well.
 #ifdef _MSC_VER
-#include "libutp_inet_ntop.h" // inetDefined in libutp. See  the (LONG) comment there
+#include "inet_ntop.h"
+#define INET_PTON bt_inet_pton
+#define INET_NTOP bt_inet_ntop
 #else
-#include <arpa/inet.h> // for inet_ntop, inet_pton
+#include <arpa/inet.h>
 #define INET_PTON inet_pton
-#endif // WIN32
+#define INET_NTOP inet_ntop
+#endif
 
 // Set by Network_Initialize if system supports IPv6
 bool SockAddr::_use_ipv6 = false;

@@ -17,6 +17,8 @@
 //#include "templates.h"
 #include "utypes.h" // for tstr, ctstr etc.
 
+#include "RefBase.h" // for BencEntity RefBase
+
 #ifdef _UNICODE
 typedef std::wstring t_string;
 #else
@@ -138,8 +140,9 @@ public:
 	virtual void EmitEntity(const BencEntity *e);
 };
 
-class BencEntity {
+class BencEntity : public RefBase {
 public:
+	REFBASE
 	union {
 		int64 num;
 		BencodedMem *mem;
