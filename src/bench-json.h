@@ -54,16 +54,15 @@ class JsonString : public JsonValue {
     JsonString(const std::string& value) : value(value) {}
 
     std::string serialize() const {
-        return "\"" + escape_json() + "\"";
+        return "\"" + escape() + "\"";
     }
 
     JsonString* clone() const { return new JsonString(value); }
 
-  private:
-    std::string escape_json() const {
+	static std::string escape(const std::string& json) {
         std::string new_str;
-        for (int i = 0; i < value.size(); i++) {
-            switch (value[i]) {
+        for (int i = 0; i < json.size(); i++) {
+            switch (json[i]) {
                 case '\\': new_str += "\\\\"; break;
                 case '"': new_str += "\\\""; break;
                 case '/': new_str += "\\/"; break;
@@ -72,10 +71,15 @@ class JsonString : public JsonValue {
                 case '\n': new_str += "\\n"; break;
                 case '\r': new_str += "\\r"; break;
                 case '\t': new_str += "\\t"; break;
-                default: new_str += value[i]; break;
+                default: new_str += json[i]; break;
             }
         }
         return new_str;
+    }
+
+  private:
+    std::string escape() const {
+		return escape(value);
     }
 
     std::string value;
