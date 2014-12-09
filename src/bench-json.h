@@ -89,6 +89,13 @@ class JsonObject : public JsonValue {
   public:
     typedef std::map<JsonString*, JsonValue*>::const_iterator const_iterator;
 
+	JsonObject() {}
+	JsonObject(const JsonObject& o) {
+		for (const_iterator it = o.map_.begin(); it != o.map_.end(); ++it) {
+			insert(*it->first, *it->second);
+		}
+	}
+
     // This is for convenience.
     void insert(const std::string& str, const JsonValue& value) {
         insert(JsonString(str), value);
@@ -98,9 +105,13 @@ class JsonObject : public JsonValue {
         map_[key.clone()] = value.clone();
     }
 
-    std::string serialize() const {
+	std::string serialize() const {
+		return "{" + serializeWithoutBraces() + "}";
+	}
+
+    std::string serializeWithoutBraces() const {
         if (map_.empty())
-            return "{}";
+            return "";
 
         const_iterator it = map_.begin();
         std::string value = "";
@@ -113,7 +124,7 @@ class JsonObject : public JsonValue {
             ++it;
         }
 
-        return "{" + value + "}";
+		return value;
     }
 
     JsonObject *clone() const {
