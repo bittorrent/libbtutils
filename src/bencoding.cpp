@@ -998,10 +998,21 @@ BencodedDict *BencodedList::GetDict(size_t i)
 	return AsDict(Get(i));
 }
 
+BencodedDict const* BencodedList::GetDict(size_t i) const
+{
+	return AsDict(Get(i));
+}
+
 BencodedList *BencodedList::GetList(size_t i)
 {
 	return AsList(Get(i));
 }
+
+BencodedList const* BencodedList::GetList(size_t i) const
+{
+	return AsList(Get(i));
+}
+
 const char* BencodedList::GetString(size_t i, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
@@ -1122,11 +1133,11 @@ BencodedList *BencodedList::AppendList()
 
 // lookup function.  Returns NULL if the key is not found.
 // The returned pointer is not a copy.  Do not deallocate it.
-const BencEntity *BencodedDict::Get(const char* key) const
+const BencEntity *BencodedDict::Get(const char* key, int len) const
 {
 	assert(bencType == BENC_DICT);
 	assert(dict);
-	BencKey Key( (unsigned char *) key, (int)strlen(key));
+	BencKey Key( (unsigned char *) key, len < 0 ? (int)strlen(key) : len);
 	BencodedEntityMap::const_iterator it = dict->find( Key );
 	if( it == dict->end() )
 		return NULL;
@@ -1137,15 +1148,23 @@ const BencEntity *BencodedDict::Get(const char* key) const
 // Returns dict matching the given key or returns NULL if the
 // key does not exist or the associated value is not a dict.
 // The returned pointer is not a copy.  Do not deallocate it.
-BencodedDict *BencodedDict::GetDict(const char* key) {
-	return AsDict(Get(key));
+BencodedDict* BencodedDict::GetDict(const char* key, int len) {
+	return AsDict(Get(key, len));
+}
+
+BencodedDict const* BencodedDict::GetDict(const char* key, int len) const {
+	return AsDict(Get(key, len));
 }
 
 // Returns list matching the given key or returns NULL if the
 // key does not exist or the associated value is not a list.
 // The returned pointer is not a copy.  Do not deallocate it.
-BencodedList *BencodedDict::GetList(const char* key) {
-	return AsList(Get(key));
+BencodedList* BencodedDict::GetList(const char* key, int len) {
+	return AsList(Get(key, len));
+}
+
+BencodedList const* BencodedDict::GetList(const char* key, int len) const {
+	return AsList(Get(key, len));
 }
 
 // Returns string matching the given key or returns NULL if the
@@ -1273,7 +1292,7 @@ void BencodedDict::check_invariant() const
 
 #endif
 
-BencEntity *BencodedDict::Insert(const char* key, BencEntity &val)
+BencEntity *BencodedDict::Insert(const char* key, int len, BencEntity &val)
 {
 	INVARIANT_CHECK;
 
@@ -1282,7 +1301,7 @@ BencEntity *BencodedDict::Insert(const char* key, BencEntity &val)
 	assert(dict);
 	BencKey Key;
 	// This way, Key copies as not inplace (deep copy)
-	Key.SetArray( (unsigned char *) key, strlen( key ) );
+	Key.SetArray( (unsigned char *) key, len < 0 ? strlen(key) : len);
 	// insert will make a deep copy of bKey, but a shallow copy of val,
 	// which we zero out before returning.
 	std::pair<BencodedEntityMap::iterator, bool> result = dict->insert(std::pair<BencKey, BencEntity>(Key, val));
@@ -1327,7 +1346,7 @@ BencEntityMem* BencodedDict::AppendMultiple(char* key, bool allowmultiple) {
 
 	if (!slot) {// allowmultiple is off, or allowmultiple found nothing present
 		BencEntityMem beM;
-		slot = (BencEntityMem *) this->Insert(key, beM);
+		slot = (BencEntityMem *) this->Insert(key, -1, beM);
 	}
 
 	return slot;
@@ -1366,7 +1385,7 @@ BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int 
 	assert(bencType == BENC_DICT);
 	BencEntityMem beM;
 	beM.SetStr( str, length );
-	return (BencEntityMem *) Insert( key, beM );
+	return (BencEntityMem *) Insert( key, -1, beM );
 }
 
 BencEntityMem *BencodedDict::InsertStringT(const char* key, ctstr tstr)
@@ -1374,7 +1393,7 @@ BencEntityMem *BencodedDict::InsertStringT(const char* key, ctstr tstr)
 	assert(bencType == BENC_DICT);
 	BencEntityMem beM;
 	beM.SetStrT( tstr );
-	return (BencEntityMem *) Insert( key, beM );
+	return (BencEntityMem *) Insert( key, -1, beM );
 }
 
 BencEntity *BencodedDict::InsertInt(const char* key, int val)
@@ -1382,7 +1401,7 @@ BencEntity *BencodedDict::InsertInt(const char* key, int val)
 	assert(bencType == BENC_DICT);
 	BencEntity beInt;
 	beInt.SetInt( val );
-	return Insert( key, beInt );
+	return Insert( key, -1, beInt );
 }
 
 BencEntity *BencodedDict::InsertInt64(const char* key, int64 val)
@@ -1390,18 +1409,19 @@ BencEntity *BencodedDict::InsertInt64(const char* key, int64 val)
 	assert(bencType == BENC_DICT);
 	BencEntity beInt;
 	beInt.SetInt64( val );
-	return Insert( key, beInt );
+	return Insert( key, -1, beInt );
 }
 
-BencodedDict *BencodedDict::InsertDict(const char* key)
+BencodedDict *BencodedDict::InsertDict(const char* key, int len)
 {
 	assert(bencType == BENC_DICT);
 	BencodedDict beD;
-	return (BencodedDict *) Insert( key, beD);
+	return (BencodedDict *) Insert( key, len, beD);
 }
-BencodedList *BencodedDict::InsertList(const char* key)
+
+BencodedList *BencodedDict::InsertList(const char* key, int len)
 {
 	assert(bencType == BENC_DICT);
 	BencodedList beL;
-	return (BencodedList *) Insert(key, beL);
+	return (BencodedList *) Insert(key, len, beL);
 }
