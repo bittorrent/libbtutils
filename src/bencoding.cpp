@@ -48,7 +48,7 @@ char* wstr_to_utf8(const wchar_t * input, size_t *out_len)
 char* str_to_utf8(const char * input, size_t *out_len)
 {
 	if (out_len) *out_len = strlen(input);
-	return strdup(input);
+	return _strdup(input);
 }
 
 #ifdef _UNICODE
@@ -1186,7 +1186,7 @@ char* BencodedDict::GetStringCopy(const char* key) const
 	if (!pMem) return NULL;
 	const char* val = pMem->GetString(&len);
 	assert(val[len] == 0);
-	return strdup(val);
+	return _strdup(val);
 }
 
 t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
