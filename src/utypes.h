@@ -65,8 +65,6 @@ static_assert (4 == sizeof(uint32), "sizeof uint32 is not 4");
   #endif
 #endif /* _T */
 
-#define _W(x) L##x
-
 typedef const tchar * ctstr;
 typedef tchar * tstr;
 typedef const wchar_t * cwstr;
