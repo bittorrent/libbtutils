@@ -229,8 +229,8 @@ struct PACKED SockAddr {
 	// Construct from v4 addr, port (host byte order)
 	SockAddr(uint32 addr, uint16 port);
 
-	// Construct from v6 addr, port (host byte order, except in6_addr)
-	SockAddr(const in6_addr& addr, uint16 port);
+	// Construct from in6 buffer; INVALID_PORT is default, so must be set
+	SockAddr(const byte* in6);
 
 	// Construct from SOCKADDR_STORAGE
 	SockAddr(const SOCKADDR_STORAGE& sa);

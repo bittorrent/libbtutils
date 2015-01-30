@@ -281,7 +281,7 @@ bool SockAddr::is_mapped_v4() const
         if (get_family() != AF_INET6) {
             return false;
         }
-	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6) != 0;
+	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6);
 }
 #endif
 
@@ -391,16 +391,14 @@ SockAddr::SockAddr(uint32 addr, uint16 port)
 }
 
 
-SockAddr::SockAddr(const in6_addr& addr, uint16 port)
+SockAddr::SockAddr(const byte* in6)
 {
-	set_family(AF_INET6);
-	memcpy(_sin6, &addr, sizeof(_sin6));
-	_port = port;
-
-	if (is_mapped_v4())
-		set_family(AF_INET);
+    _port = INVALID_PORT;
+    set_family(AF_INET6);
+    memcpy(_sin6, in6, sizeof(_sin6));
+    if (is_mapped_v4())
+        set_family(AF_INET);
 }
-
 
 SockAddr::SockAddr(const SOCKADDR_STORAGE& sa)
 {
@@ -446,7 +444,8 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 					end++;
 					portval = atoi(end); // xxx use strtol
 				}
-				retval = SockAddr(ip6, portval);
+				retval = SockAddr((byte*)&ip6);
+                retval.set_port(portval);
 			}
 		}
 	} else {
@@ -477,7 +476,8 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 				// IPv6, rfc3513 style
 				const in6_addr ip6 = parse_ip_v6(addrspec, &ok);
 				if (ok) {
-					retval = SockAddr(ip6, 0);
+					retval = SockAddr((byte*)&ip6);
+					retval.set_port(0);
 				}
 			}
 		}
