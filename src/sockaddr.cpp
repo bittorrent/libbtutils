@@ -390,6 +390,16 @@ SockAddr::SockAddr(uint32 addr, uint16 port)
 	_port = port;
 }
 
+SockAddr::SockAddr(const in6_addr& addr, uint16 port)
+{
+	set_family(AF_INET6);
+	memcpy(_sin6, &addr, sizeof(_sin6));
+	_port = port;
+
+	if (is_mapped_v4())
+		set_family(AF_INET);
+}
+
 
 SockAddr::SockAddr(const byte* in6)
 {
@@ -444,8 +454,7 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 					end++;
 					portval = atoi(end); // xxx use strtol
 				}
-				retval = SockAddr((byte*)&ip6);
-				retval.set_port(portval);
+				retval = SockAddr(ip6, portval);
 			}
 		}
 	} else {
@@ -476,8 +485,7 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 				// IPv6, rfc3513 style
 				const in6_addr ip6 = parse_ip_v6(addrspec, &ok);
 				if (ok) {
-					retval = SockAddr((byte*)&ip6);
-					retval.set_port(0);
+					retval = SockAddr(ip6, 0);
 				}
 			}
 		}
