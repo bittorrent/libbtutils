@@ -445,7 +445,7 @@ SockAddr SockAddr::parse_addr(cstr addrspec, bool* valid)
 					portval = atoi(end); // xxx use strtol
 				}
 				retval = SockAddr((byte*)&ip6);
-                retval.set_port(portval);
+				retval.set_port(portval);
 			}
 		}
 	} else {
