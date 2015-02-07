@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <locale>
 
 class JsonValue {
   public:
@@ -96,10 +97,26 @@ class JsonObject : public JsonValue {
 		}
 	}
 
-    // This is for convenience.
     void insert(const std::string& str, const JsonValue& value) {
         insert(JsonString(str), value);
     }
+
+	void insert(const std::string& str, int value) {
+		insert(JsonString(str), JsonNumber<int>(value));
+	}
+
+	void insert(const std::string& str, const std::string& value) {
+		insert(JsonString(str), JsonString(value));
+	}
+
+#if 0 // For when C++11 comes to town
+	void insert(const std::string& str, const std::wstring& value) {
+		typedef std::codecvt_utf8<wchar_t> convert_type;
+		std::wstring_convert<convert_type, wchar_t> converter;
+		std::string converted_str = converter.to_bytes(value);
+		insert(JsonString(str), JsonString(converted_str));
+	}
+#endif
 
     void insert(const JsonString& key, const JsonValue& value) {
         map_[key.clone()] = value.clone();
