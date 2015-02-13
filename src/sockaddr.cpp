@@ -281,7 +281,7 @@ bool SockAddr::is_mapped_v4() const
         if (get_family() != AF_INET6) {
             return false;
         }
-	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6) != 0;
+	return IN6_IS_ADDR_V4MAPPED((in6_addr*)_sin6);
 }
 #endif
 
@@ -390,7 +390,6 @@ SockAddr::SockAddr(uint32 addr, uint16 port)
 	_port = port;
 }
 
-
 SockAddr::SockAddr(const in6_addr& addr, uint16 port)
 {
 	set_family(AF_INET6);
@@ -401,6 +400,15 @@ SockAddr::SockAddr(const in6_addr& addr, uint16 port)
 		set_family(AF_INET);
 }
 
+
+SockAddr::SockAddr(const byte* in6)
+{
+    _port = INVALID_PORT;
+    set_family(AF_INET6);
+    memcpy(_sin6, in6, sizeof(_sin6));
+    if (is_mapped_v4())
+        set_family(AF_INET);
+}
 
 SockAddr::SockAddr(const SOCKADDR_STORAGE& sa)
 {
