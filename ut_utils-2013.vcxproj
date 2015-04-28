@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\PurchaseManager.cpp" />
     <ClCompile Include="src\sockaddr.cpp" />
     <ClCompile Include="src\inet_ntop.cpp" />
     <ClCompile Include="src\RefBase.cpp" />
@@ -49,6 +50,7 @@
     <ClCompile Include="src\DecodeEncodedString.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PurchaseManager.h" />
     <ClInclude Include="src\RefBase.h" />
     <ClInclude Include="src\inet_ntop.h" />
     <ClInclude Include="src\sockaddr.h" />
@@ -135,41 +137,49 @@
     <Import Project="..\ut_core\prop_sheets\win32-2012.props" />
     <Import Project="..\ut_core\prop_sheets\debug-2012.props" />
     <Import Project="..\ut_core\prop_sheets\memleak.vsprops" />
+    <Import Project="..\orderLib\include\orderLib_debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRTDebug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\win32-2012.props" />
     <Import Project="..\ut_core\prop_sheets\debug-2012.props" />
+    <Import Project="..\orderLib\include\orderLib.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\x64-2012.props" />
     <Import Project="..\ut_core\prop_sheets\debug-2012.props" />
+    <Import Project="..\orderLib\include\orderLib_debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRTDebug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\x64-2012.props" />
     <Import Project="..\ut_core\prop_sheets\debug-2012.props" />
+    <Import Project="..\orderLib\include\orderLib_debug.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\win32-2012.props" />
     <Import Project="..\ut_core\prop_sheets\release-2012.props" />
+    <Import Project="..\orderLib\include\orderLib.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRTRelease|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\win32-2012.props" />
     <Import Project="..\ut_core\prop_sheets\release-2012.props" />
+    <Import Project="..\orderLib\include\orderLib.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\x64-2012.props" />
     <Import Project="..\ut_core\prop_sheets\release-2012.props" />
+    <Import Project="..\orderLib\include\orderLib.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='WinRTRelease|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\x64-2012.props" />
     <Import Project="..\ut_core\prop_sheets\release-2012.props" />
+    <Import Project="..\orderLib\include\orderLib.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
