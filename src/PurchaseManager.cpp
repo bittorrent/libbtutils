@@ -5,9 +5,9 @@
 #include "winmsgs.h"
 #include "registry.h"
 #include "Base64.h"
+#include "BenchThread.h"
 
 //ut_win
-#include "StatsUpload/EventNetworkTransmission.h"
 #include "verification_lib/plus_fingerprint.h"
 
 //orderLib
@@ -103,6 +103,7 @@ tstring PurchaseManager::getCustomerId() throw() {
 tstring PurchaseManager::getCustomerJson() {
     std::string customerId = to_string(PurchaseManager::getCustomerId()).c_str();
     return to_tstring(orderLib::Reconciliation::getCustomerJson(customerId));
+//	return tstring(_T(""));
 }
 
 //######################################################################
@@ -136,7 +137,7 @@ void PurchaseManager::reconcilePurchaseState_callback(orderLib::Reconciliation::
     //We don't wan to pass it as if we succeeded, that would be interpreded as the customer having no purchases.
     if (! purchases) {
         //Oops.
-        EventNetworkTransmission::SendBenchPing(NULL, USER_INTERACTION, "", "Reconciliation_queryServer_fail"); 
+		BenchThread::ping(t_iVal::USER_INTERACTION, "", "Reconciliation_queryServer_fail");
         PurchaseManager::reconcilePurchaseState_handleFailure();
         return;
     }
@@ -177,8 +178,8 @@ void PurchaseManager::reconcilePurchaseState() throw() {
     catch (std::exception &Ex) {
         //Couldn't start it.  Log and flow through.
         string jsonErr;
-        jsonErr += EventNetworkTransmission::AddJson("error", string(Ex.what()), false);
-        EventNetworkTransmission::SendBenchPing(NULL, USER_INTERACTION, jsonErr, "Reconciliation_queryServer"); 
+		jsonErr += BenchThread::AddJson("error", string(Ex.what()));
+		BenchThread::ping(t_iVal::USER_INTERACTION, jsonErr, "Reconciliation_queryServer");
     }
 
     //Failed.  We should still reconcile but do it through this fail function.
@@ -200,8 +201,8 @@ void PurchaseManager::reconcilePurchaseState_handleFailure() throw() {
     }
     catch (std::exception &Ex) {
         string jsonErr;
-        jsonErr += EventNetworkTransmission::AddJson("error", string(Ex.what()), false);
-        EventNetworkTransmission::SendBenchPing(NULL, USER_INTERACTION, jsonErr, "PurchaseManager_reconcilePurchaseState_handleFailure"); 
+        jsonErr += BenchThread::AddJson("error", string(Ex.what()));
+		BenchThread::ping(t_iVal::USER_INTERACTION, jsonErr, "PurchaseManager_reconcilePurchaseState_handleFailure");
     }
 }
 
@@ -240,8 +241,8 @@ void PurchaseManager::reconcilePurchaseState_continue(const orderLib::Reconcilia
         catch (std::exception &Ex) {
             //Oops... something went wrong.
             string json;
-            json += EventNetworkTransmission::AddJson("error", string(Ex.what()), false);
-            EventNetworkTransmission::SendBenchPing(NULL, USER_INTERACTION, json, "cannotReconcilePurchase"); 
+            json += BenchThread::AddJson("error", string(Ex.what()));
+			BenchThread::ping(t_iVal::USER_INTERACTION, json, "cannotReconcilePurchase");
 
             //Nothing else we can do.
             continue;
