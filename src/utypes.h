@@ -37,7 +37,6 @@ typedef uint64 ULONGLONG;
 #endif
 
 #ifdef ANDROID
-typedef int64 LONGLONG;
 #define INT64_MAX 0x7fffffffffffffffLL
 #endif
 
