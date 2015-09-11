@@ -49,7 +49,7 @@
     <ClCompile Include="src\DecodeEncodedString.cpp" />
   </ItemGroup>
   <ItemGroup>
-     <ClInclude Include="src\RefBase.h" />
+    <ClInclude Include="src\RefBase.h" />
     <ClInclude Include="src\inet_ntop.h" />
     <ClInclude Include="src\sockaddr.h" />
     <ClInclude Include="src\target.h" />
@@ -160,7 +160,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\win32-2012.props" />
     <Import Project="..\ut_core\prop_sheets\release-2012.props" />
-   </ImportGroup>
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\ut_core\prop_sheets\x64-2012.props" />
@@ -180,6 +180,7 @@
       <WarningLevel>Level2</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -234,6 +235,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
