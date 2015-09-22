@@ -67,10 +67,8 @@ public:
 	//purely here for convention's sake
 	Interface* get() const { return ptr; }
 
-	// assert that ptr is NULL since this is likely passed in to
-	// QueryInterface for it to be filled in
 	Interface** operator&() const
-	{ assert(ptr == NULL); return (Interface**)&ptr; }
+	{ return (Interface**)&ptr; }
 
 	void reset(Interface* p = NULL)
 	{
