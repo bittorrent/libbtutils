@@ -133,6 +133,7 @@ public:
 	void EmitChar(char);
 	void Emit(const void *a, size_t len);
 	unsigned char* GetResult(size_t* len);
+	std::string GetResult();
 };
 
 class BencodedEmitter : public BencodedEmitterBase {
@@ -266,6 +267,7 @@ private:
 	static bool DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *regime);
 };
 
+std::string SerializeBencEntity(const BencEntity* entity);
 unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len);
 
 class BencEntityMem : public BencEntity {

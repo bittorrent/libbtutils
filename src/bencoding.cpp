@@ -342,6 +342,14 @@ void BencodedEmitterBase::Emit(const void *a, size_t len) {
 	}
 }
 
+std::string BencodedEmitterBase::GetResult() {
+	size_t len;
+	unsigned char* res = GetResult(&len);
+	std::string s((char*)res, len);
+	free(res);
+	return s;
+}
+
 unsigned char* BencodedEmitterBase::GetResult(size_t* len) {
 	unsigned char* result = static_cast<unsigned char*>(malloc(_emit_buf.size()*sizeof(unsigned char)));
 	memcpy(result, &_emit_buf[0], _emit_buf.size()*sizeof(unsigned char));
@@ -487,6 +495,12 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 		}
 	}
 #endif
+
+std::string SerializeBencEntity(const BencEntity* entity) {
+	BencodedEmitter emit;
+	emit.EmitEntity(entity);
+	return emit.GetResult();
+}
 
 unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len) {
 	BencodedEmitter emit;
