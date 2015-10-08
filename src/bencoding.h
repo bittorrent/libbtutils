@@ -53,18 +53,6 @@ template< typename T > class BencArray
 protected:
 	std::vector<T> _arr;
 public:
-	// These are necessary for Posix/GCC (wtf?)
-	/*
-	using LList<T>::Init;
-	using LList<T>::Guarantee;
-	using LList<T>::Append;
-	using LList<T>::mem;
-	using LList<T>::SetArray;
-	using LList<T>::StealArray;
-	using LList<T>::GetCount;
-	using LList<T>::Free;
-	*/
-
 	BencArray() { Clear(); }
 	BencArray( const BencArray<T> &b ) {
 		// BencArrays must always be null terminated
