@@ -311,11 +311,9 @@ TEST(Bencoding, MoreNestedDictionary) {
 	BencodedDict b;
 	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
 	ASSERT_EQ(BENC_DICT, b.GetType());
-	size_t len = 0;
-	unsigned char *serialized = b.Serialize(&len);
-	EXPECT_EQ(sizeof(buffer) - 1, len);
-	EXPECT_EQ(0, memcmp(serialized, buffer, sizeof(buffer) - 1));
-	free( serialized );
+	std::string serialized = b.Serialize();
+	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
+	EXPECT_EQ(0, memcmp(serialized.c_str(), buffer, sizeof(buffer) - 1));
 }
 
 // out bdecoder doesn't support this!
@@ -324,11 +322,9 @@ TEST(Bencoding, DISABLED_plain_string) {
 	BencodedDict b;
 	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
 	ASSERT_EQ(BENC_STR, b.GetType());
-	size_t len = 0;
-	unsigned char *serialized = b.Serialize(&len);
-	EXPECT_EQ(sizeof(buffer) - 1, len);
-	EXPECT_EQ(0, memcmp(serialized, buffer, sizeof(buffer) - 1));
-	free( serialized );
+	std::string serialized = b.Serialize();
+	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
+	EXPECT_EQ(0, memcmp(serialized.c_str(), buffer, sizeof(buffer) - 1));
 }
 
 TEST(Bencoding, DISABLED_InfoSection) {
@@ -341,11 +337,9 @@ TEST(Bencoding, DISABLED_InfoSection) {
 	BencodedDict b;
 	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + read));
 	ASSERT_EQ(BENC_DICT, b.GetType());
-	size_t len = 0;
-	unsigned char *serialized = b.Serialize(&len);
-	EXPECT_EQ(read, len);
-	EXPECT_EQ(0, memcmp(serialized, buffer, read));
-	free( serialized );
+	std::string serialized = b.Serialize();
+	EXPECT_EQ(read, serialized.size());
+	EXPECT_EQ(0, memcmp(serialized.c_str(), buffer, read));
 }
 
 TEST(Bencoding, Torrent) {
@@ -354,11 +348,9 @@ TEST(Bencoding, Torrent) {
 				dict, (const unsigned char*)(unittest::torrent_data + 17115)));
 	ASSERT_EQ(BENC_DICT, dict.GetType());
 	ASSERT_EQ(static_cast<size_t>(17115), sizeof(unittest::torrent_data));
-	size_t len = 0;
-	unsigned char *serialized = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(17115), len);
-	EXPECT_EQ(0, memcmp(serialized, unittest::torrent_data, len));
-	free( serialized );
+	std::string serialized = dict.Serialize();
+	EXPECT_EQ(static_cast<size_t>(17115), serialized.size());
+	EXPECT_EQ(0, memcmp(serialized.c_str(), unittest::torrent_data, serialized.size()));
 }
 
 TEST(Bencoding, TorrentWithRegion) {
@@ -371,11 +363,9 @@ TEST(Bencoding, NestedDictionarySerialize) {
 	BencodedDict b;
 	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
 	ASSERT_EQ(BENC_DICT, b.GetType());
-	size_t len;
-	unsigned char* serialized = b.Serialize(&len);
-	EXPECT_EQ(sizeof(buffer) - 1, len);
-	EXPECT_EQ(0, memcmp(buffer, serialized, len));
-	free( serialized );
+	std::string serialized = b.Serialize();
+	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
+	EXPECT_EQ(0, memcmp(buffer, serialized.c_str(), serialized.size()));
 }
 
 TEST(Bencoding, LongInt) {
@@ -385,11 +375,9 @@ TEST(Bencoding, LongInt) {
 	BencEntity* value = ent.Get("k");
 	EXPECT_EQ(BENC_BIGINT, value->GetType());
 	EXPECT_EQ(12970376315, value->GetInt64(0));
-	size_t len;
-	unsigned char* p = ent.Serialize(&len);
-	EXPECT_EQ(len, sizeof(dict) - 1);
-	EXPECT_EQ(0, memcmp(dict, p, sizeof(dict) - 1));
-	free(p);
+	std::string p = ent.Serialize();
+	EXPECT_EQ(p.size(), sizeof(dict) - 1);
+	EXPECT_EQ(0, memcmp(dict, p.c_str(), sizeof(dict) - 1));
 }
 
 TEST(Bencoding, Settings1) {
@@ -404,13 +392,11 @@ TEST(Bencoding, Settings1) {
 //	ASSERT_EQ(static_cast<unsigned long>(SETTINGS_LENGTH), sizeof(unittest::settings_data));
 	ASSERT_EQ(BENC_DICT, dict.GetType());
 
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
+	std::string b = dict.Serialize();
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), b.size());
 	//EXPECT_EQ(sizeof(unittest::settings_data), len);
-	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b.c_str(), SETTINGS_LENGTH));
 	//EXPECT_EQ(0, memcmp(unittest::settings_data, b, sizeof(unittest::settings_data)));
-	free( b );
 }
 
 TEST(Bencoding, Settings2) {
@@ -423,14 +409,12 @@ TEST(Bencoding, Settings2) {
 											dict,
  											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
 	ASSERT_TRUE(dict.GetType() == BENC_DICT);
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
-	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
+	std::string b = dict.Serialize();
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), b.size());
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b.c_str(), SETTINGS_LENGTH));
 	//for(int i = 0; i < SETTINGS_LENGTH; i++)
 	//	if( unittest::settings_data[i] != b[i] )
 	//		break;
-	free( b );
 }
 
 TEST(Bencoding, Settings3) {
@@ -442,11 +426,9 @@ TEST(Bencoding, Settings3) {
 											dict,
  											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH));
 	ASSERT_TRUE(dict.GetType() == BENC_DICT);
-	size_t len = 0;
-	unsigned char *b = dict.Serialize(&len);
-	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), len);
-	EXPECT_EQ(0, memcmp(unittest::settings_data, b, SETTINGS_LENGTH));
-	free( b );
+	std::string b = dict.Serialize();
+	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), b.size());
+	EXPECT_EQ(0, memcmp(unittest::settings_data, b.c_str(), SETTINGS_LENGTH));
 }
 
 TEST(Bencoding, Copy) {
@@ -467,18 +449,16 @@ TEST(Bencoding, Copy) {
 	ASSERT_TRUE(d2);
 	d2->CopyFrom(dict);
 //	EXPECT_TRUE(d2->inplace == false);
-	size_t serialized_len;
-	unsigned char* bytes = d2->Serialize(&serialized_len);
-	EXPECT_EQ(sample_len, serialized_len);
+	std::string bytes = d2->Serialize();
+	EXPECT_EQ(sample_len, bytes.size());
 	/*utassert_failmsg(serialized_len == sample_len,
 		utlogf("serialized_len %d sample_len %d",
 		serialized_len, sample_len));*/
-	EXPECT_EQ(0, memcmp(sample_data, (const char*)bytes, sample_len));
+	EXPECT_EQ(0, memcmp(sample_data, bytes.c_str(), sample_len));
 	/*utassert_failmsg(memcmp(sample_data, (const char*)bytes, sample_len) == 0,
 		utlogf("sample_data %s bytes %s", sample_data, bytes));*/
 	delete d2;
 	d2 = NULL;
-	free(bytes);
 
 	// Copy and verify a string
 	static cstr testString = "foobar";
