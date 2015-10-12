@@ -6,62 +6,47 @@
 #include <vector>
 #include "snprintf.h"
 
-char* wstr_to_utf8(const wchar_t * input, size_t *out_len)
+std::string wstr_to_utf8(const wchar_t * input)
 {
-	size_t size = 127;
-	size_t i = 0;
-	// +4 to make sure we don't over-write the buffer while decoding
-	char* output = (char*)malloc(sizeof(char) * (127 + 4));
+	std::ostringstream output;
 
 	for(;;) {
 		unsigned int c = *input++;
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				// 3-byte code
-				output[i++] = 0xE0 | (c >> 12);
-				output[i++] = ((c >> 6) & 0x3F) | 0x80;
+				output << (char)(0xE0 | (c >> 12));
+				output << (char)(((c >> 6) & 0x3F) | 0x80);
 			} else {
 				// 2-byte code
-				output[i++] = 0xC0 | (c >> 6);
+				output << (char)(0xC0 | (c >> 6));
 			}
 			c = (c & 0x3F) | 0x80;
 		}
-
-		output[i++] = c;
-
 		if (!c)
 			break;
-
-		// Need to make more room for next round?
-		if (i >= size)
-			output = (char*)realloc(output, (size *= 2) + 4);
+		output << (char)c;
 	}
-
-	if (out_len) *out_len = i - 1;
-
-	return output;
+	return output.str();
 }
 
 /* TODO: this is not really valid. Not knowing what is the encoding of
    <input>, we can't convert it to utf8, so this really works only if
    <input> is already valid utf8 */
-char* str_to_utf8(const char * input, size_t *out_len)
+std::string str_to_utf8(const char * input)
 {
-	if (out_len) *out_len = strlen(input);
-	return strdup(input);
+	return input ? std::string(input) : std::string();
 }
 
 #ifdef _UNICODE
-char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return wstr_to_utf8(input, out_len); }
+std::string EncodeUtf8(ctstr input) { return wstr_to_utf8(input); }
 #else
-char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return str_to_utf8(input, out_len); }
+std::string EncodeUtf8(ctstr input) { return str_to_utf8(input); }
 #endif
 
 BencEntityMem::BencEntityMem(ctstr memArg, size_t len): BencEntity( BENC_STR ) {
 	assert(memArg);
-	char* utf8_encoded = EncodeUtf8(memArg);
-	std::string utf8(utf8_encoded);
-	free(utf8_encoded);
+	std::string utf8(EncodeUtf8(memArg));
 	if(len == static_cast<size_t>(~0))
 		len = utf8.size();
 	mem = new BencodedMem( (unsigned char *) utf8.c_str(), static_cast<int>(len) );
@@ -903,12 +888,8 @@ void BencEntityMem::SetStrT(ctstr ss)
 	assert(mem);
 	mem->Resize(0);
 	if (ss != NULL) {
-		size_t len = 0;
-		char* pEncoded = EncodeUtf8(ss, &len);	//	on error, len set to -1.
-		assert(pEncoded);
-		assert((int)len >= 0);
-		mem->SetArray((unsigned char *) pEncoded, len);
-		free(pEncoded);
+		std::string pEncoded = EncodeUtf8(ss);
+		mem->SetArray((unsigned char *) pEncoded.c_str(), pEncoded.size());
 	}
 }
 
