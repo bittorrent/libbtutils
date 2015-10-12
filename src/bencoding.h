@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
 #include <utility>	// std::pair
 #include "bencparser.h"
 //#include "string_type.h" // namespace aux_
@@ -115,12 +116,11 @@ struct VListData;
 
 class BencodedEmitterBase {
 protected:
-	std::vector<char> _emit_buf;
+	std::ostringstream _emit_buf;
 public:
-	BencodedEmitterBase() { _emit_buf.reserve(4096); };
+	BencodedEmitterBase() { };
 	void EmitChar(char);
 	void Emit(const void *a, size_t len);
-	unsigned char* GetResult(size_t* len);
 	std::string GetResult();
 };
 
@@ -256,7 +256,6 @@ private:
 };
 
 std::string SerializeBencEntity(const BencEntity* entity);
-unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len);
 
 class BencEntityMem : public BencEntity {
 public:
@@ -364,7 +363,7 @@ public:
 	bool ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegime *regime);
 	void CopyFrom(const BencEntity& b);
 
-	unsigned char *Serialize(size_t *len);
+	std::string Serialize();
 
 protected:
 	void grow(unsigned int num);
@@ -418,7 +417,7 @@ public:
 	void Delete(const char * key);
 	void CopyFrom(const BencEntity& b);
 
-	unsigned char *Serialize(size_t *len);
+	std::string Serialize();
 
 #ifdef _DEBUG
 	void check_invariant() const;

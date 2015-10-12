@@ -332,28 +332,18 @@ void BencEntity::Print(bool oneline, int indent)
 #endif
 
 void BencodedEmitterBase::EmitChar(char a) {
-	_emit_buf.push_back(a);
+	_emit_buf << a;
 }
 
 void BencodedEmitterBase::Emit(const void *a, size_t len) {
 	if (len > 0) {
 		assert(a);
-		_emit_buf.insert(_emit_buf.end(), (char*)a, (char*)((char*)a + len*sizeof(char)));
+		_emit_buf.write((char*)a, len);
 	}
 }
 
 std::string BencodedEmitterBase::GetResult() {
-	size_t len;
-	unsigned char* res = GetResult(&len);
-	std::string s((char*)res, len);
-	free(res);
-	return s;
-}
-
-unsigned char* BencodedEmitterBase::GetResult(size_t* len) {
-	unsigned char* result = static_cast<unsigned char*>(malloc(_emit_buf.size()*sizeof(unsigned char)));
-	memcpy(result, &_emit_buf[0], _emit_buf.size()*sizeof(unsigned char));
-	if (len) *len = _emit_buf.size();
+	std::string result = _emit_buf.str();
 	_emit_buf.clear();
 	return result;
 }
@@ -500,12 +490,6 @@ std::string SerializeBencEntity(const BencEntity* entity) {
 	BencodedEmitter emit;
 	emit.EmitEntity(entity);
 	return emit.GetResult();
-}
-
-unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len) {
-	BencodedEmitter emit;
-	emit.EmitEntity(entity);
-	return emit.GetResult(len);
 }
 
 #if 0
@@ -1145,10 +1129,10 @@ BencodedList *BencodedList::AppendList()
 	return (BencodedList *) Append(beL);
 }
 
-unsigned char *BencodedList::Serialize(size_t *len)
+std::string BencodedList::Serialize()
 {
 	assert(bencType == BENC_LIST);
-	return SerializeBencEntity(this, len);
+	return SerializeBencEntity(this);
 }
 
 // lookup function.  Returns NULL if the key is not found.
@@ -1385,12 +1369,12 @@ void BencodedDict::Delete(const char* key)
 	//bKey.StealArray();
 }
 
-unsigned char *BencodedDict::Serialize(size_t *len)
+std::string BencodedDict::Serialize()
 {
 	assert(bencType == BENC_DICT);
 	INVARIANT_CHECK;
 
-	return SerializeBencEntity(this, len);
+	return SerializeBencEntity(this);
 }
 
 BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)
