@@ -12,6 +12,8 @@ class JsonValue {
     virtual std::string serialize() const = 0;
 
     virtual JsonValue *clone() const = 0;
+
+    virtual ~JsonValue() {}
 };
 
 template<typename T>

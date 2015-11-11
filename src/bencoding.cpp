@@ -1131,6 +1131,12 @@ BencodedList *BencodedList::AppendList()
 	return (BencodedList *) Append(beL);
 }
 
+unsigned char *BencodedList::Serialize(size_t *len)
+{
+	assert(bencType == BENC_LIST);
+	return SerializeBencEntity(this, len);
+}
+
 // lookup function.  Returns NULL if the key is not found.
 // The returned pointer is not a copy.  Do not deallocate it.
 const BencEntity *BencodedDict::Get(const char* key, int len) const

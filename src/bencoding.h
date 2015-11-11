@@ -137,6 +137,7 @@ public:
 
 class BencodedEmitter : public BencodedEmitterBase {
 public:
+	virtual ~BencodedEmitter() {}
 	virtual void EmitEntity(const BencEntity *e);
 };
 
@@ -372,6 +373,8 @@ public:
 	void FreeMembers();
 	bool ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegime *regime);
 	void CopyFrom(const BencEntity& b);
+
+	unsigned char *Serialize(size_t *len);
 
 protected:
 	void grow(unsigned int num);
