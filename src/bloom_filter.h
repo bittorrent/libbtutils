@@ -11,7 +11,7 @@ struct bloom_filter
 	bloom_filter(int size = 16 * 32, int num_hashes = 4);
 	bloom_filter(int size, byte* set, int num_hashes = 4);
 	bloom_filter(bloom_filter const& bf);
-	bloom_filter const& operator=(bloom_filter const& bf);
+	bloom_filter& operator=(bloom_filter const& bf);
 	~bloom_filter();
 	void set_union(byte const* set);
 	void add(sha1_hash const& k);
