@@ -126,11 +126,11 @@ IBencParser::PARSE_T  BencParserElement::ParseNext( const unsigned char **ppStar
 				_lastString = *ppStart;
 				// We mark a key match if we were parsing a key position, and the string matches in length and content
 				if (_keyMatch == 0) {
-					for (std::vector<const char*>::const_iterator k = _keys.begin(); k != _keys.end(); k++) {
-						if (memcmp( (unsigned char *) _lastString, *k, strlen(*k)) == 0 && strlen(*k) == *pSize) {
-
-							_origKey = _key = *k;
-							_keyLen = strlen(*k);
+					for (auto k : _keys) {
+						size_t size = strlen(k);
+						if (memcmp( (unsigned char *) _lastString, k, size) == 0 && size == *pSize) {
+							_origKey = _key = k;
+							_keyLen = size;
 							_keyMatch |= 1 << (_level - 1);
 							break;
 						}
