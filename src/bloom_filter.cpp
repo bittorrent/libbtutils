@@ -33,7 +33,7 @@ bloom_filter::bloom_filter(bloom_filter const& bf)
 	_num_hashes = bf._num_hashes;
 }
 
-bloom_filter const& bloom_filter::operator=(bloom_filter const& bf)
+bloom_filter& bloom_filter::operator=(bloom_filter const& bf)
 {
 	free(_set);
 

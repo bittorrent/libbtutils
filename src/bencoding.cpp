@@ -253,8 +253,6 @@ static char* NeedPrintAsHex(unsigned char *mem, int len)
 
 void BencEntity::Print(bool oneline, int indent)
 {
-
-	unsigned int i;
 	int j;
 
 	switch(bencType) {
@@ -284,7 +282,7 @@ void BencEntity::Print(bool oneline, int indent)
 	case BENC_LIST:
 	case BENC_VLIST:
 		printf("[");
-		for(i=0; i!=((BencodedList*)this)->GetCount(); i++) {
+		for(int i=0; i!=((BencodedList*)this)->GetCount(); i++) {
 			if (i != 0) printf(", ");
 			((BencodedList *) this )->Get(i)->Print(oneline, indent);
 		}
@@ -293,10 +291,8 @@ void BencEntity::Print(bool oneline, int indent)
 
 	case BENC_DICT:
 		printf("{");
-		i = 0;
-		for(BencodedEntityMap::iterator it = dict->begin();
-			it != dict->end(); it++, i++ ) {
-			if (i != 0) printf(", ");
+		for(BencodedEntityMap::iterator it = dict->begin(); it != dict->end(); ++it) {
+			if (it != dict->begin()) printf(", ");
 			if (!oneline) printf("\n");
 			for(j=0; j!=indent; j++) printf("	");
 			unsigned int len  = it->first.GetCount();
@@ -364,7 +360,7 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	case BENC_DICT: {
 		const BencodedDict *ed = BencEntity::AsDict( e );
 		EmitChar('d');
-		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); it++ ) {
+		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); ++it ) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
@@ -1212,7 +1208,7 @@ void BencodedDict::CopyFrom(const BencEntity& b)
 	bencType = BENC_DICT;
 	dict = new BencodedEntityMap();
 	BencodedEntityMap::iterator lastIt = dict->begin();
-	for( BencodedEntityMap::iterator it = b.dict->begin(); it != b.dict->end(); it++) {
+	for( BencodedEntityMap::iterator it = b.dict->begin(); it != b.dict->end(); ++it) {
 		BencKey bencKey(it->first);
 		BencodedEntityMap::iterator inserted =
 			dict->insert( lastIt, BencodedEntityMap::value_type(bencKey, BencEntity(it->second.bencType)) );
@@ -1229,7 +1225,7 @@ void BencodedDict::CopyFrom(const BencEntity& b)
 void BencodedDict::FreeMembers()
 {
 	if(dict) {
-		for( BencodedEntityMap::iterator it = dict->begin(); it != dict->end(); it++) {
+		for( BencodedEntityMap::iterator it = dict->begin(); it != dict->end(); ++it) {
 			// Shouldn't be necessary.
 //			const_cast<BencKey *>(&(it->first))->Free();
 			it->second.FreeMembers();

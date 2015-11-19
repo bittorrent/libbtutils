@@ -4,11 +4,12 @@
 #include <string.h> // for memcmp, et. al.
 #include <assert.h>
 
+#include "target.h" // for PACKED
 #include "utypes.h" // for byte
 
 #define SHA1_DIGESTSIZE 20
 
-struct sha1_hash {
+struct PACKED sha1_hash {
 	byte value[SHA1_DIGESTSIZE];
 
 	sha1_hash() {}

@@ -216,7 +216,6 @@ bool is_ip_local(const SockAddr& sa)
 uint32 parse_ip(cstr ip, bool *valid)
 {
 	uint32 r = 0;
-	uint n;
 	str end;
 
 	if (valid) *valid=false;
@@ -227,7 +226,7 @@ uint32 parse_ip(cstr ip, bool *valid)
 	}
 
 	for(uint i = 0; i != 4; i++) {
-		n = strtoul(ip, &end, 10);
+		uint n = strtoul(ip, &end, 10);
 		if (n > 255) return (uint32)-1;
 		ip = end;
 		if (*ip++ != (i==3 ? 0 : '.')) return (uint32)-1;
