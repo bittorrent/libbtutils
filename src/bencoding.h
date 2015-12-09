@@ -21,9 +21,9 @@
 #include "RefBase.h" // for BencEntity RefBase
 
 #ifdef _UNICODE
-typedef std::wstring t_string;
+typedef std::wstring tstring;
 #else
-typedef std::string t_string;
+typedef std::string tstring;
 #endif // _UNICODE
 
 ENUM_TYPE(BENC_T, uint8) {
@@ -291,7 +291,7 @@ public:
 		return GetSize() ? GetRaw() : "";
 	}
 
-	t_string GetStringT(int encoding, size_t *count) const;
+	tstring GetStringT(int encoding, size_t *count) const;
 
 	// Sets a unicode string, internally converts to utf-8
 	void SetStrT(ctstr s);
@@ -347,7 +347,7 @@ public:
 
 	const char * GetString(size_t i, size_t *length = NULL) const;
 	// See comment at GetStringT()
-	t_string GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
 
 	int GetInt(size_t i, int def = 0) const;
 	int64 GetInt64(size_t i, int64 def = 0) const;
@@ -396,7 +396,7 @@ public:
 	char * GetStringCopy(const char * key) const;
 
 	// See comment at GetStringT()
-	t_string GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
 	char * GetString(const char * key, size_t length) const;
 	int GetInt(const char * key, int def = 0) const;
 	BencEntityMem *InsertString(const char * key, const char * str, int length=-1);

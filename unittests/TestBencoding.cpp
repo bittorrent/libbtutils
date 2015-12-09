@@ -222,7 +222,7 @@ TEST(Bencoding, String1) {
 	BencodedDict dict;
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
-	t_string value(dict.GetStringT("astring"));
+	tstring value(dict.GetStringT("astring"));
 	EXPECT_TRUE(value.size());
 	if (value.size()) {
 		size_t valuelen = value.size();
@@ -255,7 +255,7 @@ TEST(Bencoding, String2) {
 	BencodedDict dict;
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
-	t_string value = dict.GetStringT("astring");
+	tstring value = dict.GetStringT("astring");
 	EXPECT_TRUE(value.size());
 	if (value.size()) {
 		size_t valuelen = value.size();
@@ -443,7 +443,7 @@ TEST(Bencoding, Copy) {
 	BencodedDict dict;
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sample_len)) ? true : false;
 	ASSERT_TRUE(ok);
-	t_string value = dict.GetStringT("astring");
+	tstring value = dict.GetStringT("astring");
 	ASSERT_TRUE(value.size());
 	BencodedDict* d2 = new BencodedDict();
 	ASSERT_TRUE(d2);

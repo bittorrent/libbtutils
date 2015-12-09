@@ -950,12 +950,12 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 }
 
 
-t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
+tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (!(bencType == BENC_STR)) return _T("");
 	size_t tmp = 0;
 #ifdef _UNICODE
 	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
-	t_string tmps(str);
+	tstring tmps(str);
 	free(str);
 	assert(tmp <= INT_MAX);
 	if (count) *count = tmp;
@@ -963,7 +963,7 @@ t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
 #else
 	const char* str = GetString(&tmp);
 	if (count) *count = tmp;
-	return t_string(str, tmp);
+	return tstring(str, tmp);
 #endif
 }
 
@@ -994,7 +994,7 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
-t_string BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
+tstring BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
 	if (pMem == NULL) return _T("");
@@ -1170,7 +1170,7 @@ char* BencodedDict::GetStringCopy(const char* key) const
 	return strdup(val);
 }
 
-t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
+tstring BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
 	if (pMem == NULL) return _T("");
