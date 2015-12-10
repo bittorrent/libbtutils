@@ -312,20 +312,9 @@ void BencEntity::Print(bool oneline, int indent)
 }
 #endif
 
-void BencodedEmitterBase::EmitChar(char a) {
-	_emit_buf << a;
-}
-
-void BencodedEmitterBase::Emit(const void *a, size_t len) {
-	if (len > 0) {
-		assert(a);
-		_emit_buf.write((char*)a, len);
-	}
-}
-
 std::string BencodedEmitterBase::GetResult() {
-	std::string result = _emit_buf.str();
-	_emit_buf.clear();
+	std::string result = emit_buf.str();
+	emit_buf.clear();
 	return result;
 }
 
@@ -334,46 +323,45 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 
 	switch(e->bencType) {
 	case BENC_INT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.write(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_BIGINT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.write(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
-		Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
-		Emit(me->GetRaw(), me->GetSize());
+		emit_buf.write(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
+		emit_buf.write(me->GetRaw(), me->GetSize());
 		break;
 	}
 	case BENC_LIST:
 	case BENC_VLIST:
 	{
 		const BencodedList *el = BencEntity::AsList( e );
-		EmitChar('l');
+		emit_buf << 'l';
 		for(size_t i=0; i!=el->GetCount(); i++)
 			EmitEntity(el->Get(i));
-		EmitChar('e');
+		emit_buf << 'e';
 		break;
 	}
 	case BENC_DICT: {
 		const BencodedDict *ed = BencEntity::AsDict( e );
-		EmitChar('d');
+		emit_buf << 'd';
 		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); ++it ) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
-			Emit(&(it->first[0]), j);
+			emit_buf.write(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
+			emit_buf.write((char*)&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
-		EmitChar('e');
+		emit_buf << 'e';
 		break;
 	}
 	default:
 		assert(0);
-
 	}
 }
 
