@@ -389,6 +389,7 @@ public:
 	BencodedList* GetList(const char* key, int len = -1);
 	BencodedList const* GetList(const char* key, int len = -1) const;
 	const char* GetString(const char* key, size_t *length = NULL) const;
+	std::string GetStdString(const char* key) const;
 
 	// Like GetString, but returns a malloc'ed copy
 	char * GetStringCopy(const char * key) const;

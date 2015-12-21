@@ -1147,6 +1147,11 @@ const char* BencodedDict::GetString(const char* key, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
+std::string BencodedDict::GetStdString(const char* key) const
+{
+	const char* res = GetString(key);
+	return res ? std::string(res) : std::string();
+}
 
 char* BencodedDict::GetStringCopy(const char* key) const
 {
