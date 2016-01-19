@@ -943,10 +943,13 @@ tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	size_t tmp = 0;
 #ifdef _UNICODE
 	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
+	assert(tmp <= INT_MAX);
+	if (count)
+		*count = tmp;
+	if (!str) //XXX should use safe_string once it's moved to ut_util or even better have DecodeEncodedString return a string
+		return tstring();
 	tstring tmps(str);
 	free(str);
-	assert(tmp <= INT_MAX);
-	if (count) *count = tmp;
 	return tmps;
 #else
 	const char* str = GetString(&tmp);
