@@ -289,7 +289,7 @@ public:
 		return GetSize() ? GetRaw() : "";
 	}
 
-	tstring GetStringT(int encoding, size_t *count) const;
+	tstring GetStringT(int encoding) const;
 
 	// Sets a unicode string, internally converts to utf-8
 	void SetStrT(ctstr s);
@@ -345,7 +345,7 @@ public:
 
 	const char * GetString(size_t i, size_t *length = NULL) const;
 	// See comment at GetStringT()
-	tstring GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(size_t i, int encoding = 0) const;
 
 	int GetInt(size_t i, int def = 0) const;
 	int64 GetInt64(size_t i, int64 def = 0) const;
@@ -395,7 +395,7 @@ public:
 	char * GetStringCopy(const char * key) const;
 
 	// See comment at GetStringT()
-	tstring GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(const char * key, int encoding = 0) const;
 	char * GetString(const char * key, size_t length) const;
 	int GetInt(const char * key, int def = 0) const;
 	BencEntityMem *InsertString(const char * key, const char * str, int length=-1);
