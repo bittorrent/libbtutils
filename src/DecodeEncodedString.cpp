@@ -133,7 +133,7 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 	}
 OK:
 	t[len] = 0; // null terminate
-	if (in_len >= len + 4)
+	if ((int)in_len >= len + 4)
 		t = (wchar_t*)realloc(t, sizeof(wchar_t) * (len + 1));
 	if (out_len)
 		*out_len = len;

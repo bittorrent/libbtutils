@@ -26,7 +26,7 @@ const unsigned char *BencParser::ParseString(size_t *pSize)
 	}
 
 	// See if this string length will go off the end of the buffer or file
-	if (_pEnd - _p < val) {
+	if (size_t(_pEnd - _p) < val) {
 		/*DbgLogf("Can't parse string with length longer than remaining buffer:  %Lu %s",
 			(uint64_t) val, (const unsigned char*) pReturn);*/
 
