@@ -313,9 +313,7 @@ void BencEntity::Print(bool oneline, int indent)
 #endif
 
 std::string BencodedEmitterBase::GetResult() {
-	std::string result = emit_buf.str();
-	emit_buf.clear();
-	return result;
+	return std::move(emit_buf);
 }
 
 void BencodedEmitter::EmitEntity(const BencEntity *e) {
@@ -323,41 +321,41 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 
 	switch(e->bencType) {
 	case BENC_INT:
-		emit_buf.write(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_BIGINT:
-		emit_buf.write(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
-		emit_buf.write(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
-		emit_buf.write(me->GetRaw(), me->GetSize());
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
+		emit_buf.append(me->GetRaw(), me->GetSize());
 		break;
 	}
 	case BENC_LIST:
 	case BENC_VLIST:
 	{
 		const BencodedList *el = BencEntity::AsList( e );
-		emit_buf << 'l';
+		emit_buf += 'l';
 		for(size_t i=0; i!=el->GetCount(); i++)
 			EmitEntity(el->Get(i));
-		emit_buf << 'e';
+		emit_buf += 'e';
 		break;
 	}
 	case BENC_DICT: {
 		const BencodedDict *ed = BencEntity::AsDict( e );
-		emit_buf << 'd';
+		emit_buf += 'd';
 		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); ++it ) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			emit_buf.write(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
-			emit_buf.write((char*)&(it->first[0]), j);
+			emit_buf.append(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
+			emit_buf.append((char*)&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
-		emit_buf << 'e';
+		emit_buf += 'e';
 		break;
 	}
 	default:
