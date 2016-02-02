@@ -8,26 +8,26 @@
 
 std::string wstr_to_utf8(const wchar_t * input)
 {
-	std::ostringstream output;
+	std::string output;
 
 	for(;;) {
 		unsigned int c = *input++;
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				// 3-byte code
-				output << (char)(0xE0 | (c >> 12));
-				output << (char)(((c >> 6) & 0x3F) | 0x80);
+				output += (0xE0 | (c >> 12));
+				output += (((c >> 6) & 0x3F) | 0x80);
 			} else {
 				// 2-byte code
-				output << (char)(0xC0 | (c >> 6));
+				output += (0xC0 | (c >> 6));
 			}
 			c = (c & 0x3F) | 0x80;
 		}
 		if (!c)
 			break;
-		output << (char)c;
+		output += c;
 	}
-	return output.str();
+	return output;
 }
 
 /* TODO: this is not really valid. Not knowing what is the encoding of
