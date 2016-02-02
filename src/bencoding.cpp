@@ -1342,13 +1342,6 @@ std::string BencodedDict::Serialize()
 	return SerializeBencEntity(this);
 }
 
-BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)
-{
-	// contiguous if string length > 0
-	assert(!key.empty());
-	return InsertString(&(key[0]), &(str[0]), length);
-}
-
 BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int length /*=-1*/)
 {
 	assert(bencType == BENC_DICT);
@@ -1357,12 +1350,22 @@ BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int 
 	return (BencEntityMem *) Insert( key, -1, beM );
 }
 
+BencEntityMem *BencodedDict::InsertString(const char * key, const std::string& str)
+{
+	return InsertString(key, str.c_str(), str.size());
+}
+
 BencEntityMem *BencodedDict::InsertStringT(const char* key, ctstr tstr)
 {
 	assert(bencType == BENC_DICT);
 	BencEntityMem beM;
 	beM.SetStrT( tstr );
 	return (BencEntityMem *) Insert( key, -1, beM );
+}
+
+BencEntityMem *BencodedDict::InsertStringT(const char* key, const tstring& str)
+{
+	return InsertStringT(key, str.c_str());
 }
 
 BencEntity *BencodedDict::InsertInt(const char* key, int val)
