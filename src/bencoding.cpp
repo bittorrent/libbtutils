@@ -6,62 +6,47 @@
 #include <vector>
 #include "snprintf.h"
 
-char* wstr_to_utf8(const wchar_t * input, size_t *out_len)
+std::string wstr_to_utf8(const wchar_t * input)
 {
-	size_t size = 127;
-	size_t i = 0;
-	// +4 to make sure we don't over-write the buffer while decoding
-	char* output = (char*)malloc(sizeof(char) * (127 + 4));
+	std::string output;
 
 	for(;;) {
 		unsigned int c = *input++;
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				// 3-byte code
-				output[i++] = 0xE0 | (c >> 12);
-				output[i++] = ((c >> 6) & 0x3F) | 0x80;
+				output += (0xE0 | (c >> 12));
+				output += (((c >> 6) & 0x3F) | 0x80);
 			} else {
 				// 2-byte code
-				output[i++] = 0xC0 | (c >> 6);
+				output += (0xC0 | (c >> 6));
 			}
 			c = (c & 0x3F) | 0x80;
 		}
-
-		output[i++] = c;
-
 		if (!c)
 			break;
-
-		// Need to make more room for next round?
-		if (i >= size)
-			output = (char*)realloc(output, (size *= 2) + 4);
+		output += c;
 	}
-
-	if (out_len) *out_len = i - 1;
-
 	return output;
 }
 
 /* TODO: this is not really valid. Not knowing what is the encoding of
    <input>, we can't convert it to utf8, so this really works only if
    <input> is already valid utf8 */
-char* str_to_utf8(const char * input, size_t *out_len)
+std::string str_to_utf8(const char * input)
 {
-	if (out_len) *out_len = strlen(input);
-	return strdup(input);
+	return input ? std::string(input) : std::string();
 }
 
 #ifdef _UNICODE
-char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return wstr_to_utf8(input, out_len); }
+std::string EncodeUtf8(ctstr input) { return wstr_to_utf8(input); }
 #else
-char* EncodeUtf8(ctstr input, size_t *out_len = NULL) { return str_to_utf8(input, out_len); }
+std::string EncodeUtf8(ctstr input) { return str_to_utf8(input); }
 #endif
 
 BencEntityMem::BencEntityMem(ctstr memArg, size_t len): BencEntity( BENC_STR ) {
 	assert(memArg);
-	char* utf8_encoded = EncodeUtf8(memArg);
-	std::string utf8(utf8_encoded);
-	free(utf8_encoded);
+	std::string utf8(EncodeUtf8(memArg));
 	if(len == static_cast<size_t>(~0))
 		len = utf8.size();
 	mem = new BencodedMem( (unsigned char *) utf8.c_str(), static_cast<int>(len) );
@@ -327,23 +312,8 @@ void BencEntity::Print(bool oneline, int indent)
 }
 #endif
 
-void BencodedEmitterBase::EmitChar(char a) {
-	_emit_buf.push_back(a);
-}
-
-void BencodedEmitterBase::Emit(const void *a, size_t len) {
-	if (len > 0) {
-		assert(a);
-		_emit_buf.insert(_emit_buf.end(), (char*)a, (char*)((char*)a + len*sizeof(char)));
-	}
-}
-
-unsigned char* BencodedEmitterBase::GetResult(size_t* len) {
-	unsigned char* result = static_cast<unsigned char*>(malloc(_emit_buf.size()*sizeof(unsigned char)));
-	memcpy(result, &_emit_buf[0], _emit_buf.size()*sizeof(unsigned char));
-	if (len) *len = _emit_buf.size();
-	_emit_buf.clear();
-	return result;
+std::string BencodedEmitterBase::GetResult() {
+	return std::move(emit_buf);
 }
 
 void BencodedEmitter::EmitEntity(const BencEntity *e) {
@@ -351,46 +321,45 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 
 	switch(e->bencType) {
 	case BENC_INT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_BIGINT:
-		Emit(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "i%" PRId64 "e", e->num));
 		break;
 
 	case BENC_STR: {
 		const BencEntityMem *me = BencEntity::AsBencString( e );
-		Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
-		Emit(me->GetRaw(), me->GetSize());
+		emit_buf.append(buf, snprintf(buf, sizeof(buf), "%d:", int(me->GetSize())));
+		emit_buf.append(me->GetRaw(), me->GetSize());
 		break;
 	}
 	case BENC_LIST:
 	case BENC_VLIST:
 	{
 		const BencodedList *el = BencEntity::AsList( e );
-		EmitChar('l');
+		emit_buf += 'l';
 		for(size_t i=0; i!=el->GetCount(); i++)
 			EmitEntity(el->Get(i));
-		EmitChar('e');
+		emit_buf += 'e';
 		break;
 	}
 	case BENC_DICT: {
 		const BencodedDict *ed = BencEntity::AsDict( e );
-		EmitChar('d');
+		emit_buf += 'd';
 		for(BencodedEntityMap::const_iterator it = ed->dict->begin(); it != ed->dict->end(); ++it ) {
 			size_t j = strnlen((char*)(&(it->first[0])),
 					it->first.GetCount());
 			//Emit(buf, btsnprintf(buf, lenof(buf), "%u:", j));
-			Emit(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
-			Emit(&(it->first[0]), j);
+			emit_buf.append(buf, snprintf(buf, sizeof(buf), "%d:", int(j)));
+			emit_buf.append((char*)&(it->first[0]), j);
 			EmitEntity(&it->second);
 		}
-		EmitChar('e');
+		emit_buf += 'e';
 		break;
 	}
 	default:
 		assert(0);
-
 	}
 }
 
@@ -484,10 +453,10 @@ void BencodedEmitter::EmitEntity(const BencEntity *e) {
 	}
 #endif
 
-unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len) {
+std::string SerializeBencEntity(const BencEntity* entity) {
 	BencodedEmitter emit;
 	emit.EmitEntity(entity);
-	return emit.GetResult(len);
+	return emit.GetResult();
 }
 
 #if 0
@@ -901,12 +870,8 @@ void BencEntityMem::SetStrT(ctstr ss)
 	assert(mem);
 	mem->Resize(0);
 	if (ss != NULL) {
-		size_t len = 0;
-		char* pEncoded = EncodeUtf8(ss, &len);	//	on error, len set to -1.
-		assert(pEncoded);
-		assert((int)len >= 0);
-		mem->SetArray((unsigned char *) pEncoded, len);
-		free(pEncoded);
+		std::string pEncoded = EncodeUtf8(ss);
+		mem->SetArray((unsigned char *) pEncoded.c_str(), pEncoded.size());
 	}
 }
 
@@ -971,20 +936,23 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 }
 
 
-t_string BencEntityMem::GetStringT(int encoding, size_t *count) const {
+tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
 	if (!(bencType == BENC_STR)) return _T("");
 	size_t tmp = 0;
 #ifdef _UNICODE
 	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
-	t_string tmps(str);
-	free(str);
 	assert(tmp <= INT_MAX);
-	if (count) *count = tmp;
+	if (count)
+		*count = tmp;
+	if (!str) //XXX should use safe_string once it's moved to ut_util or even better have DecodeEncodedString return a string
+		return tstring();
+	tstring tmps(str);
+	free(str);
 	return tmps;
 #else
 	const char* str = GetString(&tmp);
 	if (count) *count = tmp;
-	return t_string(str, tmp);
+	return tstring(str, tmp);
 #endif
 }
 
@@ -1015,7 +983,7 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
-t_string BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
+tstring BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
 	if (pMem == NULL) return _T("");
@@ -1127,10 +1095,10 @@ BencodedList *BencodedList::AppendList()
 	return (BencodedList *) Append(beL);
 }
 
-unsigned char *BencodedList::Serialize(size_t *len)
+std::string BencodedList::Serialize()
 {
 	assert(bencType == BENC_LIST);
-	return SerializeBencEntity(this, len);
+	return SerializeBencEntity(this);
 }
 
 // lookup function.  Returns NULL if the key is not found.
@@ -1180,6 +1148,11 @@ const char* BencodedDict::GetString(const char* key, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
+std::string BencodedDict::GetStdString(const char* key) const
+{
+	const char* res = GetString(key);
+	return res ? std::string(res) : std::string();
+}
 
 char* BencodedDict::GetStringCopy(const char* key) const
 {
@@ -1191,7 +1164,7 @@ char* BencodedDict::GetStringCopy(const char* key) const
 	return strdup(val);
 }
 
-t_string BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
+tstring BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
 	if (pMem == NULL) return _T("");
@@ -1367,12 +1340,12 @@ void BencodedDict::Delete(const char* key)
 	//bKey.StealArray();
 }
 
-unsigned char *BencodedDict::Serialize(size_t *len)
+std::string BencodedDict::Serialize()
 {
 	assert(bencType == BENC_DICT);
 	INVARIANT_CHECK;
 
-	return SerializeBencEntity(this, len);
+	return SerializeBencEntity(this);
 }
 
 BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)

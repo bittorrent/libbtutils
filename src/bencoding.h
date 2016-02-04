@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
 #include <utility>	// std::pair
 #include "bencparser.h"
 //#include "string_type.h" // namespace aux_
@@ -20,9 +21,9 @@
 #include "RefBase.h" // for BencEntity RefBase
 
 #ifdef _UNICODE
-typedef std::wstring t_string;
+typedef std::wstring tstring;
 #else
-typedef std::string t_string;
+typedef std::string tstring;
 #endif // _UNICODE
 
 ENUM_TYPE(BENC_T, uint8) {
@@ -53,18 +54,6 @@ template< typename T > class BencArray
 protected:
 	std::vector<T> _arr;
 public:
-	// These are necessary for Posix/GCC (wtf?)
-	/*
-	using LList<T>::Init;
-	using LList<T>::Guarantee;
-	using LList<T>::Append;
-	using LList<T>::mem;
-	using LList<T>::SetArray;
-	using LList<T>::StealArray;
-	using LList<T>::GetCount;
-	using LList<T>::Free;
-	*/
-
 	BencArray() { Clear(); }
 	BencArray( const BencArray<T> &b ) {
 		// BencArrays must always be null terminated
@@ -127,12 +116,10 @@ struct VListData;
 
 class BencodedEmitterBase {
 protected:
-	std::vector<char> _emit_buf;
+	std::string emit_buf;
 public:
-	BencodedEmitterBase() { _emit_buf.reserve(4096); };
-	void EmitChar(char);
-	void Emit(const void *a, size_t len);
-	unsigned char* GetResult(size_t* len);
+	BencodedEmitterBase() { };
+	std::string GetResult();
 };
 
 class BencodedEmitter : public BencodedEmitterBase {
@@ -266,7 +253,7 @@ private:
 	static bool DoParse(BencEntity &ent, IBencParser *pParser, AllocRegime *regime);
 };
 
-unsigned char* SerializeBencEntity(const BencEntity* entity, size_t* len);
+std::string SerializeBencEntity(const BencEntity* entity);
 
 class BencEntityMem : public BencEntity {
 public:
@@ -302,7 +289,7 @@ public:
 		return GetSize() ? GetRaw() : "";
 	}
 
-	t_string GetStringT(int encoding, size_t *count) const;
+	tstring GetStringT(int encoding, size_t *count) const;
 
 	// Sets a unicode string, internally converts to utf-8
 	void SetStrT(ctstr s);
@@ -358,7 +345,7 @@ public:
 
 	const char * GetString(size_t i, size_t *length = NULL) const;
 	// See comment at GetStringT()
-	t_string GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(size_t i, int encoding = 0, size_t *length = NULL) const;
 
 	int GetInt(size_t i, int def = 0) const;
 	int64 GetInt64(size_t i, int64 def = 0) const;
@@ -374,7 +361,7 @@ public:
 	bool ResumeList(IBencParser *pParser, BencEntity **ent, AllocRegime *regime);
 	void CopyFrom(const BencEntity& b);
 
-	unsigned char *Serialize(size_t *len);
+	std::string Serialize();
 
 protected:
 	void grow(unsigned int num);
@@ -402,12 +389,13 @@ public:
 	BencodedList* GetList(const char* key, int len = -1);
 	BencodedList const* GetList(const char* key, int len = -1) const;
 	const char* GetString(const char* key, size_t *length = NULL) const;
+	std::string GetStdString(const char* key) const;
 
 	// Like GetString, but returns a malloc'ed copy
 	char * GetStringCopy(const char * key) const;
 
 	// See comment at GetStringT()
-	t_string GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
+	tstring GetStringT(const char * key, int encoding = 0, size_t *length = NULL) const;
 	char * GetString(const char * key, size_t length) const;
 	int GetInt(const char * key, int def = 0) const;
 	BencEntityMem *InsertString(const char * key, const char * str, int length=-1);
@@ -428,7 +416,7 @@ public:
 	void Delete(const char * key);
 	void CopyFrom(const BencEntity& b);
 
-	unsigned char *Serialize(size_t *len);
+	std::string Serialize();
 
 #ifdef _DEBUG
 	void check_invariant() const;
