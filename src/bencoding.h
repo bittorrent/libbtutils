@@ -116,7 +116,7 @@ struct VListData;
 
 class BencodedEmitterBase {
 protected:
-	std::ostringstream emit_buf;
+	std::string emit_buf;
 public:
 	BencodedEmitterBase() { };
 	std::string GetResult();

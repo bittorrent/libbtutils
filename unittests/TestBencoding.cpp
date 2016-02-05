@@ -15,25 +15,20 @@
 #define utlogf(fmt,...) string_fmt(fmt ,##__VA_ARGS__)
 //#define utassert_failmsg(x,log) EXPECT_TRUE(x) << log
 
-std::ostream &operator << (std::ostream &stream, const std::string &other) {
-	stream << other;
-	return stream;
-}
-
 namespace unittest {
 #define SETTINGS_LENGTH 0x50dc
 
 
 void Parse(const unsigned char *p, uint len, BencodedDict &base)
 {
-	ASSERT_TRUE(p);
-	ASSERT_TRUE(len);
+	ASSERT_TRUE(p != NULL);
+	ASSERT_NE(0, len);
 
 	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 
 	// parse the torrent file
 //	EXPECT_TRUE(base.GetType() == BENC_VOID);
-	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info\0", &rgn));
+	ASSERT_TRUE(BencEntity::Parse(p, base, p + len, "info\0", &rgn) != NULL);
 	ASSERT_EQ(BENC_DICT, base.GetType());
 
 	EXPECT_GE(rgn.first, p);
@@ -125,7 +120,7 @@ TEST(Bencoding, Basics) {
 
 	const char* name;
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_scrape)));
-	EXPECT_TRUE(tmp);
+	EXPECT_TRUE(tmp != NULL);
 	memcpy(tmp, sample_scrape, sizeof(sample_scrape));
 	BencodedDict dict;
 	bool ok = (BencEntity::ParseInPlace(tmp, dict, tmp + sizeof(sample_scrape))) ? true : false;
@@ -133,7 +128,7 @@ TEST(Bencoding, Basics) {
 
 	ASSERT_EQ(BENC_DICT, dict.GetType());
 	BencodedDict* files = dict.GetDict("files");
-	EXPECT_TRUE(files);
+	EXPECT_TRUE(files != NULL);
 	EXPECT_EQ(static_cast<size_t>(3), files->GetCount());
 	for(int i = 0; i < 3; i++) {
 		EXPECT_TRUE(files->HasKey(keys[i]));
@@ -141,7 +136,7 @@ TEST(Bencoding, Basics) {
 	if (files) {
 		BencodedEntityMap::iterator it = files->dict->begin();
 		BencodedDict* d = (BencodedDict*) &it->second;
-		EXPECT_TRUE(d);
+		EXPECT_TRUE(d != NULL);
 		EXPECT_EQ(BENC_DICT, d->bencType);
 		EXPECT_EQ(8, d->GetInt("complete", -99));
 		EXPECT_EQ(16838, d->GetInt("downloaded", -99));
@@ -151,7 +146,7 @@ TEST(Bencoding, Basics) {
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
-		EXPECT_TRUE(d);
+		EXPECT_TRUE(d != NULL);
 		EXPECT_EQ(BENC_DICT, d->bencType);
 		EXPECT_EQ(36, d->GetInt("complete", -99));
 		EXPECT_EQ(45649, d->GetInt("downloaded", -99));
@@ -161,7 +156,7 @@ TEST(Bencoding, Basics) {
 
 		it++;
 		d = (BencodedDict*) (BencodedDict*) &it->second;
-		EXPECT_TRUE(d);
+		EXPECT_TRUE(d != NULL);
 		EXPECT_EQ(BENC_DICT, d->bencType);
 		EXPECT_EQ(24, d->GetInt("complete", -99));
 		EXPECT_EQ(29004, d->GetInt("downloaded", -99));
@@ -175,7 +170,7 @@ TEST(Bencoding, Basics) {
 	static const char sample_tracker[] = "d8:completei36e10:incompletei10e8:intervali1800e5:peers108:E\0210\236\032\342J)K\5'\315D\222\216\026\030:\230\3\334\245\032\341:\010F+N/\301\331}\245\363\235\022\7\031\241\032\341O\317\232\203\260\017Y\365b\022&\232\325\263\344\6\267\"\200\257\015c\032\341U\036\2329\032\341W\3+S\303V\303\270\311\n\032\342N^8CA\361Xz\375Nd\325\246R\t,\032\337Ov\013$\314\377e";
 
 	tmp = static_cast<unsigned char*>(malloc(sizeof(sample_tracker) * sizeof(char)));
-	ASSERT_TRUE(tmp);
+	ASSERT_TRUE(tmp != NULL);
 	memcpy(tmp, sample_tracker, sizeof(sample_tracker));
 	BencodedDict dict2;
 	ok = (BencEntity::ParseInPlace(tmp, dict2, tmp + sizeof(sample_tracker))) ? true : false;
@@ -189,7 +184,7 @@ TEST(Bencoding, Basics) {
 	size_t len;
 	cstr pbin = dict2.GetString("peers", &len);
 	EXPECT_EQ(static_cast<size_t>(108), len);
-	EXPECT_TRUE(pbin);
+	EXPECT_TRUE(pbin != NULL);
 
 	static const char* peer_addrs[] = {
 		"69.17.48.158:6882", "74.41.75.5:10189", "68.146.142.22:6202",
@@ -216,14 +211,14 @@ TEST(Bencoding, String1) {
 	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
 
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_data)));
-	ASSERT_TRUE(tmp);
+	ASSERT_TRUE(tmp != NULL);
 	memcpy(tmp, sample_data, sizeof(sample_data));
 	BencodedDict dictinplace;
 	BencodedDict dict;
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
 	tstring value(dict.GetStringT("astring"));
-	EXPECT_TRUE(value.size());
+	EXPECT_FALSE(value.empty());
 	if (value.size()) {
 		size_t valuelen = value.size();
 		EXPECT_EQ(static_cast<size_t>(6), valuelen);
@@ -234,7 +229,7 @@ TEST(Bencoding, String1) {
 	ok = (BencEntity::ParseInPlace(tmp, dictinplace, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
 	value = dictinplace.GetStringT("astring");
-	EXPECT_TRUE(value.size());
+	EXPECT_FALSE(value.empty());
 	if (value.size()) {
 		size_t valuelen = value.size();
 		EXPECT_EQ(static_cast<size_t>(6), valuelen);
@@ -249,14 +244,14 @@ TEST(Bencoding, String2) {
 	static const char sample_data[] = "d7:astring6:avalue5:aznumi10e6:newstr10:0123456789e";
 
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sizeof(sample_data)));
-	ASSERT_TRUE(tmp);
+	ASSERT_TRUE(tmp != NULL);
 	memcpy(tmp, sample_data, sizeof(sample_data));
 	BencodedDict dictinplace;
 	BencodedDict dict;
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
 	tstring value = dict.GetStringT("astring");
-	EXPECT_TRUE(value.size());
+	EXPECT_FALSE(value.empty());
 	if (value.size()) {
 		size_t valuelen = value.size();
 		EXPECT_EQ(static_cast<size_t>(6), valuelen);
@@ -267,7 +262,7 @@ TEST(Bencoding, String2) {
 	ok = (BencEntity::ParseInPlace(tmp, dictinplace, tmp + sizeof(sample_data))) ? true : false;
 	ASSERT_TRUE(ok);
 	value = dictinplace.GetStringT("astring");
-	EXPECT_TRUE(value.size());
+	EXPECT_FALSE(value.empty());
 	if (value.size()) {
 		size_t valuelen = value.size();
 		EXPECT_EQ(static_cast<size_t>(6), valuelen);
@@ -281,35 +276,35 @@ TEST(Bencoding, String2) {
 TEST(Bencoding, TwoFiles) {
 	unsigned char buffer[] = "ld6:lengthi73773662e4:pathl18:13 Silverfuck.flaceed6:lengthi68006760e4:pathl15:11 Oceania.flaceee";
 	BencEntity b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	EXPECT_EQ(BENC_LIST, b.GetType());
 }
 
 TEST(Bencoding, AllFiles) {
 	unsigned char buffer[] = "ld6:lengthi73773662e4:pathl18:13 Silverfuck.flaceed6:lengthi68006760e4:pathl15:11 Oceania.flaceed6:lengthi53151088e4:pathl49:16 Thru the Eyes of Ruby (w: I Am One tease).flaceed6:lengthi51403387e4:pathl14:04 Starla.flaceed6:lengthi51282991e4:pathl18:20 For Martha.flaceed6:lengthi45949439e4:pathl12:10 Siva.flaceed6:lengthi43531708e4:pathl35:23 Bullet With Butterfly Wings.flaceed6:lengthi38384832e4:pathl12:09 Soma.flaceed6:lengthi35563659e4:pathl20:07 Window Paine.flaceed6:lengthi34611179e4:pathl14:02 Quasar.flaceed6:lengthi33650038e4:pathl18:05 Geek U.S.A.flaceed6:lengthi33056735e4:pathl25:08 Lightning Strikes.flaceed6:lengthi31249410e4:pathl19:17 Cherub Rock.flaceed6:lengthi29052468e4:pathl18:15 Pale Horse.flaceed6:lengthi28567588e4:pathl13:18 Owata.flaceed6:lengthi27877903e4:pathl25:19 My Love Is Winter.flaceed6:lengthi27128747e4:pathl20:21 Encore Break.flaceed6:lengthi24447297e4:pathl14:06 Muzzle.flaceed6:lengthi23627619e4:pathl18:03 Panopticon.flaceed6:lengthi21799823e4:pathl16:14 Obscured.flaceed6:lengthi19913776e4:pathl27:12 Frail and Bedazzled.flaceed6:lengthi16869841e4:pathl15:22 Pissant.flaceed6:lengthi5643269e4:pathl13:01 Intro.flaceed6:lengthi1321e4:pathl10:md5sum.md5eed6:lengthi1302e4:pathl19:fingerprint.ffp.txteed6:lengthi638e4:pathl8:info.txteee";
 	BencEntity b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	EXPECT_EQ(BENC_LIST, b.GetType());
 }
 
 TEST(Bencoding, NestedList) {
 	unsigned char buffer[] = "l1:al1:b1:ce1:de";
 	BencEntity b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	EXPECT_EQ(BENC_LIST, b.GetType());
 }
 
 TEST(Bencoding, MixedDictionary) {
 	unsigned char buffer[] = "d1:a1:b1:cd1:dl1:e1:feee";
 	BencEntity b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	EXPECT_EQ(BENC_DICT, b.GetType());
 }
 
 TEST(Bencoding, MoreNestedDictionary) {
 	unsigned char buffer[] = "d1:a1:b1:c1:d1:ed1:fld2:k12:v12:k22:v2ed2:k32:v32:k42:v4eeee";
 	BencodedDict b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	ASSERT_EQ(BENC_DICT, b.GetType());
 	std::string serialized = b.Serialize();
 	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
@@ -320,7 +315,7 @@ TEST(Bencoding, MoreNestedDictionary) {
 TEST(Bencoding, DISABLED_plain_string) {
 	unsigned char buffer[] = "4:abab";
 	BencodedDict b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	ASSERT_EQ(BENC_STR, b.GetType());
 	std::string serialized = b.Serialize();
 	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
@@ -335,7 +330,7 @@ TEST(Bencoding, DISABLED_InfoSection) {
 	size_t read = fread(buffer, sizeof(char), 32768, fp);
 	assert(read < 32768);
 	BencodedDict b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + read));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + read) != NULL);
 	ASSERT_EQ(BENC_DICT, b.GetType());
 	std::string serialized = b.Serialize();
 	EXPECT_EQ(read, serialized.size());
@@ -345,7 +340,7 @@ TEST(Bencoding, DISABLED_InfoSection) {
 TEST(Bencoding, Torrent) {
 	BencodedDict dict;
 	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::torrent_data,
-				dict, (const unsigned char*)(unittest::torrent_data + 17115)));
+		dict, (const unsigned char*)(unittest::torrent_data + 17115)) != NULL);
 	ASSERT_EQ(BENC_DICT, dict.GetType());
 	ASSERT_EQ(static_cast<size_t>(17115), sizeof(unittest::torrent_data));
 	std::string serialized = dict.Serialize();
@@ -361,7 +356,7 @@ TEST(Bencoding, TorrentWithRegion) {
 TEST(Bencoding, NestedDictionarySerialize) {
 	unsigned char buffer[] = "d1:ad1:b1:cee";
 	BencodedDict b;
-	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer) - 1));
+	ASSERT_TRUE(BencEntity::Parse(buffer, b, buffer + sizeof(buffer)-1) != NULL);
 	ASSERT_EQ(BENC_DICT, b.GetType());
 	std::string serialized = b.Serialize();
 	EXPECT_EQ(sizeof(buffer) - 1, serialized.size());
@@ -371,7 +366,7 @@ TEST(Bencoding, NestedDictionarySerialize) {
 TEST(Bencoding, LongInt) {
 	BencodedDict ent;
 	const unsigned char dict[] = "d1:ki12970376315ee";
-	ASSERT_TRUE(BencEntity::Parse(dict, ent, dict + sizeof(dict) - 1));
+	ASSERT_TRUE(BencEntity::Parse(dict, ent, dict + sizeof(dict)-1) != NULL);
 	BencEntity* value = ent.Get("k");
 	EXPECT_EQ(BENC_BIGINT, value->GetType());
 	EXPECT_EQ(12970376315, value->GetInt64(0));
@@ -387,7 +382,7 @@ TEST(Bencoding, Settings1) {
 	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 	// parse the settings
 	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
-											dict, ((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
+		dict, ((const unsigned char*)unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn) != NULL);
 	//the below fails.  why???
 //	ASSERT_EQ(static_cast<unsigned long>(SETTINGS_LENGTH), sizeof(unittest::settings_data));
 	ASSERT_EQ(BENC_DICT, dict.GetType());
@@ -405,9 +400,8 @@ TEST(Bencoding, Settings2) {
 
 	std::pair<unsigned char*, unsigned char*> rgn(NULL,NULL);
 	// parse the settings
-	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data,
-											dict,
- 											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn));
+	ASSERT_TRUE(BencEntity::Parse((const unsigned char*)unittest::settings_data, dict,
+		((const unsigned char*)unittest::settings_data) + SETTINGS_LENGTH, "info", &rgn) != NULL);
 	ASSERT_TRUE(dict.GetType() == BENC_DICT);
 	std::string b = dict.Serialize();
 	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), b.size());
@@ -422,9 +416,8 @@ TEST(Bencoding, Settings3) {
 	BencodedDict dict;
 
 	// parse the settings
-	ASSERT_TRUE(BencEntity::ParseInPlace((unsigned char*)unittest::settings_data,
-											dict,
- 											((const unsigned char*) unittest::settings_data) + SETTINGS_LENGTH));
+	ASSERT_TRUE(BencEntity::ParseInPlace((unsigned char*)unittest::settings_data, dict,
+		((const unsigned char*)unittest::settings_data) + SETTINGS_LENGTH) != NULL);
 	ASSERT_TRUE(dict.GetType() == BENC_DICT);
 	std::string b = dict.Serialize();
 	EXPECT_EQ(static_cast<size_t>(SETTINGS_LENGTH), b.size());
@@ -436,7 +429,7 @@ TEST(Bencoding, Copy) {
 	// sizeof(sample_data) includes the terminating zero byte
 	static const size_t sample_len = sizeof(sample_data) - 1;
 	unsigned char* tmp = static_cast<unsigned char*>(malloc(sample_len));
-	ASSERT_TRUE(tmp);
+	ASSERT_TRUE(tmp != NULL);
 	memcpy(tmp, sample_data, sample_len);
 
 	// Copy and verify a dict
@@ -444,9 +437,9 @@ TEST(Bencoding, Copy) {
 	bool ok = (BencEntity::Parse(tmp, dict, tmp + sample_len)) ? true : false;
 	ASSERT_TRUE(ok);
 	tstring value = dict.GetStringT("astring");
-	ASSERT_TRUE(value.size());
+	EXPECT_FALSE(value.empty());
 	BencodedDict* d2 = new BencodedDict();
-	ASSERT_TRUE(d2);
+	ASSERT_TRUE(d2 != NULL);
 	d2->CopyFrom(dict);
 //	EXPECT_TRUE(d2->inplace == false);
 	std::string bytes = d2->Serialize();
