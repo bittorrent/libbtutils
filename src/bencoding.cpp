@@ -1146,16 +1146,6 @@ std::string BencodedDict::GetStdString(const char* key) const
 	return res ? std::string(res) : std::string();
 }
 
-char* BencodedDict::GetStringCopy(const char* key) const
-{
-	size_t len;
-	const BencEntityMem *pMem = AsBencString(Get(key));
-	if (!pMem) return NULL;
-	const char* val = pMem->GetString(&len);
-	assert(val[len] == 0);
-	return strdup(val);
-}
-
 tstring BencodedDict::GetStringT(const char* key, int encoding) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));

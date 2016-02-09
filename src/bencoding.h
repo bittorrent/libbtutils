@@ -391,9 +391,6 @@ public:
 	const char* GetString(const char* key, size_t *length = NULL) const;
 	std::string GetStdString(const char* key) const;
 
-	// Like GetString, but returns a malloc'ed copy
-	char * GetStringCopy(const char * key) const;
-
 	// See comment at GetStringT()
 	tstring GetStringT(const char * key, int encoding = 0) const;
 	char * GetString(const char * key, size_t length) const;
