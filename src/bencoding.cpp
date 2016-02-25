@@ -943,7 +943,6 @@ tstring BencEntityMem::GetStringT(int encoding) const {
 #else
 	size_t tmp;
 	const char* str = GetString(&tmp);
-	if (count) *count = tmp;
 	return tstring(str, tmp);
 #endif
 }
