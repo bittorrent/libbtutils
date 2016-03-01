@@ -105,9 +105,8 @@ TEST(SockAddr, get_arpa)
 		}
 		//std::cout << buf << std::endl;
 		match_strings(ip_cstr[i], buf);
-		char * arpa = sockaddr.get_arpa();
-		EXPECT_STREQ(return_chars[i], arpa);
-		free(arpa);
+		std::string arpa = sockaddr.get_arpa();
+		EXPECT_STREQ(return_chars[i], arpa.c_str());
 #endif
 	}
 #ifdef _WIN32
