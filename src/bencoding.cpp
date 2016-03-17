@@ -936,22 +936,13 @@ BencodedList *BencEntity::SetVList(BencVListCallback callback, size_t count, voi
 }
 
 
-tstring BencEntityMem::GetStringT(int encoding, size_t *count) const {
+tstring BencEntityMem::GetStringT(int encoding) const {
 	if (!(bencType == BENC_STR)) return _T("");
-	size_t tmp = 0;
 #ifdef _UNICODE
-	tchar* str = DecodeEncodedString(encoding, (char*) GetRaw(), GetSize(), &tmp);
-	assert(tmp <= INT_MAX);
-	if (count)
-		*count = tmp;
-	if (!str) //XXX should use safe_string once it's moved to ut_util or even better have DecodeEncodedString return a string
-		return tstring();
-	tstring tmps(str);
-	free(str);
-	return tmps;
+	return DecodeEncodedString(encoding, (char*) GetRaw(), GetSize());
 #else
+	size_t tmp;
 	const char* str = GetString(&tmp);
-	if (count) *count = tmp;
 	return tstring(str, tmp);
 #endif
 }
@@ -983,11 +974,11 @@ const char* BencodedList::GetString(size_t i, size_t *length) const
 	return (pMem?pMem->GetString(length):NULL);
 }
 
-tstring BencodedList::GetStringT(size_t i, int encoding, size_t *length) const
+tstring BencodedList::GetStringT(size_t i, int encoding) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(i));
 	if (pMem == NULL) return _T("");
-	return pMem->GetStringT(encoding, length);
+	return pMem->GetStringT(encoding);
 }
 
 // This is one of the weird places.  The members of e
@@ -1154,21 +1145,11 @@ std::string BencodedDict::GetStdString(const char* key) const
 	return res ? std::string(res) : std::string();
 }
 
-char* BencodedDict::GetStringCopy(const char* key) const
-{
-	size_t len;
-	const BencEntityMem *pMem = AsBencString(Get(key));
-	if (!pMem) return NULL;
-	const char* val = pMem->GetString(&len);
-	assert(val[len] == 0);
-	return strdup(val);
-}
-
-tstring BencodedDict::GetStringT(const char* key, int encoding, size_t *length) const
+tstring BencodedDict::GetStringT(const char* key, int encoding) const
 {
 	const BencEntityMem *pMem = AsBencString(Get(key));
 	if (pMem == NULL) return _T("");
-	return pMem->GetStringT(encoding, length);
+	return pMem->GetStringT(encoding);
 }
 
 char* BencodedDict::GetString(const char* key, size_t length) const
@@ -1348,13 +1329,6 @@ std::string BencodedDict::Serialize()
 	return SerializeBencEntity(this);
 }
 
-BencEntityMem *BencodedDict::InsertString(const std::string& key, const std::string& str, int length /*=-1*/)
-{
-	// contiguous if string length > 0
-	assert(!key.empty());
-	return InsertString(&(key[0]), &(str[0]), length);
-}
-
 BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int length /*=-1*/)
 {
 	assert(bencType == BENC_DICT);
@@ -1363,12 +1337,22 @@ BencEntityMem *BencodedDict::InsertString(const char* key, const char* str, int 
 	return (BencEntityMem *) Insert( key, -1, beM );
 }
 
+BencEntityMem *BencodedDict::InsertString(const char * key, const std::string& str)
+{
+	return InsertString(key, str.c_str(), str.size());
+}
+
 BencEntityMem *BencodedDict::InsertStringT(const char* key, ctstr tstr)
 {
 	assert(bencType == BENC_DICT);
 	BencEntityMem beM;
 	beM.SetStrT( tstr );
 	return (BencEntityMem *) Insert( key, -1, beM );
+}
+
+BencEntityMem *BencodedDict::InsertStringT(const char* key, const tstring& str)
+{
+	return InsertStringT(key, str.c_str());
 }
 
 BencEntity *BencodedDict::InsertInt(const char* key, int val)

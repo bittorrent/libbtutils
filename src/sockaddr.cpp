@@ -586,7 +586,7 @@ bool ParseCIDR(cstr s, SockAddr *pfrom, SockAddr *pto)
 	return true;
 }
 
-char* SockAddr::get_arpa() const
+std::string SockAddr::get_arpa() const
 {
 	char buf[500];
 
@@ -627,7 +627,7 @@ char* SockAddr::get_arpa() const
 			);
 #undef out
 	}
-	return strdup(buf);
+	return buf;
 }
 
 SockAddr SockAddr::round_up(SockAddr ip, const SockAddr &mask)

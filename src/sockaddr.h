@@ -13,6 +13,7 @@ typedef sockaddr_storage SOCKADDR_STORAGE;
 #include <stdlib.h> // for NULL
 #include <assert.h>
 #include <string.h> // for memcmp
+#include <string>
 #include "target.h"
 #include "utypes.h"
 
@@ -203,7 +204,7 @@ struct PACKED SockAddr {
 	// takes size of compact format
 	bool from_compact(const byte* p, size_t len);
 
-	char* get_arpa() const; // allocates
+	std::string get_arpa() const;
 
 	// Weak equality (a mapped v4 address will equal a v4 addr)
 	bool operator==(const SockAddr& rhs) const;

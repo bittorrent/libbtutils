@@ -78,14 +78,15 @@ int DecodeUtf8(cstr utf8, size_t in_len, wchar_t *out_ptr, size_t out_len, bool 
 	}
 }
 
-wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *out_len)
+std::wstring DecodeEncodedString(int encoding, cstr encoded, size_t in_len)
 {
 	if (in_len == (size_t) -1) in_len = strlen(encoded);
 
 	assert(in_len < INT_MAX);
-	if (in_len >= INT_MAX) return NULL;
+	if (in_len >= INT_MAX) return std::wstring();
 
-	wchar_t *t = (wchar_t*)malloc(sizeof(wchar_t) * (in_len + 1));
+	std::wstring t;
+	t.resize(in_len + 1);
 	int len = in_len;
 
 	if (in_len != 0) {
@@ -99,7 +100,7 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 		// First try to decode as utf-8
 		if (encoding == 0 || encoding == CP_UTF8) {
 			bool invalid;
-			len = DecodeUtf8(encoded, in_len, t, in_len, &invalid);
+			len = DecodeUtf8(encoded, in_len, &t[0], in_len, &invalid);
 			assert(len >= 0);
 			if (!invalid || encoding == CP_UTF8)
 				goto OK;
@@ -108,9 +109,9 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 
 		// Otherwise perform operating system-specific decode
 #ifdef _WIN32
-		len = MultiByteToWideChar(encoding, 0, encoded, in_len, t, in_len);
+		len = MultiByteToWideChar(encoding, 0, encoded, in_len, &t[0], in_len);
 		if (0 == len && CP_ACP != encoding)
-			len = MultiByteToWideChar(CP_ACP, 0, encoded, in_len, t, in_len);
+			len = MultiByteToWideChar(CP_ACP, 0, encoded, in_len, &t[0], in_len);
 #else
 		// See man pages for mbstowcs mbstowcs_l multibyte xlocale mbsnrtowcs
 		mbstate_t ps;
@@ -118,9 +119,9 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 		cstr in_p = encoded;
 #ifdef ANDROID
 		// 20110302 - Android doesn't support the safer length-limited mbsnrtowcs
-		len = mbsrtowcs(t, &in_p, in_len, &ps);
+		len = mbsrtowcs(&t[0], &in_p, in_len, &ps);
 #else
-		len = mbsnrtowcs(t, &in_p, in_len, (in_len + 1) * sizeof(wchar_t), &ps);
+		len = mbsnrtowcs(&t[0], &in_p, in_len, (in_len + 1) * sizeof(wchar_t), &ps);
 #endif // ANDROID
 		if (len == -1) // error
 			len = 0;
@@ -132,10 +133,6 @@ wchar_t *DecodeEncodedString(int encoding, cstr encoded, size_t in_len, size_t *
 #endif
 	}
 OK:
-	t[len] = 0; // null terminate
-	if ((int)in_len >= len + 4)
-		t = (wchar_t*)realloc(t, sizeof(wchar_t) * (len + 1));
-	if (out_len)
-		*out_len = len;
+	t.resize(len);
 	return t;
 }
