@@ -1,5 +1,5 @@
-#ifndef __BENCH_JSON_H__
-#define __BENCH_JSON_H__
+#ifndef BENCH_JSON_H
+#define BENCH_JSON_H
 
 #include <map>
 #include <sstream>
