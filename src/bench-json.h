@@ -1,5 +1,4 @@
-#ifndef BENCH_JSON_H
-#define BENCH_JSON_H
+#pragma once
 
 #include <map>
 #include <sstream>
@@ -203,5 +202,3 @@ class JsonArray : public JsonValue {
   private:
     std::vector<JsonValue*> values_;
 };
-
-#endif
