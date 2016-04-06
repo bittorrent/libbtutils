@@ -2,7 +2,6 @@
 Tests for the BencEntity class
 */
 
-#include "StdAfx.h"
 #undef _M_CEE_PURE
 #undef new
 
