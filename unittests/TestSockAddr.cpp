@@ -85,7 +85,7 @@ TEST(SockAddr, get_arpa)
 	char buf[buf_len];
 #endif
 	SockAddr sockaddr;
-	for (int i=0; i<ip_cstr.size(); ++i)
+	for (size_t i=0; i<ip_cstr.size(); ++i)
 	{
 		bool ok = false;
 		sockaddr = SockAddr::parse_addr(ip_cstr[i], &ok);

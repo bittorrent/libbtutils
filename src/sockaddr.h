@@ -31,7 +31,7 @@ void sockaddr_from_bytes(sockaddr_storage* ss, uint8_t const* buf, int len);
 uint32 parse_ip(cstr ip, bool *valid = NULL);
 in6_addr parse_ip_v6(cstr ip_v6, bool *valid = NULL);
 
-struct PACKED SockAddr {
+struct SockAddr {
 	// If this is set, we use IPv6 addresses internally, but send and
 	// receive v4 over protocols that require it.  getv4addr() will
 	// return an address suitable for this; it requires the SockAddr
@@ -46,7 +46,7 @@ struct PACKED SockAddr {
 	// The values are always stored here in network byte order, while all
 	// functions expect and return host byte order.
 
-	union PACKED {
+	union {
 		byte _in6[16];		// IPv6
 		uint16 _in6w[8];	// IPv6, word based (for convenience)
 		uint32 _in6d[4];	// Dword access
@@ -254,9 +254,6 @@ static inline ctstr basic_tfmt(const SockAddr& sa) { return _T("%A"); }
 bool ParseCIDR(cstr s, SockAddr *pfrom, SockAddr *pto);
 
 struct
-#ifndef LEAKCHECK
-	PACKED
-#endif
 	TinyAddr {
 	union {
 		uint32 ip;
