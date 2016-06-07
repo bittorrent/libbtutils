@@ -1,5 +1,5 @@
-ut_utils
+libbtutils
 ========
 
-basic utility functions used in utorrent and its components
+basic utility functions used by BitTorrent projects
 

@@ -5,7 +5,7 @@ udp_utils DecodeEncodedString bitfield bloom_filter inet_ntop sockaddr ;
 lib rt : : <name>rt ;
 lib ws2 : : <name>Ws2_32 ;
 
-lib ut_utils : src/$(SOURCES).cpp
+lib btutils : src/$(SOURCES).cpp
 	: # requirements
 	  <include>src
 	  <target-os>linux:<library>rt # required for clock_gettime
